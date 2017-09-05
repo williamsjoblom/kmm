@@ -4,6 +4,7 @@
 #include <limits.h>
 
 #include "timer.h"
+#include "serial.h"
 
 /**
  * Step pins.
@@ -56,8 +57,15 @@ int main() {
 
   install_timer(TIMER_INTERVAL);
 
-  while(1) { }
-   
+  while(1) {
+    if (serial_rx_available()) {
+      PORTB |= _BV(1); // Turn on LED @ PB1
+      int in_byte = serial_read();
+      serial_write(in_byte);
+      PORTB &= 253U; // Turn off LED
+    }
+  }
+  
   return 1;
 }
 
@@ -83,8 +91,9 @@ void set_motor_speed(unsigned char motor, unsigned long speed) {
  * Timer interrupt.
  */
 ISR(TIMER1_COMPA_vect) {
-  
-  unsigned char step = direction;
+  motor0_remaining--;
+  motor1_remaining--;
+  motor2_remaining--;
 
   if (motor0_ticks != UINT_MAX) {
     motor0_remaining--;
@@ -114,6 +123,3 @@ ISR(TIMER1_COMPA_vect) {
 
   PORTB = direction;
 }
-
-
-
