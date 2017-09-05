@@ -44,6 +44,8 @@ int main (void) {
   motor1_remaining = motor1_ticks;
   motor2_remaining = motor2_ticks;
 
+  serial_init();
+
   install_timer(10);
 
   while(1) {

@@ -42,8 +42,8 @@ void serial_establish_contact (void) {
 }
 
 void serial_init (void) {
-  DDRD = _BV(1);
-  DDRB = _BV(0) | _BV(1) | _BV(3) | _BV(5);
+  DDRD = _BV(1); // TODO: Check what this does
+  //DDRB = _BV(0) | _BV(1) | _BV(3) | _BV(5); // TODO: Check what this does
 
   // Baud rate
   UBRR0H = (unsigned char)(MYUBRR >> 8);
