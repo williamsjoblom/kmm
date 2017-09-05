@@ -2,8 +2,8 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-#define BaudRate 9600
-#define MYUBRR (F_CPU / 16 / BaudRate ) - 1
+#define BAUD_RATE 9600
+#define MYUBRR (F_CPU / 16 / BAUD_RATE ) - 1
 
 void delay_long();
 

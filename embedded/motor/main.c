@@ -1,6 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include <limits.h>
 
 #include "timer.h"
 #include "serial.h"
@@ -20,13 +21,25 @@
 #define MOTOR2_BCK 0b00100000
 
 /**
+ * Timer interval (us).
+ */
+#define TIMER_INTERVAL 50
+
+/**
+ * Steps per revolution.
+ */
+#define STEPS_PER_REVOLUTION 800
+
+void set_motor_speed(unsigned char motor, unsigned long speed);
+
+/**
  * Direction.
  */
 char direction = MOTOR0_BCK;
 
-unsigned int motor0_ticks = 100;
-unsigned int motor1_ticks = 200;
-unsigned int motor2_ticks = 1000000;
+unsigned int motor0_ticks = UINT_MAX;
+unsigned int motor1_ticks = UINT_MAX;
+unsigned int motor2_ticks = UINT_MAX;
 
 unsigned int motor0_remaining = 0;
 unsigned int motor1_remaining = 0;
@@ -36,28 +49,43 @@ unsigned int motor2_remaining = 0;
 /**
  * Main.
  */
-int main (void) {
+int main() {
   // Set PORTB as output.
   DDRB = 0xFF;
 
-  motor0_remaining = motor0_ticks;
-  motor1_remaining = motor1_ticks;
-  motor2_remaining = motor2_ticks;
+  set_motor_speed(0, 100000);
+
+  install_timer(TIMER_INTERVAL);
 
   serial_init();
 
-  install_timer(10);
-
   while(1) {
-    if (serial_rx_available()) {
-  		PORTB |= _BV(1); // Turn on LED @ PB1
-  		int in_byte = serial_read();
+    /*if (serial_rx_available()) {
+      PORTB |= _BV(1); // Turn on LED @ PB1
+      int in_byte = serial_read();
       serial_write(in_byte);
-  		PORTB &= 253U; // Turn off LED
-  	}
+      PORTB &= 253U; // Turn off LED
+    }*/
   }
 
   return 1;
+}
+
+/**
+ * Set motor speed.
+ * (revolutions per second/1000)
+ */
+void set_motor_speed(unsigned char motor, unsigned long speed) {
+  const unsigned long timer_freq = 1000000 / TIMER_INTERVAL;
+  unsigned long step_freq = speed*STEPS_PER_REVOLUTION;
+
+  unsigned int ticks = (unsigned int) ((timer_freq*1000)/step_freq);
+
+  switch(motor) {
+  case 0: motor0_ticks = ticks; break;
+  case 1: motor1_ticks = ticks; break;
+  case 2: motor2_ticks = ticks; break;
+  }
 }
 
 
@@ -69,24 +97,29 @@ ISR(TIMER1_COMPA_vect) {
   motor1_remaining--;
   motor2_remaining--;
 
-  unsigned char step = direction;
-
-  if (motor0_remaining == 0) {
-    motor0_remaining = motor0_ticks;
-    step |= MOTOR0_STP;
+  if (motor0_ticks != UINT_MAX) {
+    motor0_remaining--;
+    if (motor0_remaining == 0) {
+      motor0_remaining = motor0_ticks;
+      PORTB |= MOTOR0_STP;
+    }
   }
 
-  if (motor1_remaining == 0) {
-    motor1_remaining = motor1_ticks;
-    step |= MOTOR1_STP;
+  if (motor1_ticks != UINT_MAX) {
+    motor1_remaining--;
+    if (motor1_remaining == 0) {
+      motor1_remaining = motor1_ticks;
+      PORTB |= MOTOR1_STP;
+    }
   }
 
-  if (motor2_remaining == 0) {
-    motor2_remaining = motor2_ticks;
-    //step |= MOTOR2_STP;
+  if (motor2_ticks != UINT_MAX) {
+    motor2_remaining--;
+    if (motor2_remaining == 0) {
+      motor2_remaining = motor2_ticks;
+      PORTB |= MOTOR2_STP;
+    }
   }
-
-  PORTB = step;
 
   _delay_us(5);
 
