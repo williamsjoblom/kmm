@@ -3,6 +3,7 @@
 #include <util/delay.h>
 
 #include "timer.h"
+#include "serial.h"
 
 /**
  * Step pins.
@@ -24,7 +25,7 @@
 char direction = MOTOR0_BCK;
 
 unsigned int motor0_ticks = 100;
-unsigned int motor1_ticks = 100;
+unsigned int motor1_ticks = 200;
 unsigned int motor2_ticks = 1000000;
 
 unsigned int motor0_remaining = 0;
@@ -38,15 +39,22 @@ unsigned int motor2_remaining = 0;
 int main (void) {
   // Set PORTB as output.
   DDRB = 0xFF;
-  
+
   motor0_remaining = motor0_ticks;
   motor1_remaining = motor1_ticks;
   motor2_remaining = motor2_ticks;
-  
+
   install_timer(10);
 
-  while(1) { }
-  
+  while(1) {
+    if (serial_rx_available()) {
+  		PORTB |= _BV(1); // Turn on LED @ PB1
+  		int in_byte = serial_read();
+      serial_write(in_byte);
+  		PORTB &= 253U; // Turn off LED
+  	}
+  }
+
   return 1;
 }
 
@@ -60,7 +68,7 @@ ISR(TIMER1_COMPA_vect) {
   motor2_remaining--;
 
   unsigned char step = direction;
-  
+
   if (motor0_remaining == 0) {
     motor0_remaining = motor0_ticks;
     step |= MOTOR0_STP;
@@ -82,6 +90,3 @@ ISR(TIMER1_COMPA_vect) {
 
   PORTB = direction;
 }
-
-
-
