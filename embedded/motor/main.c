@@ -57,6 +57,7 @@ int main() {
 
   install_timer(TIMER_INTERVAL);
 
+  /*
   while(1) {
     if (serial_rx_available()) {
       PORTB |= _BV(1); // Turn on LED @ PB1
@@ -65,6 +66,7 @@ int main() {
       PORTB &= 253U; // Turn off LED
     }
   }
+  */
   
   return 1;
 }
