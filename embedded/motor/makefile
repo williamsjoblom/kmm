@@ -1,10 +1,11 @@
 all: build prog
 
 SRC=$(wildcard *.c)
+OBJ=$(wildcard *.o)
 
 build:
 	avr-gcc -Os -DF_CPU=16000000 -std=gnu99 -mmcu=atmega328p -c $(SRC)
-	avr-gcc -mmcu=atmega328p main.o timer.o -o stepper
+	avr-gcc -mmcu=atmega328p $(OBJ) -o stepper
 	avr-objcopy -O ihex -R .eeprom stepper stepper.hex
 
 prog:
