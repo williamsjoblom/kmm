@@ -1,7 +1,7 @@
 # KMM
 Konstruktion med mikrodatorer, projekt.
 
-## Tools and libraries
+## Tools, libraries and dependencies
 ROS Kinetic (Robot Operating System)
 
 Supported on: Ubuntu 15.10 (Wily), Ubuntu 16.04 (Xenial), Debian 8 (Jessie)
@@ -29,4 +29,12 @@ SFML (Simple and Fast Multimedia Library)
 
 ```
 sudo apt-get install libsfml-dev
+```
+## Setup project
+
+```
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/
+catkin_make
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
 ```
