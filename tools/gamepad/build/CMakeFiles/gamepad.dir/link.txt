@@ -1,1 +1,0 @@
-/usr/bin/c++   -g    CMakeFiles/gamepad.dir/main.cpp.o  -o gamepad -rdynamic /usr/local/lib/libsfml-system-d.so /usr/local/lib/libsfml-window-d.so /usr/local/lib/libsfml-graphics-d.so /usr/local/lib/libsfml-network-d.so /usr/local/lib/libsfml-audio-d.so -lX11 -Wl,-rpath,/usr/local/lib: 
