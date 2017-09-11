@@ -29,6 +29,8 @@ sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
 
 ### SFML (Simple and Fast Multimedia Library)
 
+https://www.sfml-dev.org/tutorials/2.4/
+
 ```
 sudo apt-get install libsfml-dev
 ```
