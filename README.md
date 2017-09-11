@@ -2,7 +2,7 @@
 Konstruktion med mikrodatorer, projekt.
 
 ## Tools, libraries and dependencies
-###ROS Kinetic (Robot Operating System)
+### ROS Kinetic (Robot Operating System)
 
 Supported on: Ubuntu 15.10 (Wily), Ubuntu 16.04 (Xenial), Debian 8 (Jessie)
 
@@ -21,13 +21,13 @@ source ~/.bashrc
 sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
 ```
 
-###AVR compiler
+### AVR compiler
 
 ```
 sudo apt-get install gcc-avr binutils-avr gdb-avr avr-libc avrdude
 ```
 
-###SFML (Simple and Fast Multimedia Library)
+### SFML (Simple and Fast Multimedia Library)
 
 ```
 sudo apt-get install libsfml-dev
