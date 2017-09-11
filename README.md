@@ -43,4 +43,8 @@ catkin_make
 echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 echo $ROS_PACKAGE_PATH
+cd ~/catkin_ws/src/
+git clone git@github.com:williamsjoblom/kmm.git
+~/catkin_ws/
+catkin_make
 ```
