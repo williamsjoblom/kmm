@@ -2,7 +2,8 @@
 Konstruktion med mikrodatorer, projekt.
 
 ## Tools and libraries
-ROS (Robot Operating System)
+ROS Kinetic (Robot Operating System)
+Supported on: Ubuntu 15.10 (Wily), Ubuntu 16.04 (Xenial), Debian 8 (Jessie)
 ```
 sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
 sudo apt-key adv --keyserver hkp://ha.pool.sks-keyservers.net:80 --recv-key 421C365BD9FF1F717815A3895523BAEEB01FA116
