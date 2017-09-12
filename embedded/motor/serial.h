@@ -2,6 +2,8 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
+#include <stdio.h>
+
 #define BAUD_RATE 9600
 #define MYUBRR (F_CPU / 16 / BAUD_RATE ) - 1
 
@@ -20,5 +22,10 @@ void serial_write_uint(unsigned int i);
 void serial_establish_contact (void);
 
 void serial_init (void);
+
+/**
+ * Printf
+ */
+void serial_send_byte(char byte, FILE* stream);
 
 #endif

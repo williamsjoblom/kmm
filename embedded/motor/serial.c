@@ -1,8 +1,8 @@
 
 #include <avr/io.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "serial.h"
-
 
 void delay_long() {
     unsigned int delay = 65500U;
@@ -13,12 +13,12 @@ void delay_long() {
 }
 
 
-unsigned char serial_rx_available (void) {
+inline unsigned char serial_rx_available (void) {
     return (UCSR0A & _BV(RXC0)) != 0;
 }
 
 
-unsigned char serial_tx_ready (void) {
+inline unsigned char serial_tx_ready (void) {
     return (UCSR0A & _BV(UDRE0)) != 0;
 }
 
@@ -43,7 +43,7 @@ void serial_write_uint(unsigned int i) {
 
 
 void serial_write_str(char* str) {
-    while (*str) {
+    while (*str != '\0') {
 	serial_write(*str);
 	str++;
     }
@@ -64,6 +64,14 @@ void serial_establish_contact (void) {
 }
 
 
+void serial_send_byte(char byte, FILE* stream) {
+    while (!serial_tx_ready());
+    UDR0 = byte;
+}
+
+
+FILE serial_out = FDEV_SETUP_STREAM(serial_send_byte, NULL, _FDEV_SETUP_WRITE);
+
 void serial_init (void) {
     DDRD = _BV(1); // TODO: Check what this does
     //DDRB = _BV(0) | _BV(1) | _BV(3) | _BV(5); // TODO: Check what this does
@@ -77,4 +85,8 @@ void serial_init (void) {
 
     // Frame format: 8data, No parity, 1stop bit
     UCSR0C = (3 << UCSZ00);
+
+    stdout = &serial_out;
 }
+
+

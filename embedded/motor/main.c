@@ -5,6 +5,7 @@
 
 #include "timer.h"
 #include "serial.h"
+#include "packet.h"
 
 /**
  * Step pins.
@@ -55,11 +56,17 @@ int main() {
 
     serial_init();
     
-    set_motor_speed(0, 2000);
+    //set_motor_speed(0, 2000);
 
-    install_timer(TIMER_INTERVAL);
+    //install_timer(TIMER_INTERVAL);
 
-    while (1) { }
+    //printf("Hello printf!\n\r");
+    
+    while (1) { read_packet(); }
+    
+    /* while (1) { */
+    /* 	read_packet(); */
+    /* } */
     
     return 1;
 }
