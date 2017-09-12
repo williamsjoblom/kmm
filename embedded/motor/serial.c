@@ -1,6 +1,8 @@
 
 #include <avr/io.h>
+#include <stdlib.h>
 #include "serial.h"
+
 
 void delay_long() {
     unsigned int delay = 65500U;
@@ -10,23 +12,43 @@ void delay_long() {
     }
 }
 
+
 unsigned char serial_rx_available (void) {
     return (UCSR0A & _BV(RXC0)) != 0;
 }
 
+
 unsigned char serial_tx_ready (void) {
     return (UCSR0A & _BV(UDRE0)) != 0;
 }
+
 
 unsigned char serial_read (void) {
     while (!serial_rx_available());
     return UDR0;
 }
 
-void serial_write(unsigned char data) {
+
+void serial_write(char data) {
     while (!serial_tx_ready());
     UDR0 = data;
 }
+
+
+void serial_write_uint(unsigned int i) {
+    char buffer[32];
+    itoa(i, buffer, 10);
+    serial_write_str(buffer);
+}
+
+
+void serial_write_str(char* str) {
+    while (*str) {
+	serial_write(*str);
+	str++;
+    }
+}
+
 
 void serial_establish_contact (void) {
     while (!serial_rx_available()) {
@@ -41,6 +63,7 @@ void serial_establish_contact (void) {
     }
 }
 
+
 void serial_init (void) {
     DDRD = _BV(1); // TODO: Check what this does
     //DDRB = _BV(0) | _BV(1) | _BV(3) | _BV(5); // TODO: Check what this does
@@ -54,12 +77,4 @@ void serial_init (void) {
 
     // Frame format: 8data, No parity, 1stop bit
     UCSR0C = (3 << UCSZ00);
-
-    // Turn on LED @ PB1
-    PORTB |= _BV(1);
-
-    serial_establish_contact();
-
-    // Turn off LED
-    PORTB &= 253U;
 }

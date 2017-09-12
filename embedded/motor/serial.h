@@ -13,7 +13,9 @@ unsigned char serial_tx_ready (void);
 
 unsigned char serial_read (void);
 
-void serial_write(unsigned char data);
+void serial_write(char data);
+void serial_write_str(char* str);
+void serial_write_uint(unsigned int i);
 
 void serial_establish_contact (void);
 

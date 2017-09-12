@@ -23,7 +23,7 @@
 /**
  * Timer interval (us).
  */
-#define TIMER_INTERVAL 50
+#define TIMER_INTERVAL 125
 
 /**
  * Steps per revolution.
@@ -53,21 +53,14 @@ int main() {
     // Set PORTB as output.
     DDRB = 0xFF;
 
-    set_motor_speed(0, 100000);
+    serial_init();
+    
+    set_motor_speed(0, 2000);
 
     install_timer(TIMER_INTERVAL);
 
-    serial_init();
-
-    while(1) {
-	/*if (serial_rx_available()) {
-	  PORTB |= _BV(1); // Turn on LED @ PB1
-	  int in_byte = serial_read();
-	  serial_write(in_byte);
-	  PORTB &= 253U; // Turn off LED
-	  }*/
-    }
-
+    while (1) { }
+    
     return 1;
 }
 
@@ -80,13 +73,19 @@ void set_motor_speed(unsigned char motor, unsigned long speed) {
     const unsigned long timer_freq = 1000000 / TIMER_INTERVAL;
     unsigned long step_freq = speed*STEPS_PER_REVOLUTION;
 
-    unsigned int ticks = (unsigned int) ((timer_freq*1000)/step_freq);
-
+    unsigned int ticks = (unsigned int) ((timer_freq*1000)/step_freq*2);
+    
     switch(motor) {
     case 0: motor0_ticks = ticks; break;
     case 1: motor1_ticks = ticks; break;
     case 2: motor2_ticks = ticks; break;
     }
+
+    serial_write_str("speed ");
+    serial_write_uint(speed);
+    serial_write_str(" => ticks ");
+    serial_write_uint(ticks);
+    serial_write_str("\n\r");
 }
 
 
@@ -122,7 +121,7 @@ ISR(TIMER1_COMPA_vect) {
 	}
     }
 
-    _delay_us(5);
+    _delay_us(20);
 
     PORTB = direction;
 }
