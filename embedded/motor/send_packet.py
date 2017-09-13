@@ -6,7 +6,7 @@ def read_uint16():
     while True:
         try:
             i = int(input('> '))
-            if i >= 0 and i < int(2**16/2):
+            if abs(i) < int(2**16/2):
                 return i
         except ValueError:
             pass
@@ -20,7 +20,7 @@ def build_packet():
 
     # Magic 8-bit header
     buf.extend(struct.pack("<b", 42))
-
+    
     # Data
     buf.extend(struct.pack("<h", cmd))
     for i in range(3):
