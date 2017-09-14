@@ -1,8 +1,10 @@
+#include <stdlib.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include <limits.h>
 
+#include "main.h"
 #include "timer.h"
 #include "serial.h"
 #include "packet.h"
@@ -31,13 +33,19 @@
  */
 #define STEPS_PER_REVOLUTION 800
 
-void set_motor_speed(unsigned char motor, unsigned long speed);
 
 /**
  * Direction.
  */
-char direction = MOTOR0_BCK;
+unsigned char direction = 0;
 
+unsigned char motor0_direction = 0;
+unsigned char motor1_direction = 0;
+unsigned char motor2_direction = 0;
+
+/**
+ * Speed.
+ */
 unsigned int motor0_ticks = UINT_MAX;
 unsigned int motor1_ticks = UINT_MAX;
 unsigned int motor2_ticks = UINT_MAX;
@@ -56,17 +64,9 @@ int main() {
 
     serial_init();
     
-    //set_motor_speed(0, 2000);
-
-    //install_timer(TIMER_INTERVAL);
-
-    //printf("Hello printf!\n\r");
-    
+    install_timer(TIMER_INTERVAL);
+        
     while (1) { read_packet(); }
-    
-    /* while (1) { */
-    /* 	read_packet(); */
-    /* } */
     
     return 1;
 }
@@ -76,23 +76,31 @@ int main() {
  * Set motor speed.
  * (revolutions per second/1000)
  */
-void set_motor_speed(unsigned char motor, unsigned long speed) {
+void set_motor_speed(unsigned char motor, int speed) {
     const unsigned long timer_freq = 1000000 / TIMER_INTERVAL;
-    unsigned long step_freq = speed*STEPS_PER_REVOLUTION;
+    unsigned long step_freq = abs(speed)*STEPS_PER_REVOLUTION;
 
     unsigned int ticks = (unsigned int) ((timer_freq*1000)/step_freq*2);
     
     switch(motor) {
-    case 0: motor0_ticks = ticks; break;
-    case 1: motor1_ticks = ticks; break;
-    case 2: motor2_ticks = ticks; break;
+    case 0:
+	motor0_ticks = ticks;
+	motor0_direction =  speed < 0 ? 1 : 0;
+	break;
+    case 1:
+	motor1_ticks = ticks;
+	motor1_direction = speed < 0 ? 1 : 0;
+	break;
+    case 2:
+	motor2_ticks = ticks;
+	motor2_direction = speed < 0 ? 1 : 0;
+	break;
     }
 
-    serial_write_str("speed ");
-    serial_write_uint(speed);
-    serial_write_str(" => ticks ");
-    serial_write_uint(ticks);
-    serial_write_str("\n\r");
+    direction = (motor2_direction << 2) | (motor1_direction << 1) | motor0_direction;
+
+    printf("motor %i = %i rps/1000\r\n", motor, speed);
+    printf("dirmask = 0x%X\r\n", direction);
 }
 
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
-import sys, os, readline, argparse, struct, serial, time
+import sys, os, readline, argparse, struct, serial, time, ctypes
+
+END_OF_TRANSMISSION = chr(4)
 
 def read_uint16():
     while True:
@@ -24,7 +26,7 @@ def build_packet():
     # Data
     buf.extend(struct.pack("<h", cmd))
     for i in range(3):
-        buf.extend(struct.pack("<h", i))
+        buf.extend(struct.pack("<h", -i))
 
     # Magic 8-bit footer
     buf.extend(struct.pack("<b", 24))
@@ -60,6 +62,7 @@ if __name__ == "__main__":
         out = []
         while s.inWaiting() > 0:
             out += s.read(1)
+            time.sleep(0.001)
 
         out_str = "".join([chr(c) for c in out])
         print(out_str)
