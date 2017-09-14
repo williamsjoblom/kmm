@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
     geometry_msgs::Twist msg;
     msg.linear.x = -y * MAX_LINEAR;
-    msg.linear.y = x * MAX_LINEAR;
+    msg.linear.y = -x * MAX_LINEAR;
     msg.angular.z = u * MAX_ANGLUAR;
     pub.publish(msg);
 
