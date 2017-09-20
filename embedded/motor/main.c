@@ -9,6 +9,7 @@
 #include "serial.h"
 #include "packet.h"
 
+
 /**
  * Step pins.
  */
@@ -100,9 +101,11 @@ void set_motor_speed(unsigned char motor, int speed) {
 
     direction = motor2_direction | motor1_direction | motor0_direction;
 
+#if ENABLE_TRACES
     printf("motor %i = %i rps/1000\r\n", motor, speed);
     printf("N time quanta = %u\r\n", ticks);
     printf("dirmask = 0x%X\r\n", direction);
+#endif
 }
 
 
