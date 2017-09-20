@@ -34,7 +34,7 @@ def read_int16():
         except ValueError:
             pass
         
-        print("Must be a positive integer between 0 and", 2**16/2 - 1)
+        print("Must be a positive integer between", -2**16/2 + 1, "  and", 2**16/2 - 1)
 
         
 def read_speed_vector():
