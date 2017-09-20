@@ -73,11 +73,11 @@ void serial_send_byte(char byte, FILE* stream) {
 FILE serial_out = FDEV_SETUP_STREAM(serial_send_byte, NULL, _FDEV_SETUP_WRITE);
 
 void serial_init (void) {
-    DDRD = _BV(1); // TODO: Check what this does
+    DDRD = _BV(1); // Set TX pin as output.
     //DDRB = _BV(0) | _BV(1) | _BV(3) | _BV(5); // TODO: Check what this does
 
     // Baud rate
-    UBRR0H = (unsigned char)(MYUBRR >> 8);
+    UBRR0H = (unsigned char) (MYUBRR >> 8);
     UBRR0L = (unsigned char) MYUBRR;
 
     // Enable receiver and transmitter

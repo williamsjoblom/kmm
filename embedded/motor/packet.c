@@ -28,9 +28,9 @@ struct packet read_packet() {
     }
 
     if (verify_packet(&p)) {
-	printf("Bad packet!\n\r");
+	//printf("Bad packet!\n\r");
     } else {
-	printf("Packet OK!\n\r");
+	//printf("Packet OK!\n\r");
 
 	set_motor_speed(0, p.data[0]);
 	set_motor_speed(1, p.data[1]);
