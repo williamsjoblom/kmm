@@ -111,12 +111,15 @@ void set_motor_speed(unsigned char motor, int speed) {
  * Timer interrupt.
  */
 ISR(TIMER1_COMPA_vect) {
+    int motor0_step = 0;
+    int motor1_step = 0;
+    int motor2_step = 0;
+    
     if (motor0_ticks != UINT_MAX) {
 	motor0_remaining--;
 	if (motor0_remaining == 0) {
 	    motor0_remaining = motor0_ticks;
-	    //PORTB |= MOTOR0_STP;
-	    PORTB = 0xFF;
+	    motor0_step = MOTOR0_STP;
 	}
     }
 
@@ -124,7 +127,7 @@ ISR(TIMER1_COMPA_vect) {
 	motor1_remaining--;
 	if (motor1_remaining == 0) {
 	    motor1_remaining = motor1_ticks;
-	    PORTB |= MOTOR1_STP;
+	    motor1_step = MOTOR1_STP;
 	}
     }
 
@@ -132,12 +135,11 @@ ISR(TIMER1_COMPA_vect) {
 	motor2_remaining--;
 	if (motor2_remaining == 0) {
 	    motor2_remaining = motor2_ticks;
-	    PORTB |= MOTOR2_STP;
+	    motor2_step = MOTOR2_STP;
 	}
     }
 
+    PORTB = direction | motor2_step | motor1_step | motor0_step;
     for (int i = 0; i < 20; i++) { asm("nop"); }
-
-    PORTB = 0x00;
-    //PORTB = direction;
+    PORTB = direction;
 }
