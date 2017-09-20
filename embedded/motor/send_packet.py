@@ -50,7 +50,7 @@ def read_speed_vector():
         except ValueError:
             pass
         
-        print("Vector must be three positive integers between 0 and", 2**16/2 - 1)
+        print("Vector must be three positive integers between", -2**16/2 + 1, " and", 2**16/2 - 1)
 
     
 
