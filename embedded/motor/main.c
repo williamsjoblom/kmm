@@ -78,7 +78,7 @@ int main() {
  * (revolutions per second/1000)
  */
 void set_motor_speed(unsigned char motor, int speed) {
-    unsigned int ticks = (unsigned int) ((1000L * 1000000L)/(TIMER_INTERVAL*STEPS_PER_REVOLUTION*speed));
+    unsigned int ticks = (unsigned int) ((1000L * 1000000L)/(TIMER_INTERVAL*STEPS_PER_REVOLUTION*abs(speed)));
         
     switch(motor) {
     case 0:
