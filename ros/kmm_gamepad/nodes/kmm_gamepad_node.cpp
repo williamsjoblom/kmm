@@ -3,6 +3,15 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 
+float deadzone(float value) {
+  const float DEADZONE = 0.02;
+  if (value > -DEADZONE && value < DEADZONE) {
+    return 0;
+  } else {
+    return value;
+  }
+}
+
 int main(int argc, char **argv) {
 
   ros::init(argc, argv, "kmm_gamepad");
@@ -23,12 +32,12 @@ int main(int argc, char **argv) {
     float u = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::U) / 100.0;
 
     const float MAX_LINEAR = 0.5; // m/s
-    const float MAX_ANGLUAR = 0.1; // rad/s
+    const float MAX_ANGLUAR = 1.0; // rad/s
 
     geometry_msgs::Twist msg;
-    msg.linear.x = -y * MAX_LINEAR;
-    msg.linear.y = -x * MAX_LINEAR;
-    msg.angular.z = u * MAX_ANGLUAR;
+    msg.linear.x = deadzone(-y * MAX_LINEAR);
+    msg.linear.y = deadzone(-x * MAX_LINEAR);
+    msg.angular.z = deadzone(u * MAX_ANGLUAR);
     pub.publish(msg);
 
     ros::spinOnce();
