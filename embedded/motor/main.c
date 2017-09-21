@@ -51,6 +51,9 @@ unsigned int motor0_ticks = UINT_MAX;
 unsigned int motor1_ticks = UINT_MAX;
 unsigned int motor2_ticks = UINT_MAX;
 
+/**
+ * Remaining ticks until next step.
+ */
 volatile unsigned int motor0_remaining = 0;
 volatile unsigned int motor1_remaining = 0;
 volatile unsigned int motor2_remaining = 0;

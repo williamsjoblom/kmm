@@ -98,9 +98,6 @@ if __name__ == "__main__":
     while True:
         byte_buf = build_packet()
 
-        for b in byte_buf:
-            print(b)
-
         s.write(byte_buf)
 
         # Wait for response
