@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
   ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("gamepad_vel", 1);
 
-  ros::Rate rate(10);
+  ros::Rate rate(30);
 
   const int DEVICE_ID = 0;
 
@@ -31,8 +31,8 @@ int main(int argc, char **argv) {
     float y = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::Y) / 100.0;
     float u = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::U) / 100.0;
 
-    const float MAX_LINEAR = 0.5; // m/s
-    const float MAX_ANGLUAR = 1.0; // rad/s
+    const float MAX_LINEAR = 0.2; // m/s
+    const float MAX_ANGLUAR = 0.7; // rad/s
 
     geometry_msgs::Twist msg;
     msg.linear.x = deadzone(-y * MAX_LINEAR);
