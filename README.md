@@ -48,3 +48,10 @@ git clone git@github.com:williamsjoblom/kmm.git
 ~/catkin_ws/
 catkin_make
 ```
+
+## Workflow
+
+```
+rosparam set use_sim_time true
+rosbag play xxxx.bag --clock
+```
