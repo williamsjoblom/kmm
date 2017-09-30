@@ -17,9 +17,9 @@ def is_int16_vector(v):
     for i in v:
         if not is_int16(i):
             return False
-        
+
     return True
-    
+
 
 def read_int16():
     """
@@ -28,15 +28,15 @@ def read_int16():
     while True:
         try:
             i = int(input('> '))
-            
+
             if is_int16(i):
                 return i
         except ValueError:
             pass
-        
+
         print("Must be a positive integer between", -2**16/2 + 1, "  and", 2**16/2 - 1)
 
-        
+
 def read_speed_vector():
     """
     Read three dimensional 16 bit signed integer vector from stdin.
@@ -44,15 +44,15 @@ def read_speed_vector():
     while True:
         try:
             v = list(map(int, input('> ').strip().split(" ")))
-            
+
             if len(v) == 3 and is_int16_vector(v):
                 return (v[0], v[1], v[2])
         except ValueError:
             pass
-        
+
         print("Vector must be three positive integers between", -2**16/2 + 1, " and", 2**16/2 - 1)
 
-    
+
 
 def build_packet():
     """
@@ -60,12 +60,12 @@ def build_packet():
     """
     cmd = 0
     speed_vector = read_speed_vector()
-                                        
+
     buf = []
 
     # Magic 8-bit header
     buf.extend(struct.pack("<b", 42))
-    
+
     # Data
     buf.extend(struct.pack("<h", cmd))
     for i in speed_vector:
@@ -85,16 +85,16 @@ if __name__ == "__main__":
     device = args.device
 
     print("Starting session on", device + "...")
-    
+
     if not os.path.exists(device):
         print("'" + device + "' port not found!")
         sys.exit(1)
-        
+
     s = serial.Serial(port=device, baudrate=9600,
                parity=serial.PARITY_NONE,
                stopbits=serial.STOPBITS_ONE,
                bytesize=serial.EIGHTBITS)
-        
+
     while True:
         byte_buf = build_packet()
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
         # Wait for response
         time.sleep(0.1)
-        
+
         out = []
         while s.inWaiting() > 0:
             out += s.read(1)
