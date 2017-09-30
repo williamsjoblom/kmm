@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 #include <limits.h>
 
 #include "main.h"
@@ -57,6 +56,7 @@ unsigned int motor2_ticks = UINT_MAX;
 volatile unsigned int motor0_remaining = 0;
 volatile unsigned int motor1_remaining = 0;
 volatile unsigned int motor2_remaining = 0;
+
 
 /**
  * Main.
