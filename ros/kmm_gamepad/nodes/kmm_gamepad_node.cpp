@@ -2,6 +2,20 @@
 #include "geometry_msgs/Twist.h"
 #include <SFML/Window.hpp>
 #include <iostream>
+#include <dynamic_reconfigure/server.h>
+#include <kmm_gamepad/GamepadConfig.h>
+
+float max_linear_vel = 0.0; // m/s
+float max_angular_vel = 0.0; // rad/s
+
+void callback(kmm_gamepad::GamepadConfig &config, uint32_t level) {
+  ROS_INFO("Reconfigure Request: (New max linear velocity: %.2f, \
+    New max angular velocity: %.2f)",
+    config.max_linear_vel, config.max_angular_vel
+  );
+  max_linear_vel = config.max_linear_vel;
+  max_angular_vel = config.max_angular_vel;
+}
 
 float deadzone(float value) {
   const float DEADZONE = 0.05;
@@ -20,6 +34,12 @@ int main(int argc, char **argv) {
 
   ros::init(argc, argv, "kmm_gamepad");
   ros::NodeHandle nh;
+
+  dynamic_reconfigure::Server<kmm_gamepad::GamepadConfig> server;
+  dynamic_reconfigure::Server<kmm_gamepad::GamepadConfig>::CallbackType f;
+
+  f = boost::bind(&callback, _1, _2);
+  server.setCallback(f);
 
   ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("gamepad_vel", 1);
 
@@ -47,13 +67,10 @@ int main(int argc, char **argv) {
     l_y = lowpass(y, l_y, dt, T);
     l_z = lowpass(z, l_z, dt, T);
 
-    const float MAX_LINEAR = 0.25; // m/s
-    const float MAX_ANGLUAR = 1.0; // rad/s
-
     geometry_msgs::Twist msg;
-    msg.linear.x = l_x * MAX_LINEAR;
-    msg.linear.y = l_y * MAX_LINEAR;
-    msg.angular.z = l_z * MAX_ANGLUAR;
+    msg.linear.x = l_x * max_linear_vel;
+    msg.linear.y = l_y * max_linear_vel;
+    msg.angular.z = l_z * max_angular_vel;
     pub.publish(msg);
 
     ros::spinOnce();

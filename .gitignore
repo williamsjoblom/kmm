@@ -1,3 +1,5 @@
 *.o
 *.hex
 stepper
+*.swp
+*.save*
