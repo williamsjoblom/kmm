@@ -40,7 +40,17 @@ sudo apt-get install libsfml-dev
 mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/
 catkin_make
-echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+echo "source ~/.rosenv" >> ~/.bashrc
+nano ~/.rosenv
+
+**Lägg till**
+
+source ~/catkin_ws/devel/setup.bash
+# export ROS_IP=???
+# export ROS_MASTER_URI=???
+
+**Spara med Ctrl+O, och stäng med Ctrl+C**
+
 source ~/.bashrc
 echo $ROS_PACKAGE_PATH
 cd ~/catkin_ws/src/
