@@ -7,38 +7,22 @@
     </head>
     <body bgcolor = "393635" text = "white">
         <div id = "outerdiv">
+            <div id = "navbar" class = "navbar">
+                <a id = "go-to"
+                   class = "navbarbutton">
+                    <p>Go To</p>
+                </a>
+                <a id = "debug"
+                   class = "navbarbutton">
+                    <p>Debug Options</p>
+                </a>
+            </div>
             <div id = "canvasdiv">
                 <canvas class="map" id="map">
 
                 </canvas>
                 <button class="mapButton" name="zoomInButton" id="zoomInButton" onclick="zoomInMap();"></button>
                 <button class="mapButton" name="zoomOutButton" id="zoomOutButton" onclick="zoomOutMap();"></button>
-            </div>
-            <div id = "navbar", class = "navbar">
-                <a id = "start"
-                   class = "topnavbutton"
-                   onclick = "setActiveNavBarButton(this);
-                                   loadTab('start.html');">
-                    <p>Start</p>
-                </a>
-                <a id = "om-oss"
-                   class = "topnavbutton"
-                   onclick = "setActiveNavBarButton(this);
-                                   loadTab('om-oss.html');">
-                    <p>Om oss</p>
-                </a>
-                <a id = "boka-oss"
-                   class = "topnavbutton"
-                   onclick = "setActiveNavBarButton(this);
-                                   loadTab('boka-oss.html');">
-                    <p>Boka oss</p>
-                </a>
-                <a id = "kontakta-oss"
-                   class = "topnavbutton"
-                   onclick = "setActiveNavBarButton(this);
-                                   loadTab('kontakta-oss.html');">
-                    <p>Kontakta oss</p>
-                </a>
             </div>
             <div>
                 Här sabse kan du jobba :D

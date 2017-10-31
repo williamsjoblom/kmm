@@ -17,3 +17,32 @@
     height: 30px; 
     width:  30px; 
 }
+.navbar {
+    top:0;
+    position:relative;
+    overflow:hidden;
+    background-color:#333;
+    width:100%;
+    transform:translate(-50%, -50%);
+    margin-top:20px;
+    margin-left:50%;
+}
+
+.navbar a {
+    display: inline-block;
+    color: #f2f2f2;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+}
+
+.navbarbutton {
+    cursor:pointer;
+    margin-left:-4px;
+    font-family:"Palantinos", Verdana, sans-serif;
+    color: white;
+}
+
+.navbarbutton:hover {
+    background-color: rgba(156,39,176,0.8);
+}
