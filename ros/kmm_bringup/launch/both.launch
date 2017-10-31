@@ -1,0 +1,8 @@
+<launch>
+  <node name="kmm_gamepad" pkg="kmm_gamepad" type="kmm_gamepad_node">
+    <remap from="gamepad_vel" to="cmd_vel"/>
+  </node>
+  <node name="kmm_steering" pkg="kmm_drivers" type="kmm_steering_node.py">
+    <param name="device" value="$(arg device)" />
+  </node>
+</launch>

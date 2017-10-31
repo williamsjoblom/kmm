@@ -28,10 +28,13 @@ struct packet read_packet() {
     }
 
     if (verify_packet(&p)) {
+#if ENABLE_TRACES
 	printf("Bad packet!\n\r");
+#endif
     } else {
+#if ENABLE_TRACES
 	printf("Packet OK!\n\r");
-
+#endif
 	set_motor_speed(0, p.data[0]);
 	set_motor_speed(1, p.data[1]);
 	set_motor_speed(2, p.data[2]);
