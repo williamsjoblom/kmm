@@ -3,3 +3,10 @@
     margin: 0;
     text-align:center;
 }
+
+.map {
+    background-color: #FAFAFA;
+    height: 100vh;
+    width:  75vw;
+    display: block;
+}
