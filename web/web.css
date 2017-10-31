@@ -49,6 +49,34 @@
     left:0px;
 }
 
+.mapButton {
+    cursor:pointer;
+    margin-left:10px;
+    margin-bottom:10px;
+    color:black;
+    position:fixed;
+    left:40px;
+    bottom:0;
+}
+
+button[name="viewStateButton"] {
+    width:70px;
+    content:"Hello";
+    height:30px;
+    color:black;
+    font-size:14px;
+    left:80px;
+}
+
+button[name="centerViewButton"] {
+    width:30px;
+    height:30px;
+    border:0;
+    background:rgba(0,0,0,0);
+    background:url(centerViewButton.png) center no-repeat;
+    background-size: cover;
+}
+
 .navbar {
     top:0;
     position:relative;
