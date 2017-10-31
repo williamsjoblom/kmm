@@ -8,11 +8,11 @@
     <body bgcolor = "393635" text = "white">
         <div id = "outerdiv">
             <div id = "canvasdiv">
-                <canvas class="map">
+                <canvas class="map" id="map">
 
                 </canvas>
-                <button></button>
-                <button></button>
+                <button class="mapButton" name="zoomInButton" id="zoomInButton" onclick="zoomInMap();"></button>
+                <button class="mapButton" name="zoomOutButton" id="zoomOutButton" onclick="zoomOutMap();"></button>
             </div>
             <div id = "navbar", class = "navbar">
                 <a id = "start"

@@ -10,3 +10,10 @@
     width:  75vw;
     display: block;
 }
+
+.mapButton["zoomInButton"] {
+    background-color: #FAFAFA;
+    
+    height: 30px; 
+    width:  30px; 
+}
