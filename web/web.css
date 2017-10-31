@@ -1,7 +1,14 @@
 * {
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
     text-align:center;
+}
+
+.map {
+    background-color: #FAFAFA;
+    height: 100vh;
+    width:  75vw;
+    display: block;
 }
 
 .navbar {
