@@ -59,8 +59,8 @@ git clone git@github.com:williamsjoblom/kmm.git
 catkin_make
 ```
 
-## Webb stuff
-Install
+## Webb
+Install NodeJS (used to serve website locally)
 ```
 cd ~
 curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
@@ -69,7 +69,7 @@ sudo apt-get install nodejs
 sudo apt-get install build-essential
 ```
 
-Run
+Run the local webserver (similar to XAMPP but easier)
 ```
 cd ~/catkin_ws/src/kmm/web
 http-server
@@ -77,7 +77,7 @@ http-server
 
 Open broswer at http://localhost:8080
 
-## Workflow
+## Rosbag
 
 ```
 rosparam set use_sim_time true
