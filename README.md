@@ -1,5 +1,7 @@
 # KMM
-Konstruktion med mikrodatorer, projekt.
+Konstruktion med mikroprocessorer.
+
+![funny gif](https://www.outerplaces.com/images/user_upload/fail3.gif)
 
 ## Tools, libraries and dependencies
 ### ROS Kinetic (Robot Operating System)
