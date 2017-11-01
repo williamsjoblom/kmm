@@ -165,7 +165,13 @@ function toggleViewState() {
 }
 
 function centerView() {
-  alert("center view!");
+  view = {
+    zoom: 1,
+    pan: {
+      x: 0,
+      y: 0
+    }
+  };
 }
 
 function zoomIn() {
