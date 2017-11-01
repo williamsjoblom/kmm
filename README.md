@@ -83,23 +83,24 @@ Open broswer at http://localhost:8080
 ```
 rosparam set use_sim_time true
 rosbag play xxxx.bag --clock
+```
 
 ## Webb
 Install NodeJS (used to serve website locally)
+
 ```
 cd ~
 curl -sL https://deb.nodesource.com/setup_6.x -o nodesource_setup.sh
 sudo bash nodesource_setup.sh
 sudo apt-get install nodejs
 sudo apt-get install build-essential
+sudo npm install http-server -g
 ```
 
 Run the local webserver (similar to XAMPP but easier)
 ```
 cd ~/catkin_ws/src/kmm/web
 http-server
-NOTE: I had to run 'sudo npm install http-server -g' in order for the http-server command to work. //Jennifer
 ```
 
 Open broswer at http://localhost:8080
-```
