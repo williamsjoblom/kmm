@@ -12,36 +12,70 @@ var view = {
   }
 };
 
+var pxPerMeter = 120;
+
+var isDragging = false;
+var prevDragPos = { x: 0, y: 0 };
+
 var currViewState = "Local";
 
 /* * * * * * * * */
 
 // When the document has finished loading.
 $(document).ready(function () {
+  // Bind key, scroll, click events.
+  bindEvents();
+
   // Initiate view state.
   toggleViewState();
+
   // Save the canvas 2D context for later use.
   ctx = $("#map")[0].getContext("2d");
+
   // Set initial canvas size.
   resizeCanvas();
-  // Render the canvas once.
-  render();
+
   // Set an interval to show random data every second.
   setInterval(randomData, 1000);
+
+  // Render canvas 60 fps.
+  setInterval(render, 0.016);
 });
 
 // If the window is resized the context needs to know in order
 // to not squeeze the graphics in weird ways.
-$(window).resize(function () {
-  resizeCanvas();
-  render();
-});
+$(window).resize(resizeCanvas);
 
-// Bind buttons.
-$("#zoom-in-button").click(zoomIn);
-$("#zoom-out-button").click(zoomOut);
-$("#view-state-button").click(toggleViewState);
-$("#center-view-button").click(centerView);
+function bindEvents() {
+  // Bind map buttons.
+  $("#zoom-in-button").click(zoomIn);
+  $("#zoom-out-button").click(zoomOut);
+  $("#view-state-button").click(toggleViewState);
+  $("#center-view-button").click(centerView);
+
+  // Bind map scoll zoom and mouse pan.
+  $("#map")
+  .mousedown(function(e) {
+    isDragging = true;
+    prevDragPos.x = e.screenX;
+    prevDragPos.y = e.screenY;
+  })
+  .mousemove(function(e) {
+    if (isDragging) {
+      view.pan.y += (prevDragPos.x - e.screenX) / pxPerMeter;
+      view.pan.x += (prevDragPos.y - e.screenY) / pxPerMeter;
+      prevDragPos.x = e.screenX;
+      prevDragPos.y = e.screenY;
+    }
+  })
+  .mouseup(function() {
+    isDragging = false;
+  })
+  .on("wheel", function (e) {
+    view.zoom *= 1 - e.originalEvent.deltaY * 0.001;
+  });
+}
+
 
 function resizeCanvas() {
   var $container = $("#map-container")
@@ -54,10 +88,14 @@ function render() {
 
   // Transform coordinate system to something that is practical to work with
   ctx.save();
-  ctx.scale(1, -1);
   ctx.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
-  ctx.translate(-ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
-  ctx.scale(60, 60); // 1 meter is 60 px.
+  ctx.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
+  ctx.scale(-pxPerMeter, pxPerMeter);
+  ctx.translate(-2, 0);
+
+  // View settings
+  ctx.translate(view.pan.x, view.pan.y);
+  ctx.scale(view.zoom, view.zoom);
 
   drawGrid();
   drawGlobalFrame();
@@ -71,35 +109,35 @@ function clearScreen() {
 }
 
 function drawGlobalFrame() {
-  ctx.lineWidth = 0.05;
+  ctx.lineWidth = 0.03;
   // Draw x axis in red
   ctx.strokeStyle = "#FF0000";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(1, 0);
+  ctx.lineTo(0.6, 0);
   ctx.stroke();
   // Draw y axis in green
   ctx.strokeStyle = "#00FF00";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(0, 1);
+  ctx.lineTo(0, 0.6);
   ctx.stroke();
 }
 
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
-  var n = 27;
+  var n = 11;
   for (var i = 0; i < n; i++) {
     // horizontal
     ctx.beginPath();
-    ctx.moveTo(0.4*i - 0.4*(n-1)/2, 0.4*n/-2);
-    ctx.lineTo(0.4*i - 0.4*(n-1)/2, 0.4*n/2);
+    ctx.moveTo(0.4*i, 0.4*n/-2);
+    ctx.lineTo(0.4*i, 0.4*n/2);
     ctx.stroke();
     // vectical
     ctx.beginPath();
-    ctx.moveTo(0.4*n/-2, 0.4*i - 0.4*(n-1)/2);
-    ctx.lineTo(0.4*n/2, 0.4*i - 0.4*(n-1)/2);
+    ctx.moveTo(0.4*n/-2 + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
+    ctx.lineTo(0.4*n/2  + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
     ctx.stroke();
   }
 }
@@ -127,9 +165,9 @@ function centerView() {
 }
 
 function zoomIn() {
-  alert("zoom in!");
+  view.zoom *= 1.2;
 }
 
 function zoomOut() {
-  alert("zoom out!");
+  view.zoom *= 0.8;
 }
