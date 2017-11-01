@@ -73,6 +73,7 @@ Run the local webserver (similar to XAMPP but easier)
 ```
 cd ~/catkin_ws/src/kmm/web
 http-server
+NOTE: I had to run 'sudo npm install http-server -g' in order for the http-server command to work. //Jennifer
 ```
 
 Open broswer at http://localhost:8080
