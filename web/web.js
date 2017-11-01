@@ -72,6 +72,7 @@ function bindEvents() {
     isDragging = false;
   })
   .on("wheel", function (e) {
+    e.preventDefault();
     view.zoom *= 1 - e.originalEvent.deltaY * 0.001;
   });
 }
