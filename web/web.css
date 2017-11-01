@@ -4,39 +4,77 @@
     text-align:center;
 }
 
-.map {
+#map {
     background-color: #FAFAFA;
-    height: 100vh;
-    width:  75vw;
+    height: 100%;
+    width:  75%;
+    margin: 0px;
     display: block;
+    position: fixed;
+    top: 45px;
+    left: 0px;
+}
+
+.mapZoomButton {
+    cursor:pointer;
+    background:#E0E0E0;
+    color:#646464; 
+    width:30px;
+    height:30px;
+    margin:10px;
+    border:0px;
+    border-radius: 2px;
+    padding:0px;
+    -webkit-transition-duration:0.3s; /* Safari users */
+    transition-duration:0.3s;
+    display: inline-block;
+    font-family:"Inconsolata";
+    font-size:28px;
+    text-align:center;
+}
+
+.mapZoomButton:hover {
+    background:#EFEFEF;
+    color:#000000;
+}
+#zoomInButton {
+    position:fixed;
+    bottom:40px;
+    left:0px;
+}
+
+#zoomOutButton {
+    position:fixed;
+    bottom:0px;
+    left:0px;
 }
 
 .mapButton {
     cursor:pointer;
-    margin-left:20px;
-    margin-bottom:20px;
+    margin-left:10px;
+    margin-bottom:10px;
     color:black;
-    position:absolute;
-    left:0;
+    position:fixed;
+    left:40px;
     bottom:0;
 }
 
 button[name="viewStateButton"] {
     width:70px;
     content:"Hello";
-    height:35px;
+    height:30px;
     color:black;
     font-size:14px;
-    left:65px;
+    left:80px;
 }
 
 button[name="centerViewButton"] {
-    width:45px;
-    height:45px;
+    width:30px;
+    height:30px;
     border:0;
     background:rgba(0,0,0,0);
     background:url(centerViewButton.png) center no-repeat;
-    background-size:45px;
+    background-size: cover;
 }
 
 .navbar {

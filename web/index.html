@@ -18,13 +18,11 @@
                 </a>
             </div>
             <div id = "canvasdiv">
-                <canvas class="map" id="map">
-
-                </canvas>
+                <canvas class="map" id="map"></canvas>
+                <button class="mapZoomButton" id="zoomInButton" onclick="zoomInMap();">+</button>
+                <button class="mapZoomButton" id="zoomOutButton" onclick="zoomOutMap();">-</button>
                 <button class = "mapButton" name = "viewStateButton" id = "viewStateButton" onclick = "toggleViewState();"></button>
                 <button class = "mapButton" name = "centerViewButton" id = "centerViewButton" onclick = "centerView();"></button>
-                <button class="mapButton" name="zoomInButton" id="zoomInButton" onclick="zoomInMap();"></button>
-                <button class="mapButton" name="zoomOutButton" id="zoomOutButton" onclick="zoomOutMap();"></button>
             </div>
             <div>
                 Här sabse kan du jobba :D
