@@ -1,8 +1,7 @@
-
 *, *:before, *:after {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html, body {
@@ -16,9 +15,7 @@ html, body {
 
 .menu {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  width: 100%;
   height: 50px;
   background: #222;
   color: #fff;
@@ -29,7 +26,6 @@ html, body {
   color: #f2f2f2;
   padding: 17px;
   cursor: pointer;
-  color: white;
 }
 
 .menu-option:hover {
@@ -42,7 +38,7 @@ html, body {
   right: 0;
   bottom: 0;
   width: 400px;
-  background: #ddd;
+  background: #CE93D8;
   padding: 20px;
 }
 
@@ -50,13 +46,23 @@ html, body {
   width: 100%;
 }
 
+.sidebar .table-info tr {
+  padding: 10px 2px;
+  font-size: 16px;
+}
+
+.sidebar .table-info tr:nth-child(odd) {
+  font-weight: bold;
+  font-size: 20px;
+}
+
 .sidebar .table-info td {
   width: 16.6666%;
-  padding: 5px;
 }
 
 .sidebar .table-info td:nth-child(odd) {
   text-align: right;
+  padding: 10px 2px;
 }
 
 #map-container {
