@@ -146,16 +146,20 @@ function randomData() {
   $("#pos-x").html(Math.round(Math.random() * 100));
   $("#pos-y").html(Math.round(Math.random() * 100));
   $("#theta").html(Math.round(Math.random() * 100));
+  $("#tar-pos-x").html(Math.round(Math.random() * 100));
+  $("#tar-pos-y").html(Math.round(Math.random() * 100));
+  $("#tar-theta").html(Math.round(Math.random() * 100));
+  $("#w-vel-1").html(Math.round(Math.random() * 100) + " m/s");
+  $("#w-vel-2").html(Math.round(Math.random() * 100) + " m/s");
+  $("#w-vel-3").html(Math.round(Math.random() * 100) + " m/s");
 }
 
 // Toggle view state of map between global and local.
 function toggleViewState() {
   var $viewStateElem = $("#view-state-button");
   if ($viewStateElem.html() === "Global") {
-    currViewState = "Local";
     $viewStateElem.html("Local");
   } else {
-    currViewState = "Global";
     $viewStateElem.html("Global");
   }
 }

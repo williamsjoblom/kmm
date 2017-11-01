@@ -1,66 +1,94 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8"/>
-        <script src="jquery.min.js"></script>
-        <link href="web.css" rel="stylesheet">
-    </head>
-    <body>
+  <head>
+    <meta charset="utf-8"/>
+    <script src="jquery.min.js"></script>
+    <link href="web.css" rel="stylesheet">
+  </head>
+  <body>
 
-      <div class="menu">
-        <div class="menu-option">
-          Debug options
-        </div>
-        <div class="menu-option">
-          Go to
-        </div>
+    <div class="menu">
+      <div class="menu-option">
+        Debug options
       </div>
-
-      <div id="map-container">
-        <canvas id="map"></canvas>
-        <table class="controls">
-          <tr>
-            <td>
-              <div class="map-button zoom-button" id="zoom-in-button">+</div>
-            <td>
-            <td><!-- nothing --></td>
-            <td><!-- nothing --></td>
-          </tr>
-          <tr>
-            <td>
-              <div class="map-button zoom-button" id="zoom-out-button">-</div>
-            </td>
-            <td>
-              <div class="map-button" id="view-state-button"></div>
-            </td>
-            <td>
-              <div class="map-button" id="center-view-button"></div>
-            </td>
-          </tr>
-        </table>
+      <div class="menu-option">
+        Go to
       </div>
+    </div>
 
-      <div class="sidebar">
-        <!-- TODO: lots of stuff in here, this is really ugly looking now...
-          Should use material design and look really nice.
-        -->
-        <table class="table-info">
-          <tr>
-            <td colspan="6">
-              <center>Position</center>
-            </td>
-          </tr>
-          <tr>
-            <td>X:</td>
-            <td id="pos-x"></td>
-            <td>Y:</td>
-            <td id="pos-y"></td>
-            <td>&theta;:</td>
-            <td id="theta"></td>
-          <tr>
-        </table>
-      </div>
+    <div id="map-container">
+      <canvas id="map"></canvas>
+      <table class="controls">
+        <tr>
+          <td>
+            <div class="map-button zoom-button" id="zoom-in-button">+</div>
+          <td>
+          <td><!-- nothing --></td>
+          <td><!-- nothing --></td>
+        </tr>
+        <tr>
+          <td>
+            <div class="map-button zoom-button" id="zoom-out-button">-</div>
+          </td>
+          <td>
+            <div class="map-button" id="view-state-button"></div>
+          </td>
+          <td>
+            <div class="map-button" id="center-view-button"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
 
-      <script src="web.js"></script>
-    </body>
+    <div class="sidebar">
+      <!-- TODO: lots of stuff in here, this is really ugly looking now...
+        Should use material design and look really nice.
+      -->
+      <table class="table-info">
+        <tr>
+          <td colspan="6">
+            <center>Position</center>
+          </td>
+        </tr>
+        <tr>
+          <td>X:</td>
+          <td id="pos-x"></td>
+          <td>Y:</td>
+          <td id="pos-y"></td>
+          <td>&theta;:</td>
+          <td id="theta"></td>
+        </tr>
+
+        <tr>
+          <td colspan="6">
+            <center>Target Position</center>
+          </td>
+        </tr>
+        <tr>
+          <td>X<sub>tar</sub>:</td>
+          <td id="tar-pos-x"></td>
+          <td>Y<sub>tar</sub>:</td>
+          <td id="tar-pos-y"></td>
+          <td>&theta;<sub>tar</sub>:</td>
+          <td id="tar-theta"></td>
+        </tr>
+
+        <tr>
+          <td colspan="6">
+            <center>Wheel Velocity</center>
+          </td>
+        </tr>
+        <tr>
+          <td>W<sub>1</sub>:</td>
+          <td id="w-vel-1"></td>
+          <td>W<sub>2</sub>:</td>
+          <td id="w-vel-2"></td>
+          <td>W<sub>3</sub>:</td>
+          <td id="w-vel-3"></td>
+        </tr>
+      </table>
+    </div>
+
+    <script src="web.js"></script>
+  </body>
 </html>
