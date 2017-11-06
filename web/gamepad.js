@@ -3,6 +3,33 @@ var connected = false;
 // The current gamepad object
 var gamepad;
 
+var ros = new ROSLIB.ros({
+  url : 'ws://localhost:8080'
+});
+
+ros.on('connection', function() {
+  console.los('Connected to a websocket server.');
+}
+
+ros.on('error', function(error) {
+  console.lof('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed. ')
+})
+
+var gamepadVel = new ROSLIB.Topic({
+  ros : ros,
+  name : '/gamepad_vel',
+  messageType : 'geometry_msg/Twist'
+});
+
+
+
+
+
+
 /* Sets upp eventlisteners for when the gamepad gets connected and disconnected.
 Starts listening as soon as the page has loaded.
 */
