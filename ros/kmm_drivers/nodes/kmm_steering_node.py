@@ -3,6 +3,7 @@
 import os
 import sys
 import serial
+# import spidev <-- Used to work with spi devices over the pi
 import rospy
 import time
 import struct
@@ -37,12 +38,16 @@ class SteeringDriver:
             rospy.logerror("'%s' port not found!", device)
             sys.exit(1)
 
-        self.s = serial.Serial(port=device, baudrate=9600,
-                   parity=serial.PARITY_NONE,
-                   stopbits=serial.STOPBITS_ONE,
-                   bytesize=serial.EIGHTBITS)
+        # self.s = serial.Serial(port=device, baudrate=9600,
+        #            parity=serial.PARITY_NONE,
+        #            stopbits=serial.STOPBITS_ONE,
+        #            bytesize=serial.EIGHTBITS)
 
-        self.sub = rospy.Subscriber('cmd_vel', Twist, self.callback)
+        self.spi = spidev.SpiDev()
+        self.spi.open(0,0) #connection to spi device 0
+        self.spi.max_speed_hz = 100
+        
+        self.sub = rospy.Subscriber('gamepad_vel', Twist, self.callback)
 
     def callback(self, msg):
 
@@ -70,7 +75,8 @@ class SteeringDriver:
 
         byte_buf = build_packet(cmd, speed)
 
-        self.s.write(byte_buf)
+        # self.s.write(byte_buf)
+        self.spi.xfer(byte_buf)
 
         """
         # Wait for response
