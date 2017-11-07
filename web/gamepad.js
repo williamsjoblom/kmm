@@ -8,24 +8,22 @@ var ros = new ROSLIB.ros({
 });
 
 ros.on('connection', function() {
-  console.los('Connected to a websocket server.');
-}
+  console.log('Connected to a websocket server.');
+});
 
 ros.on('error', function(error) {
-  console.lof('Error connecting to websocket server: ', error);
+  console.log('Error connecting to websocket server: ', error);
 });
 
 ros.on('close', function() {
-  console.log('Connection to websocket server closed. ')
-})
+  console.log('Connection to websocket server closed. ');
+});
 
 var gamepadVel = new ROSLIB.Topic({
   ros : ros,
   name : '/gamepad_vel',
   messageType : 'geometry_msg/Twist'
 });
-
-
 
 
 
@@ -62,6 +60,7 @@ function checkMovement(){
     var x = gamepad.axes[1];
     var y = gamepad.axes[0];
     var theta = gamepad.axes[2];
+    console.log("x: "+x+ ", y: "+y);
     //TODO: check deadzone
     //TODO: implement low pass filter
     //TODO: Check how x,y, theta corresponds to the controller
