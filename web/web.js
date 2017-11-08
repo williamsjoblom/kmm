@@ -21,6 +21,26 @@ var currViewState = "Local";
 
 /* * * * * * * * */
 
+/* SETS UP ROS */
+
+var ros = new ROSLIB.Ros({
+  url : 'ws://localhost:9090'
+});
+
+ros.on('connection', function() {
+  console.log('Connected to a websocket server.');
+});
+
+ros.on('error', function(error) {
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed. ');
+});
+
+/* * * * * * * * */
+
 // When the document has finished loading.
 $(document).ready(function () {
   // Bind key, scroll, click events.
