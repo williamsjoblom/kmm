@@ -17,8 +17,6 @@ var pxPerMeter = 120;
 var isDragging = false;
 var prevDragPos = { x: 0, y: 0 };
 
-var currViewState = "Local";
-
 /* * * * * * * * */
 
 /* SETS UP ROS */
@@ -99,9 +97,14 @@ function bindEvents() {
 
 
 function resizeCanvas() {
-  var $container = $("#map-container")
+  var $container = $("#map-container");
   ctx.canvas.width = $container.width();
   ctx.canvas.height = $container.height();
+}
+
+var laserScan = [];
+for (var i = 0; i < 360; i++) {
+  laserScan.push(Math.random() * 6)
 }
 
 function render() {
@@ -120,6 +123,7 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
+  drawLaserScan(laserScan);
 
   ctx.restore();
 }
@@ -148,7 +152,7 @@ function drawGlobalFrame() {
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
-  var n = 11;
+  var n = 27;
   for (var i = 0; i < n; i++) {
     // horizontal
     ctx.beginPath();
@@ -161,6 +165,18 @@ function drawGrid() {
     ctx.lineTo(0.4*n/2  + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
     ctx.stroke();
   }
+}
+
+function drawLaserScan(laserScan) {
+  ctx.save();
+  var rectHeight = 0.02;
+  var rectWidth = 0.02;
+  for (var i = 0; i < 360; i++) {
+    ctx.rotate(1);
+    ctx.fillStyle = "#9C27B0";
+    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+  }
+  ctx.restore();
 }
 
 function randomData() {
