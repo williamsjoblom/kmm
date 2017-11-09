@@ -15,3 +15,14 @@ function toggleViewState() {
 /* Center view of map */
 function centerView() {
 }
+
+/* Zooms in on the robot in the map*/
+function zoomInMap() {
+
+}
+
+/* Zooms out from the robot in the map*/ 
+function zoomOutMap() {
+
+
+}
