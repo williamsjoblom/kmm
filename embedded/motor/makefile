@@ -8,16 +8,17 @@ stepper.hex: stepper
 	avr-objcopy -O ihex -R .eeprom stepper stepper.hex
 
 stepper: $(OBJ)
-	avr-gcc -mmcu=atmega328p $(OBJ) -o $@
+	avr-gcc -mmcu=atmega168 $(OBJ) -o $@
 
 %.o: %.c
-	avr-gcc -Os -DF_CPU=16000000 -std=gnu99 -mmcu=atmega328p -c $< -o $@
+	avr-gcc -Os -DF_CPU=8000000 -std=gnu99 -mmcu=atmega168 -c $< -o $@
 
 prog:
-	avrdude -v -p atmega328p -c arduino -P /dev/ttyUSB0 -b 57600 -D -U flash:w:stepper.hex:i
+	avrdude -c atmelice_isp -p atmega168 -U flash:w:stepper.hex
 
 clean:
 	rm -f *.o
 	rm stepper.hex stepper
 
-.PHONY: all build prog clean
+
+.PHONY: all build prog clean test
