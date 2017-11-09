@@ -1,13 +1,46 @@
 #include "ils.h"
+#include "Pose.h"
 
-ils_fit(
+/*
+  Old function, new is get_transform_pose.
+*/
+Pose ils_fit(
   std::vector<Eigen::Vector3f> &a,
   std::vector<Eigen::Vector3f> &b,
   int iterations)
 {
+  Pose total;
+
   for (int i = 0; i < iterations; i++) {
     // call on relative pose iteratively
+    total += ils_relative_pose(a, b);
   }
+
+  return total;
+}
+
+/*
+Creates a Pose that aligns points in laser scan to grid.
+*/
+Pose get_transform_pose(
+  std::vector<Eigen::vector2f> &scan
+  int iterations = 1)
+{
+  Pose total;
+  std::vector<Eigen::vector2f> newScan; //Scan whithout points in crossings.
+
+  for (int i = 0; i < iterations; i++){
+    std::vector<Eigen::Vector2f> scanPair; //Kuriosa: Namnet för en enhet i ett par är "Pair"
+    std::vector<Eigen::Vector2f> gridPair;
+
+    build_pair(&scanPair, &gridPair);
+    newScan = scanPair;
+
+    total += least_squares(scanPair, gridPair);
+  }
+
+  scan = total.transform(newScan);
+  return total;
 }
 
 /*
@@ -23,12 +56,12 @@ ils_fit(
 
 */
 
-ils_relative_pose(
+Pose least_squares(
   std::vector<Eigen::Vector3f> &a,
   std::vector<Eigen::Vector3f> &b)
 {
-    assert(a.size() == b.size());
 
+    assert(a.size() == b.size());
     int n = a.size();
     double x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0;
     double xx = 0.0, yy = 0.0, xy = 0.0, yx = 0.0;
