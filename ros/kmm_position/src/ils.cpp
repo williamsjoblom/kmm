@@ -20,10 +20,10 @@ Pose ils_fit(
 }
 
 /*
-Creates a Pose that aligns points in laser scan to grid.
+Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
 */
 Pose get_transform_pose(
-  std::vector<Eigen::vector2f> &scan
+  std::vector<Eigen::vector2f> &scan,
   int iterations = 1)
 {
   Pose total;
@@ -33,13 +33,20 @@ Pose get_transform_pose(
     std::vector<Eigen::Vector2f> scanPair; //Kuriosa: Namnet för en enhet i ett par är "Pair"
     std::vector<Eigen::Vector2f> gridPair;
 
-    build_pair(&scanPair, &gridPair);
+    //Copies scan
+    newScan = scan;
+    total.transform(newScan);
+    //Creates pairs after previous transformation
+    build_pair(newScan, &scanPair, &gridPair);
+    //Saves scan without points in crossings
     newScan = scanPair;
-
-    total += least_squares(scanPair, gridPair);
+    // Calculates difference
+    Pose diff = least_squares(scanPair, gridPair);
+    //Updates newScan so that it can be used to replace laser scan point cloud.
+    diff.transform(newScan);
+    total += diff;
   }
-
-  scan = total.transform(newScan);
+  scan = newScan;
   return total;
 }
 
