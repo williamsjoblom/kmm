@@ -3,13 +3,17 @@
 import os
 import sys
 import serial
-# import spidev <-- Used to work with spi devices over the pi
+import spidev
 import rospy
 import time
 import struct
 from math import pi, sin, cos
 from time import time, sleep
 from geometry_msgs.msg import Twist
+
+# CONSTANTS
+MAX_LINEAR_VEL = 0.2
+MAX_ANGULAR_VEL = 0.2
 
 def build_packet(cmd, speed_vector):
     buf = []
@@ -44,19 +48,37 @@ class SteeringDriver:
         #            bytesize=serial.EIGHTBITS)
 
         self.spi = spidev.SpiDev()
-        self.spi.open(0,0) #connection to spi device 0
+        self.spi.open(0,0) #connection to spi device 0 CHIP SELECT 0
         self.spi.max_speed_hz = 100
-        
-        self.sub = rospy.Subscriber('gamepad_vel', Twist, self.callback)
+
+        self.sub = rospy.Subscriber('cmd_vel', Twist, self.callback)
+
+        self.l_x = 0.0
+        self.l_y = 0.0
+        self.l_z = 0.0
+        self.T = 0.2
+        self.ts = rospy.Time.now()
 
     def callback(self, msg):
 
         # m/s
-        x = msg.linear.x
-        y = msg.linear.y
+        x = (msg.linear.x / 100.0)
+        y = (msg.linear.y / -100.0)
         # rad/s
-        z = msg.angular.z
+        z = (msg.angular.z / -100.0)
 
+        # Lowpass filtering
+        dt = (rospy.Time.now() - ts).to_sec()
+        ts = rospy.Time.now()
+
+        l_x = lowpass(x, l_x, dt, T)
+        l_y = lowpass(y, l_y, dt, T)
+        l_z = lowpass(z, l_z, dt, T)
+
+        # Adjustment to max linear an angular velocities
+        x = l_x * MAX_LINEAR_VEL
+        y = l_y * MAX_LINEAR_VEL
+        z = l_z * MAX_ANGULAR_VEL
         # meters
         R = 0.03
         L = 0.095

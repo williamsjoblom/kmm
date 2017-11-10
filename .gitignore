@@ -4,3 +4,4 @@ stepper
 *.swp
 *.save*
 *.iml
+.idea/*
