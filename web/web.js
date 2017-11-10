@@ -124,6 +124,35 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
+//* The Ros object, wrapping a web socket connection to rosbridge.
+var ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090' // url to your rosbridge server
+});
+
+ros.on('connection', function() {
+  console.log('Connected to websocket server.');
+});
+
+ros.on('error', function(error) {
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed.');
+});
+
+//* A topic for messaging.
+var wallPositionsListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wall_positions',
+  messageType: 'kmm_mapping/wall_positions'
+});
+
+wallPositionsListener.subscribe(function(message) {
+    console.log('Received message on ' + wallPositionsListener.name);
+    console.log(message.vertical_walls[1]);
+  });
+
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
