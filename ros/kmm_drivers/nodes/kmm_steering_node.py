@@ -56,7 +56,7 @@ class SteeringDriver:
         Reset AVR and stepper drivers.
         """
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(RESET_PIN, OUTPUT)
+        GPIO.setup(RESET_PIN, GPIO.OUTPUT)
 
         GPIO.output(RESET_PIN, 0)
         time.sleep(0.01)
