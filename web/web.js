@@ -148,12 +148,72 @@ var wallPositionsListener = new ROSLIB.Topic({
   messageType: 'kmm_mapping/wall_positions'
 });
 
+var horizontalWall;
+var horizontalWalls = [];
+var verticalWall;
+var verticalWalls = [];
+
+/* Listener that listens to the /wall_positions topic. */
 wallPositionsListener.subscribe(function(message) {
     console.log('Received message on ' + wallPositionsListener.name);
-    console.log(message.vertical_walls[1]);
+    horizontalWalls = [];
+    verticalWalls = [];
+    for (var i = 0; i < message.horizontal_walls.length; i++) {
+      horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
+        'col': message.horizontal_walls[i].y})
+      horizontalWalls.push(horizontalWall);
+    };
+    console.log(horizontalWall);
+    for (var i = 0; i < message.vertical_walls.length; i++) {
+      verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
+        'col': message.vertical_walls[i].y})
+      verticalWalls.push(verticalWall);
+    };
   });
 
+function setLineStyle(type) {
+  if (type == "wall") {
+    ctx.lineWidth = 0.1;
+    ctx.strokeStyle = "#000000";
+  } else {
+    ctx.lineWidth = 0.01;
+    ctx.strokeStyle = "#AAAAAA";
+  };
+}
+
 function drawGrid() {
+  var rows = 15; // 6 / 0.4
+  var cols = 30; // ((6 / 0.4) * 2)
+  setLineStyle("normal");
+  // horizontal grid lines
+  for (var i = 0; i < rows + 1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0.4*(rows - i), 0.4*(cols/2));
+    ctx.lineTo(0.4*(rows - i), 0.4*(cols/-2));
+    ctx.stroke();
+  };
+  // vertical grid lines
+  for (var i = 0; i < cols + 1; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0.4*(rows), ((0.4*cols)/2) - (0.4 * i));
+    ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
+    ctx.stroke();
+  };
+  setLineStyle("wall");
+  var currRow;
+  var currCol;
+  // Horizontal walls
+  for (var i = 0; i < horizontalWalls.length; i++) {
+    currRow = horizontalWalls[i].x;
+    currCol = horizontalWalls[i].y;
+    ctx.beginPath();
+    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.lineTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol)));
+    ctx.stroke();
+  };
+}
+
+function drawGrid_() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
   var n = 11;
@@ -168,7 +228,7 @@ function drawGrid() {
     ctx.moveTo(0.4*n/-2 + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
     ctx.lineTo(0.4*n/2  + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
     ctx.stroke();
-  }
+  };
 }
 
 function randomData() {

@@ -15,7 +15,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "wall_positions_node");
   ros::NodeHandle n;
   ros::Publisher pub = n.advertise<kmm_mapping::wall_positions>("wall_positions", 1);
-  ros::Rate loop_rate(0.5);
+  ros::Rate loop_rate(10);
 
   // the message to be published
   kmm_mapping::wall_positions wall_positions_msg;
