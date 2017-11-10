@@ -19,9 +19,9 @@ int main(int argc, char **argv) {
     sf::Joystick::update();
 
     geometry_msgs::Twist msg;
-    msg.linear.x = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::Y) / 100.0;
-    msg.linear.y = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::X) / -100.0;
-    msg.angular.z = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::U) / -100.0;
+    msg.linear.x = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::X) / 100.0;
+    msg.linear.y = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::Y) / 100.0;
+    msg.angular.z = sf::Joystick::getAxisPosition(DEVICE_ID, sf::Joystick::U) / 100.0;
     pub.publish(msg);
 
     ros::spinOnce();
