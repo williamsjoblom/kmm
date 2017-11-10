@@ -40,7 +40,7 @@ class SteeringDriver:
         """
         self.spi = spidev.SpiDev()
         self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
-        self.spi.max_speed_hz = 100
+        self.spi.max_speed_hz = 4096
 
 
     def subscribe(self):
