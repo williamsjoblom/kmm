@@ -11,7 +11,7 @@ void Pose::transform(std::vector<Eigen::Vector2f> *points)
     double c = std::cos(angle);
     double s = std::sin(angle);
 
-    for (std::vector<Vec2>::iterator i = points->begin(); i != points->end(); i++)
+    for (std::vector<Eigen::Vector2f>::iterator i = points->begin(); i != points->end(); i++)
     {
         Eigen::Vector2f &point = *i;
         point[0] += pos[0];

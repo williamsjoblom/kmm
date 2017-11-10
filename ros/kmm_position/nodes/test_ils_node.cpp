@@ -1,5 +1,8 @@
 #include "ros/ros.h"
 #include <Eigen/Dense>
+#include <sensor_msgs/LaserScan.h>
+#include "kmm_position/Pose.h"
+#include "kmm_position/ils.h"
 
 int main(int argc, char **argv) {
 
@@ -14,35 +17,35 @@ int main(int argc, char **argv) {
   while (ros::ok()) {
 
     std::vector<Eigen::Vector2f> a;
-    scan.push_back(Eigen::Vector2f(-1, 1));
-    scan.push_back(Eigen::Vector2f(1, 1));
-    scan.push_back(Eigen::Vector2f(1, -1));
-    scan.push_back(Eigen::Vector2f(-1, -1));
+    a.push_back(Eigen::Vector2f(-1, 1));
+    a.push_back(Eigen::Vector2f(1, 1));
+    a.push_back(Eigen::Vector2f(1, -1));
+    a.push_back(Eigen::Vector2f(-1, -1));
 
     std::vector<Eigen::Vector2f> b;
-    scan.push_back(Eigen::Vector2f(-1, 1));
-    scan.push_back(Eigen::Vector2f(1, 1));
-    scan.push_back(Eigen::Vector2f(1, -1));
-    scan.push_back(Eigen::Vector2f(-1, -1));
+    b.push_back(Eigen::Vector2f(-1, 1));
+    b.push_back(Eigen::Vector2f(1, 1));
+    b.push_back(Eigen::Vector2f(1, -1));
+    b.push_back(Eigen::Vector2f(-1, -1));
 
     Pose offset;
-    offset.pos.x = 0.3;
-    offset.pos.y = 0.2;
+    offset.pos[0] = 0.3;
+    offset.pos[1] = 0.2;
     offset.angle = 3.14 / 8;
     std::cout << "offset: " << offset << std::endl;
 
-    offset.transform(b);
+    offset.transform(&b);
 
-    pub_a.publish(a);
-    pub_b.publish(b);
+    //pub_a.publish(a);
+    //pub_b.publish(b);
     rate.sleep();
 
-    Pose result = ils_relative_pose(a, b);
+    Pose result = least_squares(a, b);
     std::cout << "result: " << result << std::endl;
 
-    result.transform(b);
+    result.transform(&b);
 
-    pub_b.publish(b);
+    //pub_b.publish(b);
     rate.sleep();
   }
 }

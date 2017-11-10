@@ -4,30 +4,32 @@
 /*
   Old function, new is get_transform_pose.
 */
+/*
 Pose ils_fit(
-  std::vector<Eigen::Vector3f> &a,
-  std::vector<Eigen::Vector3f> &b,
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b,
   int iterations)
 {
   Pose total;
 
   for (int i = 0; i < iterations; i++) {
     // call on relative pose iteratively
-    total += ils_relative_pose(a, b);
+    total.accumulate(ils_relative_pose(a, b));
   }
 
   return total;
 }
+*/
 
 /*
 Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
 */
 Pose get_transform_pose(
-  std::vector<Eigen::vector2f> &scan,
-  int iterations = 1)
+  std::vector<Eigen::Vector2f> &scan,
+  int iterations)
 {
   Pose total;
-  std::vector<Eigen::vector2f> newScan; //Scan whithout points in crossings.
+  std::vector<Eigen::Vector2f> newScan; //Scan whithout points in crossings.
 
   for (int i = 0; i < iterations; i++){
     std::vector<Eigen::Vector2f> scanPair; //Kuriosa: Namnet för en enhet i ett par är "Pair"
@@ -35,16 +37,18 @@ Pose get_transform_pose(
 
     //Copies scan
     newScan = scan;
-    total.transform(newScan);
+    total.transform(&newScan);
     //Creates pairs after previous transformation
-    build_pair(newScan, &scanPair, &gridPair);
+
+    //Uncomment and add function
+    //build_pair(newScan, &scanPair, &gridPair);
     //Saves scan without points in crossings
     newScan = scanPair;
     // Calculates difference
     Pose diff = least_squares(scanPair, gridPair);
     //Updates newScan so that it can be used to replace laser scan point cloud.
-    diff.transform(newScan);
-    total += diff;
+    diff.transform(&newScan);
+    total.accumulate(diff);
   }
   scan = newScan;
   return total;
@@ -64,8 +68,8 @@ Pose get_transform_pose(
 */
 
 Pose least_squares(
-  std::vector<Eigen::Vector3f> &a,
-  std::vector<Eigen::Vector3f> &b)
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b)
 {
 
     assert(a.size() == b.size());
@@ -76,16 +80,16 @@ Pose least_squares(
 
     for (int i = 0; i < n; i++)
     {
-        const Vec2 &p1 = *a[i];
-        const Vec2 &p2 = *b[i];
-        x1 += p1.x;
-        x2 += p2.x;
-        y1 += p1.y;
-        y2 += p2.y;
-        xx += p1.x * p2.x;
-        yy += p1.y * p2.y;
-        xy += p1.x * p2.y;
-        yx += p1.y * p2.x;
+        const Eigen::Vector2f &p1 = a[i];
+        const Eigen::Vector2f &p2 = b[i];
+        x1 += p1[0];
+        x2 += p2[0];
+        y1 += p1[1];
+        y2 += p2[1];
+        xx += p1[0] * p2[0];
+        yy += p1[1] * p2[1];
+        xy += p1[0] * p2[1];
+        yx += p1[1] * p2[0];
     }
 
 
@@ -107,8 +111,8 @@ Pose least_squares(
     double s = sin(angle);
 
     Pose pose;
-    pose.pos.x = xm2 - (xm1 * c - ym1 * s);
-    pose.pos.y = ym2 - (xm1 * s + ym1 * c);
+    pose.pos[0] = xm2 - (xm1 * c - ym1 * s);
+    pose.pos[1] = ym2 - (xm1 * s + ym1 * c);
     pose.angle = angle;
 
 
