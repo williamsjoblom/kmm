@@ -13,8 +13,6 @@ from time import time, sleep
 from geometry_msgs.msg import Twist
 
 # CONSTANTS
-MAX_LINEAR_VEL = 0.2
-MAX_ANGULAR_VEL = 0.2
 RESET_PIN = 31
 
 def build_packet(cmd, speed_vector):
@@ -41,6 +39,7 @@ class SteeringDriver:
         self.spi = spidev.SpiDev()
         self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
         self.spi.max_speed_hz = 4096
+        self.spi.bits_per_word = 8
 
 
     def subscribe(self):
@@ -49,7 +48,7 @@ class SteeringDriver:
         """
         self.sub = rospy.Subscriber('cmd_vel', Twist, self.callback)
 
-        
+
     def reset(self):
         """
         Reset AVR and stepper drivers.
@@ -61,7 +60,7 @@ class SteeringDriver:
         sleep(0.01)
         GPIO.output(RESET_PIN, 1)
 
-        
+
     def callback(self, msg):
         """
         Callback.
@@ -90,17 +89,17 @@ class SteeringDriver:
 
         byte_buf = build_packet(cmd, speed)
 
-        self.spi.xfer(byte_buf)
+        self.spi.xfer(byte_buf, delay_usec=2000)
 
-        
+
 if __name__ == '__main__':
     rospy.init_node('kmm_steering')
     try:
         driver = SteeringDriver()
-        
+
         driver.reset()
         driver.subscribe()
-        
+
         rospy.spin()
     except rospy.ROSInterruptException:
         pass

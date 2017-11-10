@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 
   ros::Publisher pub = nh.advertise<geometry_msgs::Twist>("gamepad", 1);
 
-  ros::Rate rate(30);
+  ros::Rate rate(1);
 
   const int DEVICE_ID = 0;
 
