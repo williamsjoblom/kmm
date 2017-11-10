@@ -1,5 +1,4 @@
 <launch>
   <node name="kmm_steering" pkg="kmm_drivers" type="kmm_steering_node.py">
-    <param name="device" value="$(arg device)" />
   </node>
 </launch>
