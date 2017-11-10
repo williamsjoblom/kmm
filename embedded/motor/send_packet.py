@@ -1,6 +1,7 @@
-#!/usr/bin/env python3
-
 import sys, os, readline, argparse, struct, serial, time, ctypes
+import binascii
+import spidev
+import RPi.GPIO as GPIO
 
 
 def is_int16(i):
@@ -27,7 +28,7 @@ def read_int16():
     """
     while True:
         try:
-            i = int(input('> '))
+            i = int(raw_input('> '))
 
             if is_int16(i):
                 return i
@@ -43,7 +44,7 @@ def read_speed_vector():
     """
     while True:
         try:
-            v = list(map(int, input('> ').strip().split(" ")))
+            v = list(map(int, raw_input('> ').strip().split(" ")))
 
             if len(v) == 3 and is_int16_vector(v):
                 return (v[0], v[1], v[2])
@@ -78,35 +79,20 @@ def build_packet():
 
 
 if __name__ == "__main__":
-    p = argparse.ArgumentParser()
-    p.add_argument("device")
-    args = p.parse_args()
+    print("Starting session...")
 
-    device = args.device
+    spi = spidev.SpiDev()
+    spi.open(1, 1) # Steering module
+    spi.max_speed_hz = 100
 
-    print("Starting session on", device + "...")
+    # Configure reset pins
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup([29, 31], GPIO.OUT) 
 
-    if not os.path.exists(device):
-        print("'" + device + "' port not found!")
-        sys.exit(1)
-
-    s = serial.Serial(port=device, baudrate=9600,
-               parity=serial.PARITY_NONE,
-               stopbits=serial.STOPBITS_ONE,
-               bytesize=serial.EIGHTBITS)
-
+    # Reset
+    GPIO.output([29, 31], 0)
+    GPIO.output([29, 31], 1)
+    
     while True:
         byte_buf = build_packet()
-
-        s.write(byte_buf)
-
-        # Wait for response
-        time.sleep(0.1)
-
-        out = []
-        while s.inWaiting() > 0:
-            out += s.read(1)
-            time.sleep(0.001)
-
-        out_str = "".join([chr(c) for c in out])
-        print(out_str)
+        spi.xfer(byte_buf)
