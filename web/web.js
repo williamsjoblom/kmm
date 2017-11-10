@@ -173,7 +173,7 @@ wallPositionsListener.subscribe(function(message) {
 
 function setLineStyle(type) {
   if (type == "wall") {
-    ctx.lineWidth = 0.1;
+    ctx.lineWidth = 0.03;
     ctx.strokeStyle = "#000000";
   } else {
     ctx.lineWidth = 0.01;
@@ -204,29 +204,20 @@ function drawGrid() {
   var currCol;
   // Horizontal walls
   for (var i = 0; i < horizontalWalls.length; i++) {
-    currRow = horizontalWalls[i].x;
-    currCol = horizontalWalls[i].y;
+    currRow = horizontalWalls[i].row;
+    currCol = horizontalWalls[i].col;
     ctx.beginPath();
     ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
     ctx.lineTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol)));
     ctx.stroke();
   };
-}
-
-function drawGrid_() {
-  ctx.lineWidth = 0.01;
-  ctx.strokeStyle = "#AAAAAA";
-  var n = 11;
-  for (var i = 0; i < n; i++) {
-    // horizontal
+  // Vertical walls
+  for (var i = 0; i < verticalWalls.length; i++) {
+    currRow = verticalWalls[i].row;
+    currCol = verticalWalls[i].col;
     ctx.beginPath();
-    ctx.moveTo(0.4*i, 0.4*n/-2);
-    ctx.lineTo(0.4*i, 0.4*n/2);
-    ctx.stroke();
-    // vectical
-    ctx.beginPath();
-    ctx.moveTo(0.4*n/-2 + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
-    ctx.lineTo(0.4*n/2  + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
+    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.lineTo(0.4*(rows - currRow), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
     ctx.stroke();
   };
 }

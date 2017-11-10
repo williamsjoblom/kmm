@@ -203,3 +203,10 @@ target_link_libraries(wall_positions_node ${catkin_LIBRARIES})
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+############
+## CUSTOM ##
+############
+if(CMAKE_COMPILER_IS_GNUCXX)
+  add_definitions(-std=gnu++0x)
+endif()
