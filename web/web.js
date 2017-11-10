@@ -99,6 +99,7 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
+  drawAcceleration();
 
   ctx.restore();
 }
@@ -142,10 +143,42 @@ function drawGrid() {
   }
 }
 
+function drawRobot(){
+
+}
+
+function drawAcceleration(){
+  var headlen = 0.1;   // length of head in pixels
+  var fromx = Number($("#pos-x").html());
+  var fromy = Number($("#pos-y").html());
+  var tox = fromx + Number($("#acc-x").html());
+  var toy = fromy + Number($("#acc-y").html());
+  var angle = Math.atan2(toy-fromy,tox-fromx);
+
+  ctx.strokeStyle = "#000000";
+
+  ctx.beginPath();
+  ctx.moveTo(fromx, fromy);
+  ctx.lineTo(tox, toy);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+  ctx.stroke();
+}
+
 function randomData() {
-  $("#pos-x").html(Math.round(Math.random() * 100));
-  $("#pos-y").html(Math.round(Math.random() * 100));
-  $("#theta").html(Math.round(Math.random() * 100));
+  $("#pos-x").html(Math.round(Math.random()*40)/10);
+  $("#pos-y").html(Math.round(Math.random()*40 - 20)/10);
+  $("#theta").html(Math.round(Math.random() * 360));
+  $("#acc-x").html(Math.round(Math.random()*10 - 5)/10);
+  $("#acc-y").html(Math.round(Math.random()*10 - 5)/10);
   $("#tar-pos-x").html(Math.round(Math.random() * 100));
   $("#tar-pos-y").html(Math.round(Math.random() * 100));
   $("#tar-theta").html(Math.round(Math.random() * 100));
