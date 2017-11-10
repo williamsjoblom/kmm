@@ -5,7 +5,6 @@ import sys
 import serial
 import spidev
 import rospy
-import time
 import struct
 import RPi.GPIO as GPIO
 
@@ -59,7 +58,7 @@ class SteeringDriver:
         GPIO.setup(RESET_PIN, GPIO.OUT)
 
         GPIO.output(RESET_PIN, 0)
-        time.sleep(0.01)
+        sleep(0.01)
         GPIO.output(RESET_PIN, 1)
 
         
