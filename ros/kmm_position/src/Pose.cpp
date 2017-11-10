@@ -2,43 +2,55 @@
 #include <cmath>
 #include <assert.h>
 
-void Pose::transform(std::vector<Eigen::Vector3f> *points)
+
+/*
+Moves points in point cloud accordingly to pose (applies the transform matrix to points).
+*/
+void Pose::transform(std::vector<Eigen::Vector2f> *points)
 {
     double c = std::cos(angle);
     double s = std::sin(angle);
 
     for (std::vector<Vec2>::iterator i = points->begin(); i != points->end(); i++)
     {
-        Vec2 &point = *i;
-        point.x += pos.x;
-        point.y += pos.y;
-        double x = c * point.x - s * point.y;
-        double y = s * point.x + c * point.y;
-        point.x = x;
-        point.y = y;
+        Eigen::Vector2f &point = *i;
+        point[0] += pos[0];
+        point[1] += pos[1];
+        double x = c * point[0] - s * point[1];
+        double y = s * point[0] + c * point[1];
+        point[0] = x;
+        point[1] = y;
     }
 }
 
+//TODO: Add +, -, (=), += operator
+
+/*
+Adding of Poses.
+*/
 void Pose::accumulate(const Pose &pose)
 {
     double c = std::cos(pose.angle);
     double s = std::sin(pose.angle);
-    pos.x += pose.pos.x;
-    pos.y += pose.pos.y;
-    double x = c * pos.x - s * pos.y;
-    double y = s * pos.x + c * pos.y;
-    pos.x = x;
-    pos.y = y;
+    pos[0] += pose.pos[0];
+    pos[1] += pose.pos[1];
+    double x = c * pos[0] - s * pos[1];
+    double y = s * pos[0] + c * pos[1];
+    pos[0] = x;
+    pos[1] = y;
     angle += pose.angle;
     while (angle >= M_PI) angle -= 2.0 * M_PI;
     while (angle <  M_PI) angle += 2.0 * M_PI;
 }
 
+/*
+cout overload isch.
+*/
 std::ostream &operator<<(std::ostream &os, const Pose &pose)
 {
 	os  << "("
-        << pose.pos.x << ","
-        << pose.pos.y << ","
+        << pose.pos[0] << ","
+        << pose.pos[1] << ","
         << pose.angle << ")";
 	return os;
 }

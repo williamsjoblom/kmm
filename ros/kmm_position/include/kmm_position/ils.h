@@ -1,3 +1,7 @@
+/*
+ITERATE LEAST SQUARES
+*/
+
 #pragma once
 
 #include <Eigen/Dense>
