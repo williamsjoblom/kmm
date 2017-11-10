@@ -1,18 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(kmm_position)
+project(kmm_mapping)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  laser_geometry
+  geometry_msgs
   roscpp
-  rospy
-  sensor_msgs
-  tf
+  std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +48,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+ FILES
+ wall_positions.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,10 +68,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs
-# )
+generate_messages(
+ DEPENDENCIES
+ geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -104,13 +102,12 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-
-###catkin_package(
-###INCLUDE_DIRS include
-###  LIBRARIES kmm_position
-###  CATKIN_DEPENDS laser_geometry roscpp rospy sensor_msgs tf
-###  DEPENDS system_lib
-###)
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES kmm_mapping
+  CATKIN_DEPENDS geometry_msgs roscpp std_msgs message_runtime
+#  DEPENDS system_lib
+)
 
 ###########
 ## Build ##
@@ -118,27 +115,29 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-###include_directories(
-###  include
-###  ${catkin_INCLUDE_DIRS}
-###)
+include_directories(
+include
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/kmm_position.cpp
+#   src/${PROJECT_NAME}/kmm_mapping.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(wall_positions_node ${kmm_mapping_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(my_subscriber ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-###add_executable(test_kalman_node
-###nodes/test_kalman_node.cpp
-###src/Kalman.cpp)
+# add_executable(${PROJECT_NAME}_node src/kmm_mapping_node.cpp)
+add_executable(wall_positions_node nodes/wall_positions_node.cpp)
+# add_executable(my_subscriber src/my_subscriber.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,12 +147,14 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-###add_dependencies(test_kalman_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(wall_positions_node ${kmm_mapping_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-###target_link_libraries(test_kalman_node
-###   ${catkin_LIBRARIES}
-###)
+# target_link_libraries(${PROJECT_NAME}_node
+#   ${catkin_LIBRARIES}
+# )
+target_link_libraries(wall_positions_node ${catkin_LIBRARIES})
+# target_link_libraries(my_subscriber ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -195,7 +196,7 @@ find_package(catkin REQUIRED COMPONENTS
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_kmm_position.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_kmm_mapping.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
