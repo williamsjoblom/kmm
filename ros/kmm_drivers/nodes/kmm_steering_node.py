@@ -89,9 +89,11 @@ class SteeringDriver:
 
         byte_buf = build_packet(cmd, speed)
 
-        for b in byte_buf:
-            self.spi.xfer([b])
-            sleep(0.01)
+        self.spi.xfer(byte_buf)
+
+        #for b in byte_buf:
+        #    self.spi.xfer([b])
+        #    sleep(0.01)
 
 
 

@@ -28,7 +28,7 @@ void reconfigureCallback(kmm_gamepad::GamepadConfig &config, uint32_t level) {
 }
 
 float deadzone(float value) {
-  if (value > -deadzone_threshold && value < deadzone_threshold) {
+  if ((value > -deadzone_threshold) && (value < deadzone_threshold)) {
     return 0;
   } else {
     return value;
