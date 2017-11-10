@@ -1,11 +1,7 @@
 #include "kmm_position/Kalman.h"
-
-int main() {
 #include <iostream>
 #include <vector>
 #include <Eigen/Dense>
-
-#include "kalman.hpp"
 
 int main(int argc, char* argv[]) {
     // Construct the filter
@@ -26,15 +22,15 @@ int main(int argc, char* argv[]) {
 
     // Best guess of initial states
     Eigen::Vector3f x0;
-    initXPos = 0;
-    initYPos = 0;
-    initTheta = 0;
+    int initXPos = 0;
+    int initYPos = 0;
+    int initTheta = 0;
     x0 << initXPos, initYPos, initTheta;
     kf.init(x0);
 
     // Feed measurements into filter, output estimated states
     Eigen::Vector3f y(3);
-    x_hat = kf.getState();
+    Eigen::Vector3f x_hat = kf.getState();
     std::cout << "x_hat[0]: " << x_hat.transpose() << std::endl;
     for (int i = 0; i < measurements.size(); i++) {
         x_hat = kf.getState();
@@ -44,6 +40,4 @@ int main(int argc, char* argv[]) {
             << ", x_hat[" << i << "] = " << x_hat.transpose() << std::endl;
     }
     return 0;
-    }
 }
-

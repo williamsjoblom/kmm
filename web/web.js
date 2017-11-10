@@ -99,6 +99,7 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
+  drawAcceleration();
 
   ctx.restore();
 }
@@ -124,6 +125,35 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
+//* The Ros object, wrapping a web socket connection to rosbridge.
+var ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090' // url to your rosbridge server
+});
+
+ros.on('connection', function() {
+  console.log('Connected to websocket server.');
+});
+
+ros.on('error', function(error) {
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed.');
+});
+
+//* A topic for messaging.
+var wallPositionsListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wall_positions',
+  messageType: 'kmm_mapping/wall_positions'
+});
+
+wallPositionsListener.subscribe(function(message) {
+    console.log('Received message on ' + wallPositionsListener.name);
+    console.log(message.vertical_walls[1]);
+  });
+
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
@@ -142,10 +172,42 @@ function drawGrid() {
   }
 }
 
+function drawRobot(){
+
+}
+
+function drawAcceleration(){
+  var headlen = 0.1;   // length of head in pixels
+  var fromx = Number($("#pos-x").html());
+  var fromy = Number($("#pos-y").html());
+  var tox = fromx + Number($("#acc-x").html());
+  var toy = fromy + Number($("#acc-y").html());
+  var angle = Math.atan2(toy-fromy,tox-fromx);
+
+  ctx.strokeStyle = "#000000";
+
+  ctx.beginPath();
+  ctx.moveTo(fromx, fromy);
+  ctx.lineTo(tox, toy);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+  ctx.stroke();
+}
+
 function randomData() {
-  $("#pos-x").html(Math.round(Math.random() * 100));
-  $("#pos-y").html(Math.round(Math.random() * 100));
-  $("#theta").html(Math.round(Math.random() * 100));
+  $("#pos-x").html(Math.round(Math.random()*40)/10);
+  $("#pos-y").html(Math.round(Math.random()*40 - 20)/10);
+  $("#theta").html(Math.round(Math.random() * 360));
+  $("#acc-x").html(Math.round(Math.random()*10 - 5)/10);
+  $("#acc-y").html(Math.round(Math.random()*10 - 5)/10);
   $("#tar-pos-x").html(Math.round(Math.random() * 100));
   $("#tar-pos-y").html(Math.round(Math.random() * 100));
   $("#tar-theta").html(Math.round(Math.random() * 100));
