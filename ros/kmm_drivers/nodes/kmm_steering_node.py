@@ -67,10 +67,10 @@ class SteeringDriver:
         Callback.
         """
         # m/s
-        x = (msg.linear.x / 100.0)
-        y = (msg.linear.y / -100.0)
+        x = msg.linear.x
+        y = msg.linear.y
         # rad/s
-        z = (msg.angular.z / -100.0)
+        z = msg.angular.z
 
         # meters
         R = 0.03
