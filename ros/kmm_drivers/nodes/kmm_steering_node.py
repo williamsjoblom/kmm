@@ -91,7 +91,7 @@ class SteeringDriver:
 
         for b in byte_buf:
             self.spi.xfer([b])
-            sleep(0.001)
+            sleep(0.01)
 
 
 

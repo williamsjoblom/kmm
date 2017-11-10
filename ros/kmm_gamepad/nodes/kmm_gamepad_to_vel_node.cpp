@@ -41,9 +41,9 @@ float lowpass(float x, float y0, float dt, float T) {
 
 void gamepadCallback(geometry_msgs::Twist gamepad_msg) {
 
-  float x = gamepad_msg.linear.x;
-  float y = gamepad_msg.linear.y;
-  float z = gamepad_msg.angular.z;
+  float x = deadzone(gamepad_msg.linear.x);
+  float y = deadzone(gamepad_msg.linear.y);
+  float z = deadzone(gamepad_msg.angular.z);
 
   double dt = (ros::Time::now() - ts).toSec();
   ts = ros::Time::now();
