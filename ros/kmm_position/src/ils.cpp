@@ -1,28 +1,8 @@
 #include "kmm_position/ils.h"
 #include "kmm_position/Pose.h"
 
-/*
-  Old function, new is get_transform_pose.
-*/
-/*
-Pose ils_fit(
-  std::vector<Eigen::Vector2f> &a,
-  std::vector<Eigen::Vector2f> &b,
-  int iterations)
-{
-  Pose total;
-
-  for (int i = 0; i < iterations; i++) {
-    // call on relative pose iteratively
-    total.accumulate(ils_relative_pose(a, b));
-  }
-
-  return total;
-}
-*/
-
-/*
-Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
+/**
+  Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
 */
 Pose get_transform_pose(
   std::vector<Eigen::Vector2f> &scan,
@@ -54,29 +34,23 @@ Pose get_transform_pose(
   return total;
 }
 
-/*
-  Iterative Least Squares Relative Pose
+/**
   Finds a relative pose that minimizes the distances between
   the pairs of points in a and b using the least squares method.
 
-  Pairs:
-  a[0] <-> b[0]
-  a[1] <-> b[1]
-  a[2] <-> b[2]
-  ...
-
+  Pairs:, a[0] <-> b[0], a[1] <-> b[1]...
 */
 
 Pose least_squares(
   std::vector<Eigen::Vector2f> &a,
   std::vector<Eigen::Vector2f> &b)
 {
-
     assert(a.size() == b.size());
+
     int n = a.size();
+
     double x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0;
     double xx = 0.0, yy = 0.0, xy = 0.0, yx = 0.0;
-
 
     for (int i = 0; i < n; i++)
     {
@@ -114,7 +88,6 @@ Pose least_squares(
     pose.pos[0] = xm2 - (xm1 * c - ym1 * s);
     pose.pos[1] = ym2 - (xm1 * s + ym1 * c);
     pose.angle = angle;
-
 
     return pose;
 }

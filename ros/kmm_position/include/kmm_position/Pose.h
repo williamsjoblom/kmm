@@ -11,6 +11,7 @@ public:
 
     void transform(std::vector<Eigen::Vector2f> *points);
     void accumulate(const Pose &pose);
+    void invert();
 };
 
 std::ostream &operator<<(std::ostream &os, const Pose &p);
