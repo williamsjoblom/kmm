@@ -99,6 +99,7 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
+  drawAcceleration();
 
   ctx.restore();
 }
@@ -124,28 +125,140 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
+//* The Ros object, wrapping a web socket connection to rosbridge.
+var ros = new ROSLIB.Ros({
+  url: 'ws://localhost:9090' // url to your rosbridge server
+});
+
+ros.on('connection', function() {
+  console.log('Connected to websocket server.');
+});
+
+ros.on('error', function(error) {
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed.');
+});
+
+//* A topic for messaging.
+var wallPositionsListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wall_positions',
+  messageType: 'kmm_mapping/wall_positions'
+});
+
+var horizontalWall;
+var horizontalWalls = [];
+var verticalWall;
+var verticalWalls = [];
+
+/* Listener that listens to the /wall_positions topic. */
+wallPositionsListener.subscribe(function(message) {
+    console.log('Received message on ' + wallPositionsListener.name);
+    horizontalWalls = [];
+    verticalWalls = [];
+    for (var i = 0; i < message.horizontal_walls.length; i++) {
+      horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
+        'col': message.horizontal_walls[i].y})
+      horizontalWalls.push(horizontalWall);
+    };
+    console.log(horizontalWall);
+    for (var i = 0; i < message.vertical_walls.length; i++) {
+      verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
+        'col': message.vertical_walls[i].y})
+      verticalWalls.push(verticalWall);
+    };
+  });
+
+function setLineStyle(type) {
+  if (type == "wall") {
+    ctx.lineWidth = 0.03;
+    ctx.strokeStyle = "#000000";
+  } else {
+    ctx.lineWidth = 0.01;
+    ctx.strokeStyle = "#AAAAAA";
+  };
+}
+
 function drawGrid() {
-  ctx.lineWidth = 0.01;
-  ctx.strokeStyle = "#AAAAAA";
-  var n = 11;
-  for (var i = 0; i < n; i++) {
-    // horizontal
+  var rows = 15; // 6 / 0.4
+  var cols = 30; // ((6 / 0.4) * 2)
+  setLineStyle("normal");
+  // horizontal grid lines
+  for (var i = 0; i < rows + 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(0.4*i, 0.4*n/-2);
-    ctx.lineTo(0.4*i, 0.4*n/2);
+    ctx.moveTo(0.4*(rows - i), 0.4*(cols/2));
+    ctx.lineTo(0.4*(rows - i), 0.4*(cols/-2));
     ctx.stroke();
-    // vectical
+  };
+  // vertical grid lines
+  for (var i = 0; i < cols + 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(0.4*n/-2 + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
-    ctx.lineTo(0.4*n/2  + 0.4*(n-1)/2, 0.4*i - 0.4*(n-1)/2);
+    ctx.moveTo(0.4*(rows), ((0.4*cols)/2) - (0.4 * i));
+    ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
-  }
+  };
+  setLineStyle("wall");
+  var currRow;
+  var currCol;
+  // Horizontal walls
+  for (var i = 0; i < horizontalWalls.length; i++) {
+    currRow = horizontalWalls[i].row;
+    currCol = horizontalWalls[i].col;
+    ctx.beginPath();
+    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.lineTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol)));
+    ctx.stroke();
+  };
+  // Vertical walls
+  for (var i = 0; i < verticalWalls.length; i++) {
+    currRow = verticalWalls[i].row;
+    currCol = verticalWalls[i].col;
+    ctx.beginPath();
+    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.lineTo(0.4*(rows - currRow), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.stroke();
+  };
+}
+
+function drawRobot(){
+
+}
+
+function drawAcceleration(){
+  var headlen = 0.1;   // length of head in pixels
+  var fromx = Number($("#pos-x").html());
+  var fromy = Number($("#pos-y").html());
+  var tox = fromx + Number($("#acc-x").html());
+  var toy = fromy + Number($("#acc-y").html());
+  var angle = Math.atan2(toy-fromy,tox-fromx);
+
+  ctx.strokeStyle = "#000000";
+
+  ctx.beginPath();
+  ctx.moveTo(fromx, fromy);
+  ctx.lineTo(tox, toy);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(tox, toy);
+  ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+  ctx.stroke();
 }
 
 function randomData() {
-  $("#pos-x").html(Math.round(Math.random() * 100));
-  $("#pos-y").html(Math.round(Math.random() * 100));
-  $("#theta").html(Math.round(Math.random() * 100));
+  $("#pos-x").html(Math.round(Math.random()*40)/10);
+  $("#pos-y").html(Math.round(Math.random()*40 - 20)/10);
+  $("#theta").html(Math.round(Math.random() * 360));
+  $("#acc-x").html(Math.round(Math.random()*10 - 5)/10);
+  $("#acc-y").html(Math.round(Math.random()*10 - 5)/10);
   $("#tar-pos-x").html(Math.round(Math.random() * 100));
   $("#tar-pos-y").html(Math.round(Math.random() * 100));
   $("#tar-theta").html(Math.round(Math.random() * 100));

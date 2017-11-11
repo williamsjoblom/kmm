@@ -3,13 +3,17 @@
 import os
 import sys
 import serial
-# import spidev <-- Used to work with spi devices over the pi
+import spidev
 import rospy
-import time
 import struct
+import RPi.GPIO as GPIO
+
 from math import pi, sin, cos
 from time import time, sleep
 from geometry_msgs.msg import Twist
+
+# CONSTANTS
+RESET_PIN = 31
 
 def build_packet(cmd, speed_vector):
     buf = []
@@ -27,30 +31,40 @@ def build_packet(cmd, speed_vector):
 
     return bytearray(buf)
 
-def lowpass(x, y0, dt, T):
-    return y0 + (x - y0) * (dt/(dt+T))
-
 class SteeringDriver:
     def __init__(self):
-        device = rospy.get_param("~device")
-
-        if not os.path.exists(device):
-            rospy.logerror("'%s' port not found!", device)
-            sys.exit(1)
-
-        # self.s = serial.Serial(port=device, baudrate=9600,
-        #            parity=serial.PARITY_NONE,
-        #            stopbits=serial.STOPBITS_ONE,
-        #            bytesize=serial.EIGHTBITS)
-
+        """
+        Constructor.
+        """
         self.spi = spidev.SpiDev()
-        self.spi.open(0,0) #connection to spi device 0
-        self.spi.max_speed_hz = 100
-        
-        self.sub = rospy.Subscriber('gamepad_vel', Twist, self.callback)
+        self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
+        self.spi.max_speed_hz = 1024
+        self.spi.bits_per_word = 8
+
+
+    def subscribe(self):
+        """
+        Subscribe.
+        """
+        self.sub = rospy.Subscriber('cmd_vel', Twist, self.callback)
+
+
+    def reset(self):
+        """
+        Reset AVR and stepper drivers.
+        """
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(RESET_PIN, GPIO.OUT)
+
+        GPIO.output(RESET_PIN, 0)
+        sleep(0.01)
+        GPIO.output(RESET_PIN, 1)
+
 
     def callback(self, msg):
-
+        """
+        Callback.
+        """
         # m/s
         x = msg.linear.x
         y = msg.linear.y
@@ -75,26 +89,22 @@ class SteeringDriver:
 
         byte_buf = build_packet(cmd, speed)
 
-        # self.s.write(byte_buf)
         self.spi.xfer(byte_buf)
 
-        """
-        # Wait for response
-        sleep(0.1)
+        #for b in byte_buf:
+        #    self.spi.xfer([b])
+        #    sleep(0.01)
 
-        out = []
-        while self.s.inWaiting() > 0:
-            out += self.s.read(1)
-            sleep(0.001)
 
-        out_str = "".join([chr(c) for c in out])
-        rospy.loginfo("response -> %s", out_str)
-        """
 
 if __name__ == '__main__':
     rospy.init_node('kmm_steering')
     try:
-        steering_driver = SteeringDriver()
+        driver = SteeringDriver()
+
+        driver.reset()
+        driver.subscribe()
+
         rospy.spin()
     except rospy.ROSInterruptException:
         pass

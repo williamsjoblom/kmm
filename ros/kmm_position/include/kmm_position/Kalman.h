@@ -32,7 +32,7 @@ public:
   * Update the estimated state based on measured values,
   * using the given time step and dynamics matrix.
   */
-  void updateWithLaser(const Eigen::Vector3f y);
+  void updateWithLaser(const Eigen::Matrix3f y);
 
   /**
   * Return the current state.
@@ -42,6 +42,6 @@ public:
 private:
   Eigen::MatrixXd processNoiseCov_, measurementNoiseCov_, estErrorCov_, K_, estErrorCovInit_;
   Eigen::MatrixXd I_;
-  Eigen::Vector3f x_hat_, x_hat_new_;
+  Eigen::Vector3f dt_, output_, x_hat_, x_hat_new_;
   ros::Time predict_ts_;
 };
