@@ -38,7 +38,7 @@ class SteeringDriver:
         """
         self.spi = spidev.SpiDev()
         self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
-        self.spi.max_speed_hz = 1024
+        self.spi.max_speed_hz = 15200
         self.spi.bits_per_word = 8
 
 
