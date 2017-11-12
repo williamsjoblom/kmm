@@ -1,7 +1,0 @@
-.idea
-.vagrant
-doc
-node_modules
-*.out
-*.log
-*.tar.gz
