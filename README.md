@@ -70,8 +70,12 @@ sudo bash nodesource_setup.sh
 sudo apt-get install nodejs
 sudo apt-get install build-essential
 sudo npm install -g http-server
+sudo apt-get install ros-kinetic-rosbridge-suite
 ```
-
+Run rosbridge
+```
+roslaunch rosbridge_server rosbridge_websocket.launch
+```
 Run the local webserver (similar to XAMPP but easier)
 ```
 cd ~/catkin_ws/src/kmm/web
@@ -79,6 +83,7 @@ http-server
 ```
 
 Open broswer at http://localhost:8080
+
 
 ## Rosbag
 

@@ -17,7 +17,25 @@ var pxPerMeter = 120;
 var isDragging = false;
 var prevDragPos = { x: 0, y: 0 };
 
-var currViewState = "Local";
+/* * * * * * * * */
+
+/* SETS UP ROS */
+
+var ros = new ROSLIB.Ros({
+  url : 'ws://localhost:9090'
+});
+
+ros.on('connection', function() {
+  console.log('Connected to a websocket server.');
+});
+
+ros.on('error', function(error) {
+  console.log('Error connecting to websocket server: ', error);
+});
+
+ros.on('close', function() {
+  console.log('Connection to websocket server closed. ');
+});
 
 /* * * * * * * * */
 
@@ -72,15 +90,21 @@ function bindEvents() {
     isDragging = false;
   })
   .on("wheel", function (e) {
+    e.preventDefault();
     view.zoom *= 1 - e.originalEvent.deltaY * 0.001;
   });
 }
 
 
 function resizeCanvas() {
-  var $container = $("#map-container")
+  var $container = $("#map-container");
   ctx.canvas.width = $container.width();
   ctx.canvas.height = $container.height();
+}
+
+var laserScan = [];
+for (var i = 0; i < 360; i++) {
+  laserScan.push(Math.random() * 6)
 }
 
 function render() {
@@ -99,7 +123,11 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
+<<<<<<< HEAD
   drawAcceleration();
+=======
+  drawLaserScan(laserScan);
+>>>>>>> web
 
   ctx.restore();
 }
@@ -183,8 +211,8 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  var rows = 15; // 6 / 0.4
-  var cols = 30; // ((6 / 0.4) * 2)
+  var rows = 25; // 10 / 0.4
+  var cols = 50; // ((10 / 0.4) * 2)
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
@@ -251,6 +279,18 @@ function drawAcceleration(){
   ctx.moveTo(tox, toy);
   ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
   ctx.stroke();
+}
+
+function drawLaserScan(laserScan) {
+  ctx.save();
+  var rectHeight = 0.02;
+  var rectWidth = 0.02;
+  for (var i = 0; i < 360; i++) {
+    ctx.rotate(1);
+    ctx.fillStyle = "#9C27B0";
+    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+  }
+  ctx.restore();
 }
 
 function randomData() {
