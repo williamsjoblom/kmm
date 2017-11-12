@@ -20,7 +20,7 @@ sudo rosdep init
 rosdep update
 echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 source ~/.bashrc
-sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential ros-kinetic-rosbridge-server
 ```
 
 ### AVR compiler
