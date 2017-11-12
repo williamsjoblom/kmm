@@ -52,10 +52,7 @@ function checkMovement(){
     var y = -gamepad.axes[1];
     //the rotation, controlled by the right stick
     var rotation = gamepad.axes[3];
-    //Checks that an actuall instruction was sent
-    (Math.abs(x) < DEADZONE) ? x=0 : x=x;
-    (Math.abs(y) < DEADZONE) ? y=0 : y=y;
-    (Math.abs(rotation) < DEADZONE) ? rotation=0 : rotation=rotation;
+    
     //Uncomment the following line to log input from the gamepad
     //console.log("X: "+x+ ", Y: "+y+", Rotation: "+ rotation);
     //Create and sends ROS-message
