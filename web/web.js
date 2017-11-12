@@ -123,11 +123,8 @@ function render() {
 
   drawGrid();
   drawGlobalFrame();
-<<<<<<< HEAD
   drawAcceleration();
-=======
   drawLaserScan(laserScan);
->>>>>>> web
 
   ctx.restore();
 }
@@ -153,24 +150,6 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
-//* The Ros object, wrapping a web socket connection to rosbridge.
-var ros = new ROSLIB.Ros({
-  url: 'ws://localhost:9090' // url to your rosbridge server
-});
-
-ros.on('connection', function() {
-  console.log('Connected to websocket server.');
-});
-
-ros.on('error', function(error) {
-  console.log('Error connecting to websocket server: ', error);
-});
-
-ros.on('close', function() {
-  console.log('Connection to websocket server closed.');
-});
-
-//* A topic for messaging.
 var wallPositionsListener = new ROSLIB.Topic({
   ros: ros,
   name: '/wall_positions',
@@ -211,8 +190,8 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  var rows = 25; // 10 / 0.4
-  var cols = 50; // ((10 / 0.4) * 2)
+  var rows = 15; // 6 / 0.4
+  var cols = 30; // ((6 / 0.4) * 2)
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
