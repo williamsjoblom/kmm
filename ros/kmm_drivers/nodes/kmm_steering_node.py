@@ -71,6 +71,9 @@ class SteeringDriver:
         # rad/s
         z = msg.angular.z
 
+        y *= -1
+        z *= -1
+
         # meters
         R = 0.03
         L = 0.095
