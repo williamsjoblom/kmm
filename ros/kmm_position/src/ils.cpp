@@ -1,46 +1,82 @@
-#include "ils.h"
-#include "Pose.h"
+#include "kmm_position/ils.h"
+#include "kmm_position/Pose.h"
+#include <cmath>
 
 /*
   Old function, new is get_transform_pose.
 */
+/*
 Pose ils_fit(
-  std::vector<Eigen::Vector3f> &a,
-  std::vector<Eigen::Vector3f> &b,
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b,
   int iterations)
 {
   Pose total;
 
   for (int i = 0; i < iterations; i++) {
     // call on relative pose iteratively
-    total += ils_relative_pose(a, b);
+    total.accumulate(ils_relative_pose(a, b));
   }
 
   return total;
 }
+*/
 
 /*
-Creates a Pose that aligns points in laser scan to grid.
+Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
 */
 Pose get_transform_pose(
-  std::vector<Eigen::vector2f> &scan
-  int iterations = 1)
+  std::vector<Eigen::Vector2f> &scan,
+  int iterations)
 {
   Pose total;
-  std::vector<Eigen::vector2f> newScan; //Scan whithout points in crossings.
+  std::vector<Eigen::Vector2f> newScan; //Scan whithout points in crossings.
 
   for (int i = 0; i < iterations; i++){
     std::vector<Eigen::Vector2f> scanPair; //Kuriosa: Namnet för en enhet i ett par är "Pair"
     std::vector<Eigen::Vector2f> gridPair;
 
-    build_pair(&scanPair, &gridPair);
+    //Copies scan
+    newScan = scan;
+    total.transform(&newScan);
+    //Creates pairs after previous transformation
+
+    //Uncomment and add function
+    build_pair(newScan, scanPair, gridPair);
+    //Saves scan without points in crossings
     newScan = scanPair;
-
-    total += least_squares(scanPair, gridPair);
+    // Calculates difference
+    Pose diff = least_squares(scanPair, gridPair);
+    //Updates newScan so that it can be used to replace laser scan point cloud.
+    diff.transform(&newScan);
+    total.accumulate(diff);
   }
-
-  scan = total.transform(newScan);
+  scan = newScan;
   return total;
+}
+
+/*
+Takes the laser scan and adds scan points which are outside diff_percentage's
+bounds to vector a. The closest point to the grid from that point is added to
+vector b.
+*/
+void build_pair(
+  const std::vector<Eigen::Vector2f> &scan,
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b)
+{
+  const float diff_percentage = 0.1;
+  for (Eigen::Vector2f v : scan){
+    float x = std::round(v[0]/0.4)*0.4;
+    float y = std::round(v[1]/0.4)*0.4;
+
+    if (!(std::abs(x - v[0]) < 0.4*diff_percentage &&
+          std::abs(y - v[1]) < 0.4*diff_percentage)){
+      a.push_back(v);
+      Eigen::Vector2f optimal(x, y);
+      b.push_back(optimal);
+    }
+  }
 }
 
 /*
@@ -57,8 +93,8 @@ Pose get_transform_pose(
 */
 
 Pose least_squares(
-  std::vector<Eigen::Vector3f> &a,
-  std::vector<Eigen::Vector3f> &b)
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b)
 {
 
     assert(a.size() == b.size());
@@ -69,16 +105,16 @@ Pose least_squares(
 
     for (int i = 0; i < n; i++)
     {
-        const Vec2 &p1 = *a[i];
-        const Vec2 &p2 = *b[i];
-        x1 += p1.x;
-        x2 += p2.x;
-        y1 += p1.y;
-        y2 += p2.y;
-        xx += p1.x * p2.x;
-        yy += p1.y * p2.y;
-        xy += p1.x * p2.y;
-        yx += p1.y * p2.x;
+        const Eigen::Vector2f &p1 = a[i];
+        const Eigen::Vector2f &p2 = b[i];
+        x1 += p1[0];
+        x2 += p2[0];
+        y1 += p1[1];
+        y2 += p2[1];
+        xx += p1[0] * p2[0];
+        yy += p1[1] * p2[1];
+        xy += p1[0] * p2[1];
+        yx += p1[1] * p2[0];
     }
 
 
@@ -100,8 +136,8 @@ Pose least_squares(
     double s = sin(angle);
 
     Pose pose;
-    pose.pos.x = xm2 - (xm1 * c - ym1 * s);
-    pose.pos.y = ym2 - (xm1 * s + ym1 * c);
+    pose.pos[0] = xm2 - (xm1 * c - ym1 * s);
+    pose.pos[1] = ym2 - (xm1 * s + ym1 * c);
     pose.angle = angle;
 
 
