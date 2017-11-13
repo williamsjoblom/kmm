@@ -118,10 +118,17 @@ generate_messages(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-###include_directories(
-###  include
-###  ${catkin_INCLUDE_DIRS}
-###)
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+### TEST KALMAN ###
+
+#add_executable(test_kalman_node
+#  nodes/test_kalman_node.cpp
+#  src/Kalman.cpp
+#)
 
 #add_dependencies(test_kalman_node
 #  ${${PROJECT_NAME}_EXPORTED_TARGETS}

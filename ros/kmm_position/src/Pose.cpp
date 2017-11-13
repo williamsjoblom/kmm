@@ -3,8 +3,9 @@
 #include <assert.h>
 
 
-/*
-Moves points in point cloud accordingly to pose (applies the transform matrix to points).
+/**
+  Moves points in point cloud accordingly to pose
+  (applies the transform matrix to points).
 */
 void Pose::transform(std::vector<Eigen::Vector2f> *points)
 {
@@ -23,10 +24,8 @@ void Pose::transform(std::vector<Eigen::Vector2f> *points)
     }
 }
 
-//TODO: Add +, -, (=), += operator
-
-/*
-Adding of Poses.
+/**
+  Add pose to this pose.
 */
 void Pose::accumulate(const Pose &pose)
 {
@@ -43,8 +42,16 @@ void Pose::accumulate(const Pose &pose)
     while (angle <  M_PI) angle += 2.0 * M_PI;
 }
 
-/*
-cout overload isch.
+void Pose::invert() {
+  pos[0] *= -1;
+  pos[1] *= -1;
+  angle *= -1;
+  while (angle >= M_PI) angle -= 2.0 * M_PI;
+  while (angle <  M_PI) angle += 2.0 * M_PI;
+}
+
+/**
+  Overloading stream operator.
 */
 std::ostream &operator<<(std::ostream &os, const Pose &pose)
 {
