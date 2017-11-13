@@ -20,8 +20,6 @@ Pose get_transform_pose(
     newScan = scan;
     total.transform(&newScan);
     //Creates pairs after previous transformation
-
-    //Uncomment and add function
     build_pair(newScan, scanPair, gridPair);
     //Saves scan without points in crossings
     newScan = scanPair;
