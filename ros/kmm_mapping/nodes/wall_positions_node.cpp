@@ -41,16 +41,19 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < 25; i++) {
         geometry_msgs::Point point_horizontal;
-        point_horizontal.x = random(1,16);
-        point_horizontal.y = random(1,30);
+        point_horizontal.x = random(0,15);
+        point_horizontal.y = random(-15,15);
+        while (point_horizontal.y == 0) {
+          point_horizontal.y = random(-15,15);
+        }
         point_horizontal.z = 0;
         wall_positions_msg.horizontal_walls.push_back(point_horizontal);
     }
 
     for (int i = 0; i < 17; i++) {
         geometry_msgs::Point point_vertical;
-        point_vertical.x = random(1,15);
-        point_vertical.y = random(1,31);
+        point_vertical.x = random(1,15); // can never be 0
+        point_vertical.y = random(-15,15);
         point_vertical.z = 0;
         wall_positions_msg.vertical_walls.push_back(point_vertical);
     }

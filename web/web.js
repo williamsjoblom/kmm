@@ -215,8 +215,8 @@ function drawGrid() {
     currRow = horizontalWalls[i].row;
     currCol = horizontalWalls[i].col;
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
-    ctx.lineTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol)));
+    ctx.moveTo(0.4*currRow, 0.4*currCol);
+    ctx.lineTo(0.4*currRow, 0.4*currCol - 0.4*(currCol/Math.abs(currCol)));
     ctx.stroke();
   };
   // Vertical walls
@@ -224,8 +224,8 @@ function drawGrid() {
     currRow = verticalWalls[i].row;
     currCol = verticalWalls[i].col;
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
-    ctx.lineTo(0.4*(rows - currRow), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.moveTo(0.4*currRow, 0.4*currCol);
+    ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
     ctx.stroke();
   };
 }
