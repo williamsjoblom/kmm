@@ -102,10 +102,10 @@ function resizeCanvas() {
   ctx.canvas.height = $container.height();
 }
 
-var laserScan = [];
+/*var laserScan = [];
 for (var i = 0; i < 360; i++) {
   laserScan.push(Math.random() * 6)
-}
+}*/
 
 function render() {
   clearScreen();
@@ -163,21 +163,47 @@ var verticalWalls = [];
 
 /* Listener that listens to the /wall_positions topic. */
 wallPositionsListener.subscribe(function(message) {
-    console.log('Received message on ' + wallPositionsListener.name);
-    horizontalWalls = [];
-    verticalWalls = [];
-    for (var i = 0; i < message.horizontal_walls.length; i++) {
-      horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
-        'col': message.horizontal_walls[i].y})
-      horizontalWalls.push(horizontalWall);
-    };
-    console.log(horizontalWall);
-    for (var i = 0; i < message.vertical_walls.length; i++) {
-      verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
-        'col': message.vertical_walls[i].y})
-      verticalWalls.push(verticalWall);
-    };
-  });
+  console.log('Received message on ' + wallPositionsListener.name);
+  horizontalWalls = [];
+  verticalWalls = [];
+  for (var i = 0; i < message.horizontal_walls.length; i++) {
+    horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
+      'col': message.horizontal_walls[i].y})
+    horizontalWalls.push(horizontalWall);
+  };
+  console.log(horizontalWall);
+  for (var i = 0; i < message.vertical_walls.length; i++) {
+    verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
+      'col': message.vertical_walls[i].y})
+    verticalWalls.push(verticalWall);
+  };
+});
+
+var laserScan = [];
+
+var laserScanListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/scan',
+  messageType: 'sensor_msgs/LaserScan'
+});
+
+/* Listener that listens to the /wall_positions topic. */
+laserScanListener.subscribe(function(message) {
+  console.log('Received message on ' + laserScanListener.name);
+  laserScan = message.ranges;
+});
+
+function drawLaserScan(laserScan) {
+  ctx.save();
+  var rectHeight = 0.02;
+  var rectWidth = 0.02;
+  for (var i = 0; i < 360; i++) {
+    ctx.rotate(Math.PI/180);
+    ctx.fillStyle = "#9C27B0";
+    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+  }
+  ctx.restore();
+}
 
 function setLineStyle(type) {
   if (type == "wall") {
@@ -258,18 +284,6 @@ function drawAcceleration(){
   ctx.moveTo(tox, toy);
   ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
   ctx.stroke();
-}
-
-function drawLaserScan(laserScan) {
-  ctx.save();
-  var rectHeight = 0.02;
-  var rectWidth = 0.02;
-  for (var i = 0; i < 360; i++) {
-    ctx.rotate(1);
-    ctx.fillStyle = "#9C27B0";
-    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
-  }
-  ctx.restore();
 }
 
 function randomData() {

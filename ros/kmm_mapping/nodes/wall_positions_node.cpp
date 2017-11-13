@@ -42,8 +42,8 @@ int main(int argc, char **argv)
     for (int i = 0; i < 25; i++) {
         geometry_msgs::Point point_horizontal;
         point_horizontal.x = random(0,15);
-        point_horizontal.y = random(-15,15);
-        while (point_horizontal.y == 0) {
+        point_horizontal.y = random(-15,15); // can never be 0
+        while (point_horizontal.y == 0) { // make sure y != 0
           point_horizontal.y = random(-15,15);
         }
         point_horizontal.z = 0;
