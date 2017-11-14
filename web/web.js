@@ -95,16 +95,10 @@ function bindEvents() {
   });
 }
 
-
 function resizeCanvas() {
   var $container = $("#map-container");
   ctx.canvas.width = $container.width();
   ctx.canvas.height = $container.height();
-}
-
-var laserScan = [];
-for (var i = 0; i < 360; i++) {
-  laserScan.push(Math.random() * 6)
 }
 
 function render() {
@@ -122,7 +116,9 @@ function render() {
   ctx.scale(view.zoom, view.zoom);
 
   drawGrid();
+  drawWalls();
   drawGlobalFrame();
+  drawRobot();
   drawAcceleration();
   drawLaserScan(laserScan);
 
@@ -132,22 +128,6 @@ function render() {
 function clearScreen() {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
-function drawGlobalFrame() {
-  ctx.lineWidth = 0.03;
-  // Draw x axis in red
-  ctx.strokeStyle = "#FF0000";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0.6, 0);
-  ctx.stroke();
-  // Draw y axis in green
-  ctx.strokeStyle = "#00FF00";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, 0.6);
-  ctx.stroke();
 }
 
 var wallPositionsListener = new ROSLIB.Topic({
@@ -163,21 +143,49 @@ var verticalWalls = [];
 
 /* Listener that listens to the /wall_positions topic. */
 wallPositionsListener.subscribe(function(message) {
-    console.log('Received message on ' + wallPositionsListener.name);
-    horizontalWalls = [];
-    verticalWalls = [];
-    for (var i = 0; i < message.horizontal_walls.length; i++) {
-      horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
-        'col': message.horizontal_walls[i].y})
-      horizontalWalls.push(horizontalWall);
+  console.log('Received message on ' + wallPositionsListener.name);
+  horizontalWalls = [];
+  verticalWalls = [];
+  for (var i = 0; i < message.horizontal_walls.length; i++) {
+    horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
+      'col': message.horizontal_walls[i].y})
+    horizontalWalls.push(horizontalWall);
+  };
+  console.log(horizontalWall);
+  for (var i = 0; i < message.vertical_walls.length; i++) {
+    verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
+      'col': message.vertical_walls[i].y})
+    verticalWalls.push(verticalWall);
+  };
+});
+
+var laserScan = [];
+
+var laserScanListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/scan',
+  messageType: 'sensor_msgs/LaserScan'
+});
+
+/* Listener that listens to the /wall_positions topic. */
+laserScanListener.subscribe(function(message) {
+  console.log('Received message on ' + laserScanListener.name);
+  laserScan = message.ranges;
+});
+
+function drawLaserScan(laserScan) {
+  ctx.save();
+  ctx.fillStyle = "#9C27B0";
+  var rectHeight = 0.02;
+  var rectWidth = 0.02;
+  for (var i = 0; i < 360; i++) {
+    ctx.rotate(Math.PI/180);
+    if (laserScan[i] > 0.1) {
+      ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
     };
-    console.log(horizontalWall);
-    for (var i = 0; i < message.vertical_walls.length; i++) {
-      verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
-        'col': message.vertical_walls[i].y})
-      verticalWalls.push(verticalWall);
-    };
-  });
+  }
+  ctx.restore();
+}
 
 function setLineStyle(type) {
   if (type == "wall") {
@@ -190,8 +198,10 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  var rows = 15; // 6 / 0.4
-  var cols = 30; // ((6 / 0.4) * 2)
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
+  var rows = 25; // 10 / 0.4
+  var cols = 52; // ((10 / 0.4) * 2) +2
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
@@ -207,6 +217,12 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
+  ctx.restore();
+}
+
+function drawWalls() {
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
   setLineStyle("wall");
   var currRow;
   var currCol;
@@ -215,8 +231,8 @@ function drawGrid() {
     currRow = horizontalWalls[i].row;
     currCol = horizontalWalls[i].col;
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
-    ctx.lineTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol)));
+    ctx.moveTo(0.4*currRow, 0.4*currCol);
+    ctx.lineTo(0.4*currRow, 0.4*currCol - 0.4*(currCol/Math.abs(currCol)));
     ctx.stroke();
   };
   // Vertical walls
@@ -224,14 +240,44 @@ function drawGrid() {
     currRow = verticalWalls[i].row;
     currCol = verticalWalls[i].col;
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows - (currRow - 1)), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
-    ctx.lineTo(0.4*(rows - currRow), (0.4*(cols/2)) - (0.4 * (currCol - 1)));
+    ctx.moveTo(0.4*currRow, 0.4*currCol);
+    ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
     ctx.stroke();
   };
+  ctx.restore();
 }
 
-function drawRobot(){
+function drawGlobalFrame() {
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
+  ctx.lineWidth = 0.02;
+  var arrowHeadOffset = 0.07;
+  var axisLength = 0.8;
+  // Draw x axis in red
+  ctx.strokeStyle = "#FF0000";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(axisLength, 0);
+  ctx.lineTo(axisLength - arrowHeadOffset, arrowHeadOffset);
+  ctx.moveTo(axisLength, 0);
+  ctx.lineTo(axisLength - arrowHeadOffset, -arrowHeadOffset);
+  ctx.stroke();
+  // Draw y axis in green
+  ctx.strokeStyle = "#00FF00";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, axisLength);
+  ctx.lineTo(arrowHeadOffset, axisLength - arrowHeadOffset);
+  ctx.moveTo(0, axisLength);
+  ctx.lineTo(-arrowHeadOffset, axisLength - arrowHeadOffset);
+  ctx.stroke();
+  ctx.restore();
+}
 
+function drawRobot() {
+  ctx.fillStyle = "#0000FF";
+  var sideLength = 0.1;
+  ctx.fillRect(-sideLength / 2, -sideLength / 2, sideLength, sideLength);
 }
 
 function drawAcceleration(){
@@ -243,6 +289,7 @@ function drawAcceleration(){
   var angle = Math.atan2(toy-fromy,tox-fromx);
 
   ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 0.02;
 
   ctx.beginPath();
   ctx.moveTo(fromx, fromy);
@@ -258,18 +305,6 @@ function drawAcceleration(){
   ctx.moveTo(tox, toy);
   ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
   ctx.stroke();
-}
-
-function drawLaserScan(laserScan) {
-  ctx.save();
-  var rectHeight = 0.02;
-  var rectWidth = 0.02;
-  for (var i = 0; i < 360; i++) {
-    ctx.rotate(1);
-    ctx.fillStyle = "#9C27B0";
-    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
-  }
-  ctx.restore();
 }
 
 function randomData() {
