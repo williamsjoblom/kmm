@@ -95,17 +95,11 @@ function bindEvents() {
   });
 }
 
-
 function resizeCanvas() {
   var $container = $("#map-container");
   ctx.canvas.width = $container.width();
   ctx.canvas.height = $container.height();
 }
-
-/*var laserScan = [];
-for (var i = 0; i < 360; i++) {
-  laserScan.push(Math.random() * 6)
-}*/
 
 function render() {
   clearScreen();
@@ -122,8 +116,10 @@ function render() {
   ctx.scale(view.zoom, view.zoom);
 
   drawGrid();
+  drawWalls();
   drawGlobalFrame();
-  drawAcceleration();
+  drawRobot();
+  //drawAcceleration();
   drawLaserScan(laserScan);
 
   ctx.restore();
@@ -132,22 +128,6 @@ function render() {
 function clearScreen() {
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
-function drawGlobalFrame() {
-  ctx.lineWidth = 0.03;
-  // Draw x axis in red
-  ctx.strokeStyle = "#FF0000";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0.6, 0);
-  ctx.stroke();
-  // Draw y axis in green
-  ctx.strokeStyle = "#00FF00";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, 0.6);
-  ctx.stroke();
 }
 
 var wallPositionsListener = new ROSLIB.Topic({
@@ -195,12 +175,14 @@ laserScanListener.subscribe(function(message) {
 
 function drawLaserScan(laserScan) {
   ctx.save();
+  ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
   for (var i = 0; i < 360; i++) {
     ctx.rotate(Math.PI/180);
-    ctx.fillStyle = "#9C27B0";
-    ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+    if (laserScan[i] > 0.1) {
+      ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+    };
   }
   ctx.restore();
 }
@@ -216,8 +198,10 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  var rows = 15; // 6 / 0.4
-  var cols = 30; // ((6 / 0.4) * 2)
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
+  var rows = 25; // 10 / 0.4
+  var cols = 52; // ((10 / 0.4) * 2) +2
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
@@ -233,6 +217,12 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
+  ctx.restore();
+}
+
+function drawWalls() {
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
   setLineStyle("wall");
   var currRow;
   var currCol;
@@ -254,10 +244,38 @@ function drawGrid() {
     ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
     ctx.stroke();
   };
+  ctx.restore();
 }
 
-function drawRobot(){
+function drawGlobalFrame() {
+  ctx.save();
+  ctx.translate(-0.2,-0.2);
+  ctx.lineWidth = 0.02;
+  // Draw x axis in red
+  ctx.strokeStyle = "#FF0000";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0.8, 0);
+  ctx.lineTo(0.73, 0.07);
+  ctx.moveTo(0.8, 0);
+  ctx.lineTo(0.73, -0.07);
+  ctx.stroke();
+  // Draw y axis in green
+  ctx.strokeStyle = "#00FF00";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, 0.8);
+  ctx.lineTo(0.07, 0.73);
+  ctx.moveTo(0, 0.8);
+  ctx.lineTo(-0.07, 0.73);
+  ctx.stroke();
+  ctx.restore();
+}
 
+function drawRobot() {
+  ctx.fillStyle = "#0000FF";
+  var sideLength = 0.1;
+  ctx.fillRect(-sideLength / 2, -sideLength / 2, sideLength, sideLength);
 }
 
 function drawAcceleration(){
