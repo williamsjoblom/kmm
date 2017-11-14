@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="tf" type="static_transform_publisher" name="neato_laser_broadcaster" args="0 0 0.1 0 0 180 1 base_link neato_laser 10" />
+  <node name="kmm_position" pkg="kmm_position" type="kmm_position_node" output="screen"></node>
+</launch>
