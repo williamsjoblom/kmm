@@ -119,6 +119,7 @@ function render() {
   drawWalls();
   drawGlobalFrame();
   drawRobot();
+  updateView();
   drawAcceleration();
   drawLaserScan(laserScan);
 
@@ -198,8 +199,6 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  ctx.save();
-  ctx.translate(-0.2,-0.2);
   var rows = 25; // 10 / 0.4
   var cols = 52; // ((10 / 0.4) * 2) +2
   setLineStyle("normal");
@@ -217,12 +216,9 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
-  ctx.restore();
 }
 
 function drawWalls() {
-  ctx.save();
-  ctx.translate(-0.2,-0.2);
   setLineStyle("wall");
   var currRow;
   var currCol;
@@ -244,12 +240,9 @@ function drawWalls() {
     ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
     ctx.stroke();
   };
-  ctx.restore();
 }
 
 function drawGlobalFrame() {
-  ctx.save();
-  ctx.translate(-0.2,-0.2);
   ctx.lineWidth = 0.02;
   var arrowHeadOffset = 0.07;
   var axisLength = 0.8;
@@ -271,19 +264,18 @@ function drawGlobalFrame() {
   ctx.moveTo(0, axisLength);
   ctx.lineTo(-arrowHeadOffset, axisLength - arrowHeadOffset);
   ctx.stroke();
-  ctx.restore();
 }
 
 function drawRobot() {
   ctx.fillStyle = "#0000FF";
   var sideLength = 0.1;
-  ctx.fillRect(-sideLength / 2, -sideLength / 2, sideLength, sideLength);
+  ctx.fillRect(posX - sideLength / 2, posY - sideLength / 2, sideLength, sideLength);
 }
 
 function drawAcceleration(){
   var headlen = 0.1;   // length of head in pixels
-  var fromx = Number($("#pos-x").html());
-  var fromy = Number($("#pos-y").html());
+  var fromx = posX; //Number($("#pos-x").html());
+  var fromy = posY; //Number($("#pos-y").html());
   var tox = fromx + Number($("#acc-x").html());
   var toy = fromy + Number($("#acc-y").html());
   var angle = Math.atan2(toy-fromy,tox-fromx);
@@ -307,10 +299,16 @@ function drawAcceleration(){
   ctx.stroke();
 }
 
+var posX = 0;
+var posY = 0;
+
 function randomData() {
-  $("#pos-x").html(Math.round(Math.random()*40)/10);
-  $("#pos-y").html(Math.round(Math.random()*40 - 20)/10);
-  $("#theta").html(Math.round(Math.random() * 360));
+  posX = Math.round(Math.random()*40)/10;
+  posY = Math.round(Math.random()*40)/10;
+  var theta = Math.round(Math.random() * 360);
+  $("#pos-x").html(posX.toString());
+  $("#pos-y").html(posY.toString());
+  $("#theta").html(theta.toString());
   $("#acc-x").html(Math.round(Math.random()*10 - 5)/10);
   $("#acc-y").html(Math.round(Math.random()*10 - 5)/10);
   $("#tar-pos-x").html(Math.round(Math.random() * 100));
@@ -326,19 +324,46 @@ function toggleViewState() {
   var $viewStateElem = $("#view-state-button");
   if ($viewStateElem.html() === "Global") {
     $viewStateElem.html("Local");
+    lastPosX = -posX;
+    lastPosY = -posY;
   } else {
     $viewStateElem.html("Global");
+    view = {
+      zoom: view.zoom,
+      pan: {
+        x: 0,
+        y: 0
+      }
+    };
   }
 }
 
-function centerView() {
-  view = {
-    zoom: 1,
-    pan: {
-      x: 0,
-      y: 0
-    }
+var lastPosX = 0;
+var lastPosY = 0;
+function updateView() {
+  var $viewStateElem = $("#view-state-button");
+  if ($viewStateElem.html() === "Local") {
+    view = {
+      zoom: view.zoom,
+      pan: {
+        x: -posX * view.zoom,
+        y: -posY * view.zoom
+      }
+    };
   };
+}
+
+function centerView() {
+  var $viewStateElem = $("#view-state-button");
+  if ($viewStateElem.html() === "Global") {
+    view = {
+      zoom: 1,
+      pan: {
+        x: 0,
+        y: 0
+      }
+    };
+  }
 }
 
 function zoomIn() {
