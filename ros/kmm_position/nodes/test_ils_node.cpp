@@ -28,7 +28,7 @@ void publish_points(ros::Publisher& pub, std::vector<Eigen::Vector2f>& points, f
 
 int main(int argc, char **argv) {
 
-  ros::init(argc, argv, "test_ils_node");
+  ros::init(argc, argv, "test_ils");
   ros::NodeHandle nh;
 
   ros::Publisher pub_a = nh.advertise<visualization_msgs::Marker>("test_a", 1);

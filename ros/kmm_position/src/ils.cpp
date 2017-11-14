@@ -1,5 +1,6 @@
 #include "kmm_position/ils.h"
 #include "kmm_position/Pose.h"
+#include <cmath>
 
 /**
   Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
@@ -19,9 +20,7 @@ Pose get_transform_pose(
     newScan = scan;
     total.transform(&newScan);
     //Creates pairs after previous transformation
-
-    //Uncomment and add function
-    //build_pair(newScan, &scanPair, &gridPair);
+    build_pair(newScan, scanPair, gridPair);
     //Saves scan without points in crossings
     newScan = scanPair;
     // Calculates difference
@@ -34,7 +33,32 @@ Pose get_transform_pose(
   return total;
 }
 
-/**
+/*
+Takes the laser scan and adds scan points which are outside diff_percentage's
+bounds to vector a. The closest point to the grid from that point is added to
+vector b.
+*/
+void build_pair(
+  const std::vector<Eigen::Vector2f> &scan,
+  std::vector<Eigen::Vector2f> &a,
+  std::vector<Eigen::Vector2f> &b)
+{
+  const float diff_percentage = 0.1;
+  for (Eigen::Vector2f v : scan){
+    float x = std::round(v[0]/0.4)*0.4;
+    float y = std::round(v[1]/0.4)*0.4;
+
+    if (!(std::abs(x - v[0]) < 0.4*diff_percentage &&
+          std::abs(y - v[1]) < 0.4*diff_percentage)){
+      a.push_back(v);
+      Eigen::Vector2f optimal(x, y);
+      b.push_back(optimal);
+    }
+  }
+}
+
+/*
+  Iterative Least Squares Relative Pose
   Finds a relative pose that minimizes the distances between
   the pairs of points in a and b using the least squares method.
 

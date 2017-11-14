@@ -123,6 +123,23 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+### POSITION NODE ###
+add_executable(kmm_position_node
+  nodes/kmm_position_node.cpp
+  src/Position.cpp
+  src/ils.cpp
+  src/Pose.cpp
+)
+
+add_dependencies(kmm_position_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(kmm_position_node
+   ${catkin_LIBRARIES}
+)
+
 ### TEST KALMAN ###
 
 #add_executable(test_kalman_node
