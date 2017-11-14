@@ -10,7 +10,7 @@ namespace kmm_position {
   {
     // Publishers
     marker_pub_ = nh_.advertise<visualization_msgs::Marker>("pair", 1);
-    broadcast_timer_ = nh_.createTimer(ros::Duration(0.01), &Position::broadcast_position, this);
+    broadcast_timer_ = nh_.createTimer(ros::Duration(0.05), &Position::broadcast_position, this);
 
     // Subscribers
     laser_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, "scan", 10);
