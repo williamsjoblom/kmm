@@ -43,16 +43,20 @@ void build_pair(
   std::vector<Eigen::Vector2f> &a,
   std::vector<Eigen::Vector2f> &b)
 {
-  const float diff_percentage = 0.1;
   for (Eigen::Vector2f v : scan){
-    float x = std::round(v[0]/0.4)*0.4;
-    float y = std::round(v[1]/0.4)*0.4;
+    float x_round = std::round(v[0] / 0.4) * 0.4;
+    float y_round = std::round(v[1] / 0.4) * 0.4;
+    float x_diff = std::abs(x_round - v[0]);
+    float y_diff = std::abs(y_round - v[1]);
+    const float magic = 0.05;
 
-    if (!(std::abs(x - v[0]) < 0.4*diff_percentage &&
-          std::abs(y - v[1]) < 0.4*diff_percentage)){
+    if ( !(x_diff < magic && y_diff < magic) ) {
       a.push_back(v);
-      Eigen::Vector2f optimal(x, y);
-      b.push_back(optimal);
+      if (x_diff < y_diff) {
+        b.push_back(Eigen::Vector2f(x_round, v[1]));
+      } else {
+        b.push_back(Eigen::Vector2f(v[0], y_round));
+      }
     }
   }
 }
