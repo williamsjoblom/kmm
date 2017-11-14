@@ -119,7 +119,7 @@ function render() {
   drawWalls();
   drawGlobalFrame();
   drawRobot();
-  //drawAcceleration();
+  drawAcceleration();
   drawLaserScan(laserScan);
 
   ctx.restore();
@@ -251,23 +251,25 @@ function drawGlobalFrame() {
   ctx.save();
   ctx.translate(-0.2,-0.2);
   ctx.lineWidth = 0.02;
+  var arrowHeadOffset = 0.07;
+  var axisLength = 0.8;
   // Draw x axis in red
   ctx.strokeStyle = "#FF0000";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(0.8, 0);
-  ctx.lineTo(0.73, 0.07);
-  ctx.moveTo(0.8, 0);
-  ctx.lineTo(0.73, -0.07);
+  ctx.lineTo(axisLength, 0);
+  ctx.lineTo(axisLength - arrowHeadOffset, arrowHeadOffset);
+  ctx.moveTo(axisLength, 0);
+  ctx.lineTo(axisLength - arrowHeadOffset, -arrowHeadOffset);
   ctx.stroke();
   // Draw y axis in green
   ctx.strokeStyle = "#00FF00";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(0, 0.8);
-  ctx.lineTo(0.07, 0.73);
-  ctx.moveTo(0, 0.8);
-  ctx.lineTo(-0.07, 0.73);
+  ctx.lineTo(0, axisLength);
+  ctx.lineTo(arrowHeadOffset, axisLength - arrowHeadOffset);
+  ctx.moveTo(0, axisLength);
+  ctx.lineTo(-arrowHeadOffset, axisLength - arrowHeadOffset);
   ctx.stroke();
   ctx.restore();
 }
@@ -287,6 +289,7 @@ function drawAcceleration(){
   var angle = Math.atan2(toy-fromy,tox-fromx);
 
   ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 0.02;
 
   ctx.beginPath();
   ctx.moveTo(fromx, fromy);
