@@ -1,5 +1,5 @@
 #include "kmm_position/Position.hpp"
-#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/Point32.h>
 #include "kmm_position/ils.h"
 
 namespace kmm_position {
@@ -9,7 +9,7 @@ namespace kmm_position {
     lidar_messurement_(0.2, 0.2, 0)
   {
     // Publishers
-    marker_pub_ = nh_.advertise<visualization_msgs::Marker>("pair", 1);
+    aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
     broadcast_timer_ = nh_.createTimer(ros::Duration(0.05), &Position::broadcast_position, this);
 
     // Subscribers
@@ -39,40 +39,34 @@ namespace kmm_position {
     // Create list of Eigen vectors.
     std::vector<Eigen::Vector2f> scan;
     scan.resize(cloud.points.size());
-    for (int i = 0; i < scan.size(); i++) {
-      scan[i] = Eigen::Vector2f(cloud.points[i].x, cloud.points[i].y);
+    for (int i = 0; i < cloud.points.size(); i++) {
+      float x = cloud.points[i].x;
+      float y = cloud.points[i].y;
+      scan[i] = Eigen::Vector2f(x, y);
     }
 
-    std::vector<Eigen::Vector2f> a, b;
-    build_pair(scan, a, b);
-
-    publish_points("a", a, 1, 0, 0);
-    publish_points("b", b, 0, 1, 0);
+    std::vector<Eigen::Vector2f> aligned;
+    Pose result = get_transform_pose(scan, aligned, 5);
+    lidar_messurement_.accumulate(result);
+    publish_aligned_scan(aligned);
   }
 
-  void Position::publish_points(std::string ns, std::vector<Eigen::Vector2f>& points, float r, float g, float b) {
-    visualization_msgs::Marker markers;
-    markers.type = visualization_msgs::Marker::POINTS;
-    markers.header.frame_id = "map";
-    markers.ns = ns;
-    markers.scale.x = 0.01;
-    markers.scale.y = 0.01;
-    markers.color.r = r;
-    markers.color.g = g;
-    markers.color.b = b;
-    markers.color.a = 1.0;
+  void Position::publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned) {
+    sensor_msgs::PointCloud cloud;
+    cloud.header.frame_id = "map";
 
-    for (Eigen::Vector2f point : points) {
-      geometry_msgs::Point p;
+    for (Eigen::Vector2f point : aligned) {
+      geometry_msgs::Point32 p;
       p.x = point[0];
       p.y = point[1];
-      markers.points.push_back(p);
+      cloud.points.push_back(p);
     }
 
-    marker_pub_.publish(markers);
+    aligned_scan_pub_.publish(cloud);
   }
 
   void Position::broadcast_position(const ros::TimerEvent&) {
+    ROS_INFO("angle %f", lidar_messurement_.angle);
     tf::Vector3 position(lidar_messurement_.pos[0], lidar_messurement_.pos[1], 0);
     tf::Quaternion orientation;
     orientation.setEuler(0, 0, lidar_messurement_.angle);
