@@ -16,7 +16,7 @@ namespace kmm_position {
     laser_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, "scan", 10);
     laser_notifier_ = new tf::MessageFilter<sensor_msgs::LaserScan>(*laser_sub_, tf_listener_, "map", 10);
     laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
-    laser_notifier_->setTolerance(ros::Duration(0.01));
+    laser_notifier_->setTolerance(ros::Duration(0.1));
   }
 
   Position::~Position() {
@@ -40,7 +40,7 @@ namespace kmm_position {
     std::vector<Eigen::Vector2f> scan;
     scan.resize(cloud.points.size());
     for (int i = 0; i < scan.size(); i++) {
-      scan.push_back(Eigen::Vector2f(cloud.points[i].x, cloud.points[i].y));
+      scan[i] = Eigen::Vector2f(cloud.points[i].x, cloud.points[i].y);
     }
 
     std::vector<Eigen::Vector2f> a, b;
