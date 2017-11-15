@@ -6,6 +6,9 @@
 
 class Pose {
 public:
+    Pose() = default;
+    Pose(float x, float y, float angle);
+
     Eigen::Vector2f pos;
     float angle = 0;
 

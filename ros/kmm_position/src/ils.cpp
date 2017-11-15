@@ -1,35 +1,40 @@
 #include "kmm_position/ils.h"
 #include "kmm_position/Pose.h"
 #include <cmath>
+#include <ros/ros.h>
 
 /**
   Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
 */
 Pose get_transform_pose(
   std::vector<Eigen::Vector2f> &scan,
+  std::vector<Eigen::Vector2f> &aligned,
   int iterations)
 {
   Pose total;
-  std::vector<Eigen::Vector2f> newScan; //Scan whithout points in crossings.
 
-  for (int i = 0; i < iterations; i++){
-    std::vector<Eigen::Vector2f> scanPair; //Kuriosa: Namnet för en enhet i ett par är "Pair"
-    std::vector<Eigen::Vector2f> gridPair;
-
-    //Copies scan
-    newScan = scan;
-    total.transform(&newScan);
-    //Creates pairs after previous transformation
-    build_pair(newScan, scanPair, gridPair);
-    //Saves scan without points in crossings
-    newScan = scanPair;
-    // Calculates difference
-    Pose diff = least_squares(scanPair, gridPair);
-    //Updates newScan so that it can be used to replace laser scan point cloud.
-    diff.transform(&newScan);
-    total.accumulate(diff);
+  if (scan.size() == 0) {
+    ROS_WARN("Scan size is zero, this is not good!");
+    return total;
   }
-  scan = newScan;
+
+  for (int i = 0; i < iterations; i++) {
+
+    std::vector<Eigen::Vector2f> scanCopy = scan;
+    total.transform(&scanCopy);
+
+    std::vector<Eigen::Vector2f> scanPair;
+    std::vector<Eigen::Vector2f> gridPair;
+    build_pairs(scanCopy, scanPair, gridPair);
+
+    Pose diff = least_squares(scanPair, gridPair);
+    total.accumulate(diff);
+
+    if (i == iterations - 1) {
+      aligned = gridPair;
+    }
+  }
+
   return total;
 }
 
@@ -38,21 +43,25 @@ Takes the laser scan and adds scan points which are outside diff_percentage's
 bounds to vector a. The closest point to the grid from that point is added to
 vector b.
 */
-void build_pair(
+void build_pairs(
   const std::vector<Eigen::Vector2f> &scan,
   std::vector<Eigen::Vector2f> &a,
   std::vector<Eigen::Vector2f> &b)
 {
-  const float diff_percentage = 0.1;
-  for (Eigen::Vector2f v : scan){
-    float x = std::round(v[0]/0.4)*0.4;
-    float y = std::round(v[1]/0.4)*0.4;
+  for (Eigen::Vector2f point : scan) {
+    float x_round = std::round(point[0] / 0.4) * 0.4;
+    float y_round = std::round(point[1] / 0.4) * 0.4;
+    float x_diff = std::abs(x_round - point[0]);
+    float y_diff = std::abs(y_round - point[1]);
+    const float magic = 0.05;
 
-    if (!(std::abs(x - v[0]) < 0.4*diff_percentage &&
-          std::abs(y - v[1]) < 0.4*diff_percentage)){
-      a.push_back(v);
-      Eigen::Vector2f optimal(x, y);
-      b.push_back(optimal);
+    if ( !(x_diff < magic && y_diff < magic) ) {
+      a.push_back(point);
+      if (x_diff < y_diff) {
+        b.push_back(Eigen::Vector2f(x_round, point[1]));
+      } else {
+        b.push_back(Eigen::Vector2f(point[0], y_round));
+      }
     }
   }
 }
@@ -89,7 +98,6 @@ Pose least_squares(
         xy += p1[0] * p2[1];
         yx += p1[1] * p2[0];
     }
-
 
     double N = (double)n;
 
