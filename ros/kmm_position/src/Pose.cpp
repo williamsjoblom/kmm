@@ -2,6 +2,7 @@
 #include <cmath>
 #include <assert.h>
 
+Pose::Pose(float x, float y, float angle) : pos(x, y), angle(angle) { };
 
 /**
   Moves points in point cloud accordingly to pose

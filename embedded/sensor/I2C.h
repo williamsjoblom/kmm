@@ -1,8 +1,8 @@
 #ifndef _TWI_H
 #define _TWI_H
 
-    #define ACC_ADDR  0b0011001 // + R/W bit
-    #define GYRO_ADDR 0b1101010 // + R/W bit
+    #define ACC_ADDR  0b00110010 // + R/W bit
+    #define GYRO_ADDR 0b11010100 // + R/W bit
     
     /* Register adresses for each coordinate. Used in SUB.
      * ACC_X_L   0b0101000
@@ -12,8 +12,8 @@
      * GYRO_Z_L  0b0101100
      * GYRO_Z_H  0b0101101
      */
-    #define ACC_START 0b0101000
-    #define GYRO_START 0b0101100
+    #define ACC_START 0b01010000 // + multiple read bit (MSB)
+    #define GYRO_START 0b01011000 // + multiple read bit (MSB)
 
     /*
     * Maximum no. iterations that we will wait for a selection to be
@@ -23,6 +23,12 @@
     * RN BASED ON A TWI CLOCK RATE OF 100 kHz.
     */
     #define MAX_ITER 200
+
+    #define TWI_START 0
+    #define TWI_DATA 1
+    #define TWI_STOP 2
+    #define TWI_ERROR 3
+    #define TWI_RESTART 4
 
 int twi_read_bytes(uint8_t sad, int iter, uint8_t *buf)
 

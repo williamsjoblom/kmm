@@ -90,7 +90,10 @@ html, body {
   background: #ccc;
   cursor: pointer;
   display: inline-block;
-  user-select: none;
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
 }
 
 .map-button:hover {
