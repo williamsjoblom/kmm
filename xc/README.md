@@ -42,13 +42,19 @@ sudo ln -s /home/$USER/catkin_ws/src/kmm/xc/xc.bash /usr/local/bin/xc
 ### Compiling for ARM
 Start compilation container:
 ```
-sudo xc start ~/catkin_ws
+sudo xc start
 ```
 
 Write some code and compile:
 ```
 sudo xc make
 ```
+
+Push the compiled binaries to the robot (requires $ROS_MASTER_URI to be set):
+```
+sudo xc push
+```
+
 
 And when you are done for the day:
 ```
