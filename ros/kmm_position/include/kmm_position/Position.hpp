@@ -33,10 +33,11 @@ private:
 
   // Publishers
   ros::Publisher aligned_scan_pub_;
+  ros::Publisher position_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
 
   // Position values
-  Pose lidar_messurement_;
+  Pose lidar_measurement_;
 
 };
 
