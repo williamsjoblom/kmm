@@ -18,6 +18,7 @@ public:
   ~Position();
 
   void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
+  void cmd_vel_callback(geometry_msgs::Twist msg);
   void publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned);
   void broadcast_position(const ros::TimerEvent&);
 
@@ -30,6 +31,7 @@ private:
   tf::TransformListener tf_listener_;
   message_filters::Subscriber<sensor_msgs::LaserScan>* laser_sub_;
   tf::MessageFilter<sensor_msgs::LaserScan>* laser_notifier_;
+  ros::Subscriber cmd_vel_sub_;
 
   // Publishers
   ros::Publisher aligned_scan_pub_;

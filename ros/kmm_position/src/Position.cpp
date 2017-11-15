@@ -17,11 +17,16 @@ namespace kmm_position {
     laser_notifier_ = new tf::MessageFilter<sensor_msgs::LaserScan>(*laser_sub_, tf_listener_, "map", 10);
     laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
     laser_notifier_->setTolerance(ros::Duration(0.1));
+    cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
   }
 
   Position::~Position() {
     delete laser_sub_;
     delete laser_notifier_;
+  }
+
+  void Position::cmd_vel_callback(geometry_msgs::Twist msg) {
+    //ROS_INFO("%f", msg.linear.x);
   }
 
   void Position::laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg) {

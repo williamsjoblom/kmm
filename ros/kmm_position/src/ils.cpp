@@ -82,6 +82,10 @@ Pose least_squares(
 
     int n = a.size();
 
+    if (n == 0) {
+      return Pose();
+    }
+
     double x1 = 0.0, x2 = 0.0, y1 = 0.0, y2 = 0.0;
     double xx = 0.0, yy = 0.0, xy = 0.0, yx = 0.0;
 
