@@ -25,21 +25,38 @@ sudo apt-get install qemu qemu-user-static debootstrap
 
 ### Building docker image
 ```
+cd ~/catkin_ws/src/kmm/xc/
 sudo docker build -t kmm_xc .
+```
+
+### Setting up environment
+```
+mkdir ~/catkin_ws_arm
+
+echo "export CATKIN_WS=\"/home/$USER/catkin_ws/\"" >> ~/.xcenv
+echo "export CATKIN_WS_ARM=\"/home/$USER/catkin_ws_arm/\"" >> ~/.xcenv
+
+sudo ln -s /home/$USER/catkin_ws/src/kmm/xc/xc.bash /usr/local/bin/xc
 ```
 
 ### Compiling for ARM
 Start compilation container:
 ```
-sudo ./xc.py start ~/catkin_ws
+sudo xc start
 ```
 
 Write some code and compile:
 ```
-sudo ./xc.py compile
+sudo xc make
 ```
+
+Push the compiled binaries to the robot (requires $ROS_MASTER_URI to be set):
+```
+sudo xc push
+```
+
 
 And when you are done for the day:
 ```
-sudo ./xc.py stop
+sudo xc stop
 ```
