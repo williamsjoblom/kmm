@@ -6,7 +6,7 @@ import serial
 import spidev
 import rospy
 import struct
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 from math import pi, sin, cos
 from time import time, sleep
@@ -37,11 +37,11 @@ class SteeringDriver:
         """
         Constructor.
         """
-        #self.spi = spidev.SpiDev()
-        #self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
-        #self.spi.max_speed_hz = 15200
-        #self.spi.bits_per_word = 8
-        self.wheel_pub = rospy.Publisher('wheel_velocities', WheelVelocities)
+        self.spi = spidev.SpiDev()
+        self.spi.open(1, 1) #connection to spi device 0 CHIP SELECT 0
+        self.spi.max_speed_hz = 15200
+        self.spi.bits_per_word = 8
+        self.wheel_pub = rospy.Publisher('wheel_velocities', WheelVelocities, queue_size = 1)
 
 
     def subscribe(self):
@@ -92,7 +92,7 @@ class SteeringDriver:
 
         byte_buf = build_packet(cmd, speed)
 
-        #self.spi.xfer(byte_buf)
+        self.spi.xfer(byte_buf)
 
         #Publish wheel spinning values
         wheel_msg = WheelVelocities(w0, w1, w2)

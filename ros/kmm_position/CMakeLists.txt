@@ -70,10 +70,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  sensor_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  sensor_msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
