@@ -84,9 +84,9 @@ namespace kmm_position {
 
     geometry_msgs::PoseWithCovarianceStamped msg;
     msg.header.frame_id = "map";
-    msg.pose.position.x = lidar_measurement_.pos[0];
-    msg.pose.position.y= lidar_measurement_.pos[1];
-    msg.pose.orientation.z = lidar_measurement_.angle;
+    msg.pose.pose.position.x = lidar_measurement_.pos[0];
+    msg.pose.pose.position.y= lidar_measurement_.pos[1];
+    msg.pose.pose.orientation.z = lidar_measurement_.angle;
     position_pub_.publish(msg);
   }
 
