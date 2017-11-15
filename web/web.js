@@ -150,6 +150,20 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
+var wheelVelocityListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wheel_velocities',
+  messageType: 'kmm_drivers/wheel_velocities'
+});
+
+wheelVelocityListener.subscribe(function(message) {
+  console.log('Recieved message on ' + wheelVelocityListener.name);
+  var w0 = message.wheel_0;
+  var w1 = message.wheel_1;
+  var w2 = message.wheel_2;
+  console.log()
+});
+
 var wallPositionsListener = new ROSLIB.Topic({
   ros: ros,
   name: '/wall_positions',
