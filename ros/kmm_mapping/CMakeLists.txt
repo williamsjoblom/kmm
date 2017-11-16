@@ -11,7 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   std_msgs
+  sensor_msgs
   message_generation
+  laser_geometry
 )
 
 ## System dependencies are found with CMake's conventions
@@ -71,6 +73,7 @@ add_message_files(
 generate_messages(
  DEPENDENCIES
  geometry_msgs
+ sensor_msgs
 )
 
 ################################################
@@ -103,10 +106,10 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES kmm_mapping
-  CATKIN_DEPENDS geometry_msgs roscpp std_msgs message_runtime
-#  DEPENDS system_lib
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
+  #  INCLUDE_DIRS include
+  #  LIBRARIES kmm_mapping
+  #  DEPENDS system_lib
 )
 
 ###########
@@ -116,7 +119,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -135,8 +138,12 @@ include
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+add_executable(wall_positions_node
+  nodes/wall_positions_node.cpp
+  src/Mapping.cpp
+)
+
 # add_executable(${PROJECT_NAME}_node src/kmm_mapping_node.cpp)
-add_executable(wall_positions_node nodes/wall_positions_node.cpp)
 # add_executable(my_subscriber src/my_subscriber.cpp)
 
 ## Rename C++ executable without prefix
@@ -147,13 +154,18 @@ add_executable(wall_positions_node nodes/wall_positions_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(wall_positions_node ${kmm_mapping_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(wall_positions_node
+  ${kmm_mapping_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(wall_positions_node ${catkin_LIBRARIES})
+target_link_libraries(wall_positions_node
+  ${catkin_LIBRARIES}
+)
 # target_link_libraries(my_subscriber ${catkin_LIBRARIES})
 
 #############
