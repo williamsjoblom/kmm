@@ -23,6 +23,17 @@ uint8_t twst;
  * Note: if the AVR has a clock frequency lower than 3.6MHz, set the
  * TWBR to 10.
  */
+   #if defined(TWSP0)
+     TWSR = 0;
+   #endif
+
+   #if CPU_FREQ < 3600000UL
+     TWBR = 10;
+   #else
+     TWBR = (CPU_FREQ / SCL_FREQ - 16) / 2;
+   #endif
+
+ /*
 void ioinit(void){
   #if defined(TWSP0)
     TWSR = 0;
@@ -33,7 +44,7 @@ void ioinit(void){
   #else
     TWBR = (CPU_FREQ / SCL_FREQ - 16) / 2;
   #endif
-}
+}*/
 
 
 /* Acceleration data is composed of 16-bit values per coordinate.
@@ -125,7 +136,7 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t &sad){
         return twi_assess_error(TWI_ERROR);
     }
   }
-  return 0;
+  return twi_transmit(TWI_STOP);
 }
 
 /* Sends repeated start condition, #4 in event loop*/

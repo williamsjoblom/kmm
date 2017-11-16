@@ -10,7 +10,7 @@ void spi_slave_init() {
 }
 
 void spi_slave_write(uint8_t *data, uint8_t len) {
-  // Shift the full array of either accelero/gyroscope data
+  // Shift the full array of accelero- and gyroscope data
   // without recieving any byte from master.
   uint8_t i;
 
