@@ -49,7 +49,8 @@ private:
   // Wall point counts
   std::vector<WallPointCount> hor_wall_point_counts_;
   std::vector<WallPointCount> ver_wall_point_counts_;
-
+  int pnt_cnt_req_ = 7;
+  int times_req_ = 5;
 
 };
 

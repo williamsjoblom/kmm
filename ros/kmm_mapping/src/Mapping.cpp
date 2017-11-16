@@ -15,8 +15,6 @@ namespace kmm_mapping {
   Mapping::~Mapping() {
   }
 
-
-
   /* Analyzes points by counting number of collisions on the same wall.
    * Finally publishes the walls that have enough collisions.
    */
@@ -30,7 +28,7 @@ namespace kmm_mapping {
       wall_points.push_back(point);
     };
 
-    /* Increment wall point counts. Will add walls that haven't been added before. */
+    // Iterate through wall points.
     for (int i = 0; i < wall_points.size(); i++) {
       int row;
       int col;
@@ -41,16 +39,16 @@ namespace kmm_mapping {
       bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
       float rem_y = std::remainder(std::fabs(y), 0.4);
       bool on_vertical_wall = (rem_y > -eps) && (rem_y < eps);
-      if (on_horizontal_wall) { // point on horizontal wall
-        row = std::round(x / 0.4); // integer, not float
-        col = std::ceil(std::fabs(y) / 0.4) * (y < 0 ? -1 : 1); // can never be 0
+      if (on_horizontal_wall) {
+        row = std::round(x / 0.4);
+        col = std::ceil(std::fabs(y) / 0.4) * (y < 0 ? -1 : 1); // col can never be 0
         hor_wall_point_counts_ = increment_wall_point_count(hor_wall_point_counts_, true, row, col);
-      } else if (on_vertical_wall) { // point on vertical wall
-        row = std::ceil(std::fabs(x) / 0.4) * (x < 0 ? -1 : 1); // can never be 0
-        col = std::round(y / 0.4); // integer, not float
+      } else if (on_vertical_wall) {
+        row = std::ceil(std::fabs(x) / 0.4) * (x < 0 ? -1 : 1); // row can never be 0
+        col = std::round(y / 0.4);
         ver_wall_point_counts_ = increment_wall_point_count(ver_wall_point_counts_, false, row, col);
       } else {
-        ROS_INFO("Point from /aligned_scan missing x or y as multiple of 0.4! x: %f y: %f fmod x: %f fmod y: %f",
+        ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
           x, y, std::remainder(std::fabs(x), 0.4),std::remainder(std::fabs(y), 0.4));
       };
     };
@@ -99,19 +97,19 @@ namespace kmm_mapping {
     it != wall_point_counts.end(); it++) {
       if (((*it).position[0] == row) && ((*it).position[1] == col)) {
         (*it).pnt_cnt++;
-        if ((*it).pnt_cnt == 7 and !(*it).published) {
+        if ((*it).pnt_cnt == pnt_cnt_req_ && !(*it).published) {
           (*it).times++;
-          if ((*it).times == 5) {
+          if ((*it).times == times_req_) {
             (*it).published = true;
             geometry_msgs::Point wall;
             wall.x = (*it).position[0];
             wall.y = (*it).position[1];
             wall.z = 0;
             if (horizontal) {
-              ROS_INFO("Pushed back horizontal!");
+              ROS_INFO("Pushed back horizontal wall!");
               wall_positions_msg_.horizontal_walls.push_back(wall);
             } else {
-              ROS_INFO("Pushed back vertical!");
+              ROS_INFO("Pushed back vertical wall!");
               wall_positions_msg_.vertical_walls.push_back(wall);
             };
           };
@@ -132,65 +130,3 @@ namespace kmm_mapping {
     return dist(eng);
   }
 }
-
-
-  //ros::Rate loop_rate(10);
-
-  /*while (ros::ok())
-  {
-    wall_positions_msg.horizontal_walls.clear();
-    wall_positions_msg.vertical_walls.clear();
-    wall_positions_msg.cnt = count;
-
-    for (int i = 0; i < 25; i++) {
-        geometry_msgs::Point point_horizontal;
-        point_horizontal.x = random(0,25);
-        point_horizontal.y = random(-26,26); // can never be 0
-        while (point_horizontal.y == 0) { // make sure y != 0
-          point_horizontal.y = random(-26,26);
-        }
-        point_horizontal.z = 0;
-        wall_positions_msg.horizontal_walls.push_back(point_horizontal);
-    }
-
-    for (int i = 0; i < 17; i++) {
-        geometry_msgs::Point point_vertical;
-        point_vertical.x = random(1,25); // can never be 0
-        point_vertical.y = random(-26,26);
-        point_vertical.z = 0;
-        wall_positions_msg.vertical_walls.push_back(point_vertical);
-    }
-
-    ROS_INFO("%d", wall_positions_msg.cnt);
-
-    pub.publish(wall_positions_msg);
-
-    ros::spinOnce();
-
-    loop_rate.sleep();
-    ++count;
-  }*/
-
-  /*
-  // Add horizontal walls
-  for (std::vector<WallPointCount>::iterator it = horizontal_wall_point_counts.begin(),
-      horizontal_wall_point_counts.end(); it != horizontal_wall_point_counts.end()) {
-    if ((*it).count > 5) {
-      geometry_msgs::Point horizontal_wall;
-      horizontal_wall.x = (*it).position.x;
-      horizontal_wall.y = (*it).position.y;
-      horizontal_wall.z = 0;
-      wall_positions_msg.horizontal_walls.push_back(horizontal_wall);
-    };
-  };
-  // Add vertical walls
-  for (std::vector<WallPointCount>::iterator it = vertical_wall_point_counts.begin(),
-      vertical_wall_point_counts.end(); it != vertical_wall_point_counts.end()) {
-    if ((*it).count > 5) {
-      geometry_msgs::Point vertical_wall;
-      vertical_wall.x = (*it).position.x;
-      vertical_wall.y = (*it).position.y;
-      vertical_wall.z = 0;
-      wall_positions_msg.vertical_walls.push_back(vertical_wall);
-    };
-  };*/
