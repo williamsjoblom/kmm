@@ -30,6 +30,14 @@
     #define TWI_ERROR 3
     #define TWI_RESTART 4
 
-int twi_read_bytes(uint8_t sad, int iter, uint8_t *buf)
+void ioinit(void);
+int twi_assess_error(unsigned char type);
+unsigned char twi_transmit(unsigned char type);
+int twi_read(uint8_t addr, uint8_t *buf, const uint8_t &sad);
+int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t &sad);
+int twi_select_register(uint8_t addr, const uint8_t &sad, uint8_t *buf);
+int twi_select_slave(const uint8_t &sad, uint8_t addr, uint8_t *buf);
+int twi_send_start(const uint8_t &sad, uint8_t addr, uint8_t *buf);
+int twi_read_bytes(const uint8_t &sad, uint8_t *buf);
 
 #endif
