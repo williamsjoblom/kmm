@@ -1,61 +1,93 @@
 #include "kmm_position/Position.hpp"
-#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/Point32.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include "kmm_position/ils.h"
 
 namespace kmm_position {
 
   Position::Position(ros::NodeHandle nh)
-  : nh_(nh)
+  : nh_(nh),
+    lidar_measurement_(0.2, 0.2, 0)
   {
-    laser_scan_sub_ = nh_.subscribe("scan", 1, &Position::laser_scan_callback, this);
-    marker_pub_ = nh_.advertise<visualization_msgs::Marker>("pair", 1);
+    // Publishers
+    aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
+    position_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("position", 1);
+    broadcast_timer_ = nh_.createTimer(ros::Duration(0.05), &Position::broadcast_position, this);
+
+    // Subscribers
+    laser_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, "scan", 10);
+    laser_notifier_ = new tf::MessageFilter<sensor_msgs::LaserScan>(*laser_sub_, tf_listener_, "map", 10);
+    laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
+    laser_notifier_->setTolerance(ros::Duration(0.1));
+    cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
   }
 
   Position::~Position() {
-
+    delete laser_sub_;
+    delete laser_notifier_;
   }
 
-  void Position::laser_scan_callback(sensor_msgs::LaserScan msg) {
-    ROS_INFO("GOT SCAN!");
+  void Position::cmd_vel_callback(geometry_msgs::Twist msg) {
+    //ROS_INFO("%f", msg.linear.x);
+  }
 
+  void Position::laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg) {
+    // Convert scan in polar coordinates robot frame (base_link)
+    // to cartesian coordinates global frame (map).
+    sensor_msgs::PointCloud cloud;
+    try {
+      projector_.transformLaserScanToPointCloud("map", *msg, cloud, tf_listener_);
+    }
+    catch (tf::TransformException ex) {
+       ROS_WARN("%s", ex.what());
+       return;
+     }
+
+    // Create list of Eigen vectors.
     std::vector<Eigen::Vector2f> scan;
-    for (int i = 0; i < msg.ranges.size(); i++) {
-      float range = msg.ranges[i];
-      if (range > 0.16) {
-        float angle = i * 3.1415 / 180;
-        float x = cos(angle) * range + 0.2;
-        float y = sin(angle) * range + 0.2;
-        scan.push_back(Eigen::Vector2f(x, y));
-      }
+    scan.resize(cloud.points.size());
+    for (int i = 0; i < cloud.points.size(); i++) {
+      float x = cloud.points[i].x;
+      float y = cloud.points[i].y;
+      scan[i] = Eigen::Vector2f(x, y);
     }
 
-    std::vector<Eigen::Vector2f> a, b;
-    build_pair(scan, a, b);
-
-    publish_points("a", a, 1, 0, 0);
-    publish_points("b", b, 0, 1, 0);
+    std::vector<Eigen::Vector2f> aligned;
+    Pose result = get_transform_pose(scan, aligned, 5);
+    lidar_measurement_.accumulate(result);
+    publish_aligned_scan(aligned);
   }
 
-  void Position::publish_points(std::string ns, std::vector<Eigen::Vector2f>& points, float r, float g, float b) {
-    visualization_msgs::Marker markers;
-    markers.type = visualization_msgs::Marker::POINTS;
-    markers.header.frame_id = "neato_laser";
-    markers.ns = ns;
-    markers.scale.x = 0.01;
-    markers.scale.y = 0.01;
-    markers.color.r = r;
-    markers.color.g = g;
-    markers.color.b = b;
-    markers.color.a = 1.0;
+  void Position::publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned) {
+    sensor_msgs::PointCloud cloud;
+    cloud.header.frame_id = "map";
 
-    for (Eigen::Vector2f point : points) {
-      geometry_msgs::Point p;
+    for (Eigen::Vector2f point : aligned) {
+      geometry_msgs::Point32 p;
       p.x = point[0];
       p.y = point[1];
-      markers.points.push_back(p);
+      cloud.points.push_back(p);
     }
 
-    marker_pub_.publish(markers);
+    aligned_scan_pub_.publish(cloud);
+  }
+
+  void Position::broadcast_position(const ros::TimerEvent&) {
+    ROS_INFO("angle %f", lidar_measurement_.angle);
+    tf::Vector3 position(lidar_measurement_.pos[0], lidar_measurement_.pos[1], 0);
+    tf::Quaternion orientation;
+    orientation.setEuler(0, 0, lidar_measurement_.angle);
+    tf_broadcaster_.sendTransform(
+      tf::StampedTransform(
+        tf::Transform(orientation, position),
+        ros::Time::now(), "map", "base_link"));
+
+    geometry_msgs::PoseWithCovarianceStamped msg;
+    msg.header.frame_id = "map";
+    msg.pose.pose.position.x = lidar_measurement_.pos[0];
+    msg.pose.pose.position.y= lidar_measurement_.pos[1];
+    msg.pose.pose.orientation.z = lidar_measurement_.angle;
+    position_pub_.publish(msg);
   }
 
 }

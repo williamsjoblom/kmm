@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "kmm_mapping/Mapping.hpp"
+#include "kmm_mapping/occupancy.hpp"
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "kmm_mapping");
