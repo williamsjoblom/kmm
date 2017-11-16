@@ -40,9 +40,9 @@ setInterval(updateDom, 100);
 
 function updateDom() {
   //Position
-  $("#pos-x").html(decimal(robot.position.x, 1) + " m/s");
-  $("#pos-y").html(decimal(robot.position.y, 1) + " m/s");
-  $("#theta").html(decimal(robot.position.angle, 1) + " m/s");
+  $("#pos-x").html(decimal(robot.position.x, 1));
+  $("#pos-y").html(decimal(robot.position.y, 1));
+  $("#theta").html(decimal(robot.position.angle, 1));
   //Velocity
   $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
   $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
@@ -97,9 +97,6 @@ $(document).ready(function () {
 
   // Set initial canvas size.
   resizeCanvas();
-
-  // Set an interval to show random data every second.
-  setInterval(randomData, 1000);
 
   // Render canvas 60 fps.
   setInterval(render, 0.016);
@@ -194,7 +191,8 @@ function drawGlobalFrame() {
 
 function drawLaserScan(laserScan) {
   ctx.save();
-  //ctx.translate(posX, posY); //Uncomment to have laser data drawn at robot pos.
+  ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
+  ctx.rotate(robot.position.angle + Math.PI);
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
@@ -288,7 +286,7 @@ function drawGlobalFrame() {
 function drawRobot() {
   ctx.fillStyle = "#0000FF";
   var sideLength = 0.1;
-  ctx.fillRect(posX - sideLength / 2, posY - sideLength / 2, sideLength, sideLength);
+  ctx.fillRect(robot.position.x - sideLength / 2, robot.position.y - sideLength / 2, sideLength, sideLength);
 }
 
 function drawArrow(fromx, fromy, tox, toy){
@@ -378,20 +376,6 @@ function zoomOut() {
   view.zoom *= 0.8;
 }
 
-var posX = 0;
-var posY = 0;
-
-function randomData() {
-  posX = Math.round(Math.random()*40)/10;
-  posY = Math.round(Math.random()*40)/10;
-  var theta = Math.round(Math.random() * 360);
-  robot.acceleration.x = (Math.round(Math.random()*10 - 5)/10);
-  robot.acceleration.y = (Math.round(Math.random()*10 - 5)/10);
-  $("#tar-pos-x").html(Math.round(Math.random() * 100));
-  $("#tar-pos-y").html(Math.round(Math.random() * 100));
-  $("#tar-theta").html(Math.round(Math.random() * 100));
-}
-
 /*
 LISTENERS
 */
@@ -403,9 +387,9 @@ var robotPositionListener = new ROSLIB.Topic({
 })
 
 robotPositionListener.subscribe(function(message) {
-  robot.position.x = message.pose.position.x;
-  robot.position.y = message.pose.position.y;
-  robot.position.angle = message.pose.orientation.z;
+  robot.position.x = message.pose.pose.position.x;
+  robot.position.y = message.pose.pose.position.y;
+  robot.position.angle = message.pose.pose.orientation.z;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({
