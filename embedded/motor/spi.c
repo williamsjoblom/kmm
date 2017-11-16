@@ -4,7 +4,7 @@ void spi_slave_init() {
     SPCR = _BV(SPE);
 }
 
-unsigned char spi_slave_read() {
+inline unsigned char spi_slave_read() {
     // Wait for receive.
     while (!(SPSR & _BV(SPIF)));
     return SPDR;

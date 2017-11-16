@@ -22,7 +22,14 @@
  */
 #define MOTOR0_BCK 0b00000001 // PC0
 #define MOTOR1_BCK 0b00010000 // PD4
-#define MOTOR2_BCK 0b01000000 // PD7
+#define MOTOR2_BCK 0b10000000 // PD7
+
+/**
+ * Enable pins.
+ */
+#define MOTOR0_DISABLE 0b00000001 // PB0
+#define MOTOR1_DISABLE 0b00000100 // PD0
+#define MOTOR2_DISABLE 0b00100000 // PD5
 
 /**
  * Timer interval (us).
@@ -63,17 +70,13 @@ volatile unsigned int motor2_remaining = 0;
  * Main.
  */
 int main() {
-    DDRB = 0b11001000;
-    DDRD = 0b01111111;
-    DDRC = 0b11111100;
+    DDRB = 0b00010011;
+    DDRC = 0b00111111;
+    DDRD = 0b11111110;
     
     spi_slave_init();
         
     install_timer(TIMER_INTERVAL);
-
-    set_motor_speed(0, 250);
-    set_motor_speed(1, 500);
-    set_motor_speed(2, 1000);
     
     while (1) {
 	read_packet();
@@ -126,7 +129,7 @@ ISR(TIMER1_COMPA_vect) {
     int motor0_step = 0;
     int motor1_step = 0;
     int motor2_step = 0;
-    
+
     if (motor0_ticks != UINT_MAX) {
 	motor0_remaining--;
 	if (motor0_remaining == 0) {
