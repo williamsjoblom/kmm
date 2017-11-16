@@ -17,6 +17,51 @@ var pxPerMeter = 120;
 var isDragging = false;
 var prevDragPos = { x: 0, y: 0 };
 
+var robot = {
+  position: {
+    x: 0,
+    y: 0,
+    angle: 0
+  },
+  velocity: {
+    x: 0,
+    y: 0,
+    w: 0
+  },
+  wheelVelocities: [0, 0, 0],
+  acceleration: {
+    x: 0,
+    y: 0,
+    angle: 0
+  }
+};
+
+setInterval(updateDom, 100);
+
+function updateDom() {
+  //Position
+  $("#pos-x").html(decimal(robot.position.x, 1) + " m/s");
+  $("#pos-y").html(decimal(robot.position.y, 1) + " m/s");
+  $("#theta").html(decimal(robot.position.angle, 1) + " m/s");
+  //Velocity
+  $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
+  $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
+  $("#vel-w").html(decimal(robot.velocity.w, 1) + " rad/s");
+  //Wheel velocity
+  $("#w-vel-1").html(decimal(robot.wheelVelocities[0], 1) + " rad/s");
+  $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 1) + " rad/s");
+  $("#w-vel-3").html(decimal(robot.wheelVelocities[2], 1) + " rad/s");
+  //Acceleration
+  $("#acc-x").html(decimal(robot.acceleration.x, 1) + " m/s");
+  $("#acc-y").html(decimal(robot.acceleration.y, 1) + " m/s");
+  $("#acc-w").html(decimal(robot.acceleration.angle, 1) + " rad/s");
+}
+
+//Rounds to given decimal
+function decimal(val, dec){
+  return Math.round(val*Math.pow(10, dec))/Math.pow(10, dec);
+}
+
 /* * * * * * * * */
 
 /* SETS UP ROS */
@@ -131,58 +176,32 @@ function clearScreen() {
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
-var wallPositionsListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/wall_positions',
-  messageType: 'kmm_mapping/wall_positions'
-});
-
-var horizontalWall;
-var horizontalWalls = [];
-var verticalWall;
-var verticalWalls = [];
-
-/* Listener that listens to the /wall_positions topic. */
-wallPositionsListener.subscribe(function(message) {
-  console.log('Received message on ' + wallPositionsListener.name);
-  horizontalWalls = [];
-  verticalWalls = [];
-  for (var i = 0; i < message.horizontal_walls.length; i++) {
-    horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
-      'col': message.horizontal_walls[i].y})
-    horizontalWalls.push(horizontalWall);
-  };
-  console.log(horizontalWall);
-  for (var i = 0; i < message.vertical_walls.length; i++) {
-    verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
-      'col': message.vertical_walls[i].y})
-    verticalWalls.push(verticalWall);
-  };
-});
-
-var laserScan = [];
-
-var laserScanListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/scan',
-  messageType: 'sensor_msgs/LaserScan'
-});
-
-/* Listener that listens to the /wall_positions topic. */
-laserScanListener.subscribe(function(message) {
-  console.log('Received message on ' + laserScanListener.name);
-  laserScan = message.ranges;
-});
+function drawGlobalFrame() {
+  ctx.lineWidth = 0.03;
+  // Draw x axis in red
+  ctx.strokeStyle = "#FF0000";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0.6, 0);
+  ctx.stroke();
+  // Draw y axis in green
+  ctx.strokeStyle = "#00FF00";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, 0.6);
+  ctx.stroke();
+}
 
 function drawLaserScan(laserScan) {
   ctx.save();
+  //ctx.translate(posX, posY); //Uncomment to have laser data drawn at robot pos.
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
   for (var i = 0; i < 360; i++) {
     ctx.rotate(Math.PI/180);
     if (laserScan[i] > 0.1) {
-      ctx.fillRect(laserScan[i] + rectHeight/2, rectWidth/2, rectWidth, rectHeight);
+      ctx.fillRect(laserScan[i] + (rectHeight/2), (rectWidth/2), rectWidth, rectHeight);
     };
   }
   ctx.restore();
@@ -272,12 +291,8 @@ function drawRobot() {
   ctx.fillRect(posX - sideLength / 2, posY - sideLength / 2, sideLength, sideLength);
 }
 
-function drawAcceleration(){
+function drawArrow(fromx, fromy, tox, toy){
   var headlen = 0.1;   // length of head in pixels
-  var fromx = posX; //Number($("#pos-x").html());
-  var fromy = posY; //Number($("#pos-y").html());
-  var tox = fromx + Number($("#acc-x").html());
-  var toy = fromy + Number($("#acc-y").html());
   var angle = Math.atan2(toy-fromy,tox-fromx);
 
   ctx.strokeStyle = "#000000";
@@ -299,24 +314,13 @@ function drawAcceleration(){
   ctx.stroke();
 }
 
-var posX = 0;
-var posY = 0;
+function drawAcceleration(){
+  var fromx = robot.position.x; //Number($("#pos-x").html());
+  var fromy = robot.position.y; //Number($("#pos-y").html());
+  var tox = fromx + robot.acceleration.x;
+  var toy = fromy + robot.acceleration.y;
 
-function randomData() {
-  posX = Math.round(Math.random()*40)/10;
-  posY = Math.round(Math.random()*40)/10;
-  var theta = Math.round(Math.random() * 360);
-  $("#pos-x").html(posX.toString());
-  $("#pos-y").html(posY.toString());
-  $("#theta").html(theta.toString());
-  $("#acc-x").html(Math.round(Math.random()*10 - 5)/10);
-  $("#acc-y").html(Math.round(Math.random()*10 - 5)/10);
-  $("#tar-pos-x").html(Math.round(Math.random() * 100));
-  $("#tar-pos-y").html(Math.round(Math.random() * 100));
-  $("#tar-theta").html(Math.round(Math.random() * 100));
-  $("#w-vel-1").html(Math.round(Math.random() * 100) + " m/s");
-  $("#w-vel-2").html(Math.round(Math.random() * 100) + " m/s");
-  $("#w-vel-3").html(Math.round(Math.random() * 100) + " m/s");
+  drawArrow(fromx, fromy, tox, toy);
 }
 
 // Toggle view state of map between global and local.
@@ -373,3 +377,100 @@ function zoomIn() {
 function zoomOut() {
   view.zoom *= 0.8;
 }
+
+var posX = 0;
+var posY = 0;
+
+function randomData() {
+  posX = Math.round(Math.random()*40)/10;
+  posY = Math.round(Math.random()*40)/10;
+  var theta = Math.round(Math.random() * 360);
+  robot.acceleration.x = (Math.round(Math.random()*10 - 5)/10);
+  robot.acceleration.y = (Math.round(Math.random()*10 - 5)/10);
+  $("#tar-pos-x").html(Math.round(Math.random() * 100));
+  $("#tar-pos-y").html(Math.round(Math.random() * 100));
+  $("#tar-theta").html(Math.round(Math.random() * 100));
+}
+
+/*
+LISTENERS
+*/
+
+var robotPositionListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/position',
+  messageType: 'geometry_msgs/PoseWithCovarianceStamped'
+})
+
+robotPositionListener.subscribe(function(message) {
+  robot.position.x = message.pose.position.x;
+  robot.position.y = message.pose.position.y;
+  robot.position.angle = message.pose.orientation.z;
+});
+
+var robotVelocityListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/cmd_vel',
+  messageType: 'geometry_msgs/Twist'
+})
+
+robotVelocityListener.subscribe(function(message) {
+  robot.velocity.x = message.linear.x;
+  robot.velocity.y = message.linear.y;
+  robot.velocity.w = message.angular.z;
+});
+
+var wheelVelocityListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wheel_velocities',
+  messageType: 'kmm_drivers/WheelVelocities'
+});
+
+wheelVelocityListener.subscribe(function(message) {
+  robot.wheelVelocities[0] = message.wheel_0;
+  robot.wheelVelocities[1] = message.wheel_1;
+  robot.wheelVelocities[2] = message.wheel_2;
+});
+
+var wallPositionsListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/wall_positions',
+  messageType: 'kmm_mapping/wall_positions'
+});
+
+var horizontalWall;
+var horizontalWalls = [];
+var verticalWall;
+var verticalWalls = [];
+
+/* Listener that listens to the /wall_positions topic. */
+wallPositionsListener.subscribe(function(message) {
+  console.log('Received message on ' + wallPositionsListener.name);
+  horizontalWalls = [];
+  verticalWalls = [];
+  for (var i = 0; i < message.horizontal_walls.length; i++) {
+    horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
+      'col': message.horizontal_walls[i].y})
+    horizontalWalls.push(horizontalWall);
+  };
+  console.log(horizontalWall);
+  for (var i = 0; i < message.vertical_walls.length; i++) {
+    verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
+      'col': message.vertical_walls[i].y})
+    verticalWalls.push(verticalWall);
+  };
+});
+
+var laserScan = [];
+
+var laserScanListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/scan',
+  messageType: 'sensor_msgs/LaserScan'
+});
+
+/* Listener that listens to the /wall_positions topic. */
+laserScanListener.subscribe(function(message) {
+  console.log('Received message on ' + laserScanListener.name);
+  laserScan = message.ranges;
+});

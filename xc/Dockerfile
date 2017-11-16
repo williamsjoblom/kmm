@@ -2,7 +2,6 @@
 # generated from docker_images/create_ros_core_image.Dockerfile.em
 FROM osrf/ubuntu_armhf:xenial
 
-
 # install packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     dirmngr \
@@ -43,6 +42,8 @@ RUN apt-get install -y python-rosinstall python-rosinstall-generator python-wsto
 
 # setup entrypoint
 COPY ./entrypoint.sh /
+
+RUN mkdir -p /home/pi/
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["bash"]

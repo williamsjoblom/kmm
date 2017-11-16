@@ -1,6 +1,9 @@
 #include "kmm_position/Pose.h"
 #include <cmath>
 #include <assert.h>
+#include <ros/ros.h>
+
+Pose::Pose() : pos(0, 0), angle(0) { };
 
 Pose::Pose(float x, float y, float angle) : pos(x, y), angle(angle) { };
 
