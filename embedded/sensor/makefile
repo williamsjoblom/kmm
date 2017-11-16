@@ -18,7 +18,7 @@ prog:
 
 clean:
 	rm -f *.o
-	rm sensor.hex stepper
+	rm sensor.hex sensor
 
 
 .PHONY: all build prog clean test
