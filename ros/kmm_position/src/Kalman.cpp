@@ -1,35 +1,70 @@
 #include <iostream>
 #include <stdexcept>
-
 #include "kmm_position/Kalman.h"
 
-KalmanFilter::KalmanFilter() {
-    dt_ << 0, 0, 0;
-    output_ << 0, 0, 0;
-    processNoiseCov_ << .05, .05, .0, .05, .05, .0, .0, .0, .0;
-    measurementNoiseCov_ << 5;
-    estErrorCov_ << .1, .1, .1, .1, 10000, 10, .1, 10, 100;
+namespace kmm_position {
+
+  const double pi = 3.1415926535897;
+
+  Kalman::Kalman(float x, float y, float angle)
+    : state_(x, y, angle)
+  {
     I_.setIdentity();
-}
 
-void KalmanFilter::init(const Eigen::Vector3f& x0) {
-    x_hat_ = x0;
-}
+    set_state_cov(0.2, 20 * pi / 180);
+    set_predict_noise(0.02, 0.01);
+    set_lidar_noise(1, 5 * pi / 180);
 
-void KalmanFilter::init() {
-    x_hat_.setZero();
-}
+    predict_ts_ = ros::Time::now();
+    lidar_measurement_ts_ = ros::Time::now();
+    accel_gyro_measurement_ts_ = ros::Time::now();
+  }
 
-void KalmanFilter::predict(const Eigen::Vector3f& u) {
-    ros::Duration dt = ros::Time::now() - predict_ts_;
-    dt_ << 1 , 1, 1;
-    x_hat_new_ = x_hat_ + dt_ * u;
-    estErrorCov_ = estErrorCov_ + processNoiseCov_;
-}
+  void Kalman::set_cov(Eigen::Matrix3f& cov, float linear, float angular) {
+    float l = linear * linear;
+    float a = angular * angular;
+    cov <<
+      l, 0, 0,
+      0, l, 0,
+      0, 0, a;
+  }
 
-void KalmanFilter::updateWithLaser(const Eigen::Matrix3f y) {
-    K_ = estErrorCov_*(estErrorCov_ + measurementNoiseCov_).inverse();
-    x_hat_new_ = K_ * (y - output_*x_hat_new_);
-    estErrorCov_ = (I_ - K_*output_)*estErrorCov_;
-    x_hat_ = x_hat_new_;
+  void Kalman::set_state_cov(float linear, float angular) {
+    set_cov(state_cov_, linear, angular);
+  }
+
+  void Kalman::set_predict_noise(float linear, float angular) {
+    set_cov(predict_noise_, linear, angular);
+  }
+
+
+  void Kalman::set_lidar_noise(float linear, float angular) {
+    set_cov(lidar_noise_, linear, angular);
+  }
+
+  void Kalman::predict(const Eigen::Vector3f& u) {
+      float dt = (ros::Time::now() - predict_ts_).toSec();
+      predict_ts_ = ros::Time::now();
+      state_ += dt * u;
+      state_cov_ += predict_noise_;
+  }
+
+  void Kalman::lidar_measurement(const Eigen::Vector3f y) {
+      Eigen::Matrix3f K = state_cov_ * (state_cov_ + lidar_noise_).inverse();
+      state_ += K * y;
+      state_cov_ *= (I_ - K);
+  }
+
+  void Kalman::accel_gyro_measurement(const Eigen::Vector3f y) {
+
+  }
+
+  Eigen::Vector3f Kalman::get_state() {
+    return state_;
+  }
+
+  Eigen::Matrix3f Kalman::get_state_cov() {
+    return state_cov_;
+  }
+
 }

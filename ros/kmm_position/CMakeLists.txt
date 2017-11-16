@@ -129,6 +129,7 @@ add_executable(kmm_position_node
   src/Position.cpp
   src/ils.cpp
   src/Pose.cpp
+  src/Kalman.cpp
 )
 
 add_dependencies(kmm_position_node

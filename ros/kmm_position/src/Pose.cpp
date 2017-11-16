@@ -43,7 +43,7 @@ void Pose::accumulate(const Pose &pose)
     pos[1] = y;
     angle += pose.angle;
     while (angle >= M_PI) angle -= 2.0 * M_PI;
-    while (angle <  M_PI) angle += 2.0 * M_PI;
+    while (angle < -M_PI) angle += 2.0 * M_PI;
 }
 
 void Pose::invert() {
@@ -51,7 +51,7 @@ void Pose::invert() {
   pos[1] *= -1;
   angle *= -1;
   while (angle >= M_PI) angle -= 2.0 * M_PI;
-  while (angle <  M_PI) angle += 2.0 * M_PI;
+  while (angle < -M_PI) angle += 2.0 * M_PI;
 }
 
 /**

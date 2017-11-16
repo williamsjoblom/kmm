@@ -3,45 +3,36 @@
 #include <Eigen/Dense>
 #include "ros/ros.h"
 
-class KalmanFilter {
+namespace kmm_position {
 
-public:
+  class Kalman {
 
-  /**
-  * Kalman filter constructor.
-  */
-  KalmanFilter();
+  public:
 
-  /**
-  * Initialize the filter with initial states as zero.
-  */
-  void init();
+    Kalman(float x, float y, float angle);
 
-  /**
-  * Initialize the filter with a guess for initial states.
-  */
-  void init(const Eigen::Vector3f& x0);
+    // Predict next state based on steering signal.
+    void predict(const Eigen::Vector3f& u);
 
-  /**
-  * Update the estimated state based on measured values. The
-  * time step is assumed to remain constant.
-  */
-  void predict(const Eigen::Vector3f& u);
+    // Update the estimated state based on measured values.
+    void lidar_measurement(const Eigen::Vector3f y);
+    void accel_gyro_measurement(const Eigen::Vector3f y);
 
-  /**
-  * Update the estimated state based on measured values,
-  * using the given time step and dynamics matrix.
-  */
-  void updateWithLaser(const Eigen::Matrix3f y);
+    // Current state.
+    Eigen::Vector3f get_state();
+    Eigen::Matrix3f get_state_cov();
 
-  /**
-  * Return the current state.
-  */
-  Eigen::Vector3f getState() { return x_hat_; };
+    // Configure noise.
+    void set_predict_noise(float linear, float angular);
+    void set_lidar_noise(float linear, float angular);
 
-private:
-  Eigen::MatrixXd processNoiseCov_, measurementNoiseCov_, estErrorCov_, K_, estErrorCovInit_;
-  Eigen::MatrixXd I_;
-  Eigen::Vector3f dt_, output_, x_hat_, x_hat_new_;
-  ros::Time predict_ts_;
-};
+  private:
+    void set_state_cov(float linear, float angular);
+    void set_cov(Eigen::Matrix3f& cov, float linear, float angular);
+
+    Eigen::Vector3f state_;
+    Eigen::Matrix3f state_cov_, predict_noise_, lidar_noise_, I_;
+    ros::Time predict_ts_, lidar_measurement_ts_, accel_gyro_measurement_ts_;
+  };
+
+}

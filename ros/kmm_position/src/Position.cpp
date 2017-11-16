@@ -7,7 +7,7 @@ namespace kmm_position {
 
   Position::Position(ros::NodeHandle nh)
   : nh_(nh),
-    lidar_measurement_(0.2, 0.2, 0)
+    kalman_(0.2, 0.2, 0)
   {
     // Publishers
     aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
@@ -28,7 +28,11 @@ namespace kmm_position {
   }
 
   void Position::cmd_vel_callback(geometry_msgs::Twist msg) {
-    //ROS_INFO("%f", msg.linear.x);
+    Eigen::Vector3f state = kalman_.get_state();
+    Eigen::Vector3f u(msg.linear.x, msg.linear.y, msg.angular.z * 0.85); // TODO:: Compensate elsewhere
+    Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(state[2], Eigen::Vector3f(0, 0, 1)));
+    u = t * u; // Rotate into global frame.
+    kalman_.predict(u);
   }
 
   void Position::laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg) {
@@ -43,18 +47,26 @@ namespace kmm_position {
        return;
      }
 
+    Eigen::Vector3f state = kalman_.get_state();
+    Eigen::Vector2f pos(state[0], state[1]);
+
     // Create list of Eigen vectors.
     std::vector<Eigen::Vector2f> scan;
-    scan.resize(cloud.points.size());
     for (int i = 0; i < cloud.points.size(); i++) {
       float x = cloud.points[i].x;
       float y = cloud.points[i].y;
-      scan[i] = Eigen::Vector2f(x, y);
+      Eigen::Vector2f p(x, y);
+      if ((p - pos).norm() < 2) {
+        scan.push_back(p);
+      }
     }
 
     std::vector<Eigen::Vector2f> aligned;
     Pose result = get_transform_pose(scan, aligned, 5);
-    lidar_measurement_.accumulate(result);
+    state[0] = result.pos[0];
+    state[1] = result.pos[1];
+    state[2] = result.angle;
+    kalman_.lidar_measurement(state);
     publish_aligned_scan(aligned);
   }
 
@@ -73,10 +85,13 @@ namespace kmm_position {
   }
 
   void Position::broadcast_position(const ros::TimerEvent&) {
-    ROS_INFO("angle %f", lidar_measurement_.angle);
-    tf::Vector3 position(lidar_measurement_.pos[0], lidar_measurement_.pos[1], 0);
+    Eigen::Vector3f state = kalman_.get_state();
+    Eigen::Matrix3f state_cov = kalman_.get_state_cov();
+    ROS_INFO("angle %f", state[2]);
+
+    tf::Vector3 position(state[0], state[1], 0);
     tf::Quaternion orientation;
-    orientation.setEuler(0, 0, lidar_measurement_.angle);
+    orientation.setEuler(0, 0, state[2]);
     tf_broadcaster_.sendTransform(
       tf::StampedTransform(
         tf::Transform(orientation, position),
@@ -84,9 +99,21 @@ namespace kmm_position {
 
     geometry_msgs::PoseWithCovarianceStamped msg;
     msg.header.frame_id = "map";
-    msg.pose.pose.position.x = lidar_measurement_.pos[0];
-    msg.pose.pose.position.y= lidar_measurement_.pos[1];
-    msg.pose.pose.orientation.z = lidar_measurement_.angle;
+    msg.pose.pose.position.x = state[0];
+    msg.pose.pose.position.y= state[1];
+    msg.pose.pose.orientation.x = orientation.x();
+    msg.pose.pose.orientation.y = orientation.y();
+    msg.pose.pose.orientation.z = orientation.z();
+    msg.pose.pose.orientation.w = orientation.w();
+    msg.pose.covariance[0] = state_cov(0,0);
+    msg.pose.covariance[1] = state_cov(0,1);
+    msg.pose.covariance[5] = state_cov(0,2);
+    msg.pose.covariance[6] = state_cov(1,0);
+    msg.pose.covariance[7] = state_cov(1,1);
+    msg.pose.covariance[11] = state_cov(1,2);
+    msg.pose.covariance[30] = state_cov(2,0);
+    msg.pose.covariance[31] = state_cov(2,1);
+    msg.pose.covariance[35] = state_cov(2,2);
     position_pub_.publish(msg);
   }
 

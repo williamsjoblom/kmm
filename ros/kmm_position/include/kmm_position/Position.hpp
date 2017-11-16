@@ -9,6 +9,7 @@
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
 #include "laser_geometry/laser_geometry.h"
+#include "kmm_position/Kalman.h"
 
 namespace kmm_position {
 
@@ -38,8 +39,8 @@ private:
   ros::Publisher position_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
 
-  // Position values
-  Pose lidar_measurement_;
+  // State estimation
+  Kalman kalman_;
 
 };
 

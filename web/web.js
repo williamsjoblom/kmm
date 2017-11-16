@@ -162,8 +162,9 @@ function render() {
   drawGlobalFrame();
   drawRobot();
   updateView();
-  drawAcceleration();
-  drawLaserScan(laserScan);
+  //drawAcceleration();
+  drawVelocity();
+  //drawLaserScan(laserScan);
 
   ctx.restore();
 }
@@ -192,7 +193,7 @@ function drawGlobalFrame() {
 function drawLaserScan(laserScan) {
   ctx.save();
   ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-  ctx.rotate(robot.position.angle + Math.PI);
+  ctx.rotate(robot.position.angle - Math.PI);
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
@@ -313,10 +314,19 @@ function drawArrow(fromx, fromy, tox, toy){
 }
 
 function drawAcceleration(){
-  var fromx = robot.position.x; //Number($("#pos-x").html());
-  var fromy = robot.position.y; //Number($("#pos-y").html());
+  var fromx = robot.position.x;
+  var fromy = robot.position.y;
   var tox = fromx + robot.acceleration.x;
   var toy = fromy + robot.acceleration.y;
+
+  drawArrow(fromx, fromy, tox, toy);
+}
+
+function drawVelocity(){
+  var fromx = robot.position.x;
+  var fromy = robot.position.y;
+  var tox = fromx + robot.velocity.x * 2;
+  var toy = fromy + robot.velocity.y * 2;
 
   drawArrow(fromx, fromy, tox, toy);
 }
