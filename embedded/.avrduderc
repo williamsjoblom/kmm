@@ -1,0 +1,24 @@
+##############################################
+# Linux GPIO configuration for avrdude.
+##############################################
+# SPI0
+programmer
+	id    = "pi_0";
+      	desc  = "Use the Linux sysfs interface to bitbang SPI0 GPIO lines";
+      	type  = "linuxgpio";
+      	reset = 29;
+      	sck   = 23;
+      	mosi  = 19;
+      	miso  = 21;
+;
+
+# SPI1
+programmer
+	id    = "pi_1";
+      	desc  = "Use the Linux sysfs interface to bitbang SPI1 GPIO lines";
+      	type  = "linuxgpio";
+      	reset = 31;
+      	sck   = 40;
+      	mosi  = 38;
+      	miso  = 35;
+;

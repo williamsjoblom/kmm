@@ -16,6 +16,9 @@ stepper: $(OBJ)
 prog:
 	avrdude -c atmelice_isp -p atmega328p -U flash:w:sensor.hex -U lfuse:w:0xe0:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m
 
+deploy: sensor.hex
+	avrdeploy 0 sensor.hex
+
 clean:
 	rm -f *.o
 	rm sensor.hex sensor

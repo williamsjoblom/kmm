@@ -36,6 +36,9 @@ mkdir ~/catkin_ws_arm
 echo "export CATKIN_WS=\"/home/$USER/catkin_ws/\"" >> ~/.xcenv
 echo "export CATKIN_WS_ARM=\"/home/$USER/catkin_ws_arm/\"" >> ~/.xcenv
 
+cd ~/catkin_ws/src/kmm/xc
+chmod +x xc.bash
+
 sudo ln -s /home/$USER/catkin_ws/src/kmm/xc/xc.bash /usr/local/bin/xc
 ```
 
