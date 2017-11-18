@@ -74,6 +74,7 @@ generate_messages(
  DEPENDENCIES
  geometry_msgs
  sensor_msgs
+ std_msgs
 )
 
 ################################################
@@ -107,8 +108,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
-  #  INCLUDE_DIRS include
-  #  LIBRARIES kmm_mapping
+  INCLUDE_DIRS include
+  LIBRARIES kmm_mapping
   #  DEPENDS system_lib
 )
 

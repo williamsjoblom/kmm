@@ -159,6 +159,7 @@ function render() {
 
   drawGrid();
   drawWalls();
+  drawEndPoints();
   drawGlobalFrame();
   drawRobot();
   updateView();
@@ -217,8 +218,10 @@ function setLineStyle(type) {
 }
 
 function drawGrid() {
-  var rows = 25; // 10 / 0.4
-  var cols = 52; // ((10 / 0.4) * 2) +2
+  ctx.save();
+  ctx.translate(0,0.2);
+  var rows = 26; // (10 / 0.4) + 1
+  var cols = 51; // ((10 / 0.4) * 2) + 2
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
@@ -234,6 +237,7 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
+  ctx.restore();
 }
 
 function drawWalls() {
@@ -257,6 +261,14 @@ function drawWalls() {
     ctx.moveTo(0.4*currRow, 0.4*currCol);
     ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
     ctx.stroke();
+  };
+}
+
+function drawEndPoints() {
+  ctx.fillStyle = "#FF0000";
+  var sideLength = 0.1;
+  for (var i = 0; i < endPoints.length; i++) {
+    ctx.fillRect(endPoints[i].x - sideLength / 2, endPoints[i].y - sideLength / 2, sideLength, sideLength);
   };
 }
 
@@ -336,8 +348,6 @@ function toggleViewState() {
   var $viewStateElem = $("#view-state-button");
   if ($viewStateElem.html() === "Global") {
     $viewStateElem.html("Local");
-    lastPosX = -posX;
-    lastPosY = -posY;
   } else {
     $viewStateElem.html("Global");
     view = {
@@ -350,16 +360,14 @@ function toggleViewState() {
   }
 }
 
-var lastPosX = 0;
-var lastPosY = 0;
 function updateView() {
   var $viewStateElem = $("#view-state-button");
   if ($viewStateElem.html() === "Local") {
     view = {
       zoom: view.zoom,
       pan: {
-        x: -posX * view.zoom,
-        y: -posY * view.zoom
+        x: -robot.position.x * view.zoom,
+        y: -robot.position.y * view.zoom
       }
     };
   };
@@ -369,7 +377,7 @@ function centerView() {
   var $viewStateElem = $("#view-state-button");
   if ($viewStateElem.html() === "Global") {
     view = {
-      zoom: 1,
+      zoom: view.zoom,
       pan: {
         x: 0,
         y: 0
@@ -447,11 +455,27 @@ wallPositionsListener.subscribe(function(message) {
       'col': message.horizontal_walls[i].y})
     horizontalWalls.push(horizontalWall);
   };
-  console.log(horizontalWall);
   for (var i = 0; i < message.vertical_walls.length; i++) {
     verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
       'col': message.vertical_walls[i].y})
     verticalWalls.push(verticalWall);
+  };
+});
+
+var endPointListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/end_points',
+  messageType: 'sensor_msgs/PointCloud'
+});
+
+var endPoints = [];
+
+/* Listener that listens to the /end_points topic. */
+endPointListener.subscribe(function(message) {
+  console.log('Received message on ' + endPointListener.name);
+  endPoints = [];
+  for (var i = 0; i < message.points.length; i++) {
+    endPoints.push(message.points[i]);
   };
 });
 

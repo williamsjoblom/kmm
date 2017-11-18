@@ -1,11 +1,14 @@
 #pragma once
 
 #include <ros/ros.h>
+#include <geometry_msgs/Point32.h>
 #include <sensor_msgs/PointCloud.h>
+#include "std_msgs/MultiArrayLayout.h"
+#include "std_msgs/MultiArrayDimension.h"
+#include "std_msgs/Int8MultiArray.h"
 #include "kmm_mapping/wall_positions.h"
 #include <Eigen/Dense>
 #include <iostream>
-#include <random>
 #include <vector>
 #include <math.h>
 #include <algorithm>
@@ -29,21 +32,23 @@ public:
   void mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col, int cnt);
   void reset_wall_point_counts();
-  std::vector<WallPointCount> increment_wall_point_count(
-    std::vector<WallPointCount> wall_point_counts,
+  void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
     bool horizontal, int row, int col);
-  int random(const int a, const int b);
-
+  void update_end_points(int row, int col, bool horizontal);
 
 private:
   ros::NodeHandle nh_;
   // Subscribers
   ros::Subscriber mapping_sub_;
   // Publishers
-  ros::Publisher mapping_pub_;
+  ros::Publisher mapping_wall_pos_pub_;
+  ros::Publisher mapping_wall_arr_pub_;
+  ros::Publisher mapping_end_points_pub_;
 
   // Message variables
   kmm_mapping::wall_positions wall_positions_msg_;
+  std_msgs::Int8MultiArray wall_arr_msg_;
+  sensor_msgs::PointCloud end_points_msg_;
   int msg_cnt_;
 
   // Wall point counts
@@ -52,6 +57,12 @@ private:
   int pnt_cnt_req_ = 7;
   int times_req_ = 5;
 
+  // Wall array
+  int w_; // Grid width
+  int offset_; // Used for wall_arr index calcs
+
+  // End points
+  std::vector<Eigen::Vector2f> end_points_;
 };
 
 }
