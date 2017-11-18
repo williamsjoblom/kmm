@@ -149,6 +149,7 @@ namespace kmm_mapping {
   }
 
   void Mapping::update_end_points(int row, int col, bool horizontal) {
+    // Calculate the two end points associated with wall.
     float x_1;
     float y_1;
     float x_2;
@@ -156,41 +157,48 @@ namespace kmm_mapping {
     if (horizontal) {
       x_1 = row * 0.4;
       y_1 = (col - 1*(col >= 1 ? 1 : 0)) * 0.4;
-
-      x_2 = row * 0.4;
+      x_2 = x_1;
       y_2 = y_1 + 0.4;
     } else {
       x_1 = (row - 1) * 0.4;
       y_1 = col * 0.4;
-
-      x_2 = row * 0.4;
-      y_2 = col * 0.4;
+      x_2 = x_1 + 0.4;
+      y_2 = y_1;
     };
-
+    // Determine if end points in list equal any of the two new end points.
     bool found_end_point_1 = false;
     bool found_end_point_2 = false;
-    for (auto it = end_points_.begin(); it != end_points_.end(); ) {
-      if ((*it).x() == x_1 && (*it).y() == y_1) {
-        it = end_points_.erase(it++);
+    float eps = 0.000001;
+    for (auto it = end_points_.begin(); it < end_points_.end(); ) {
+      float diff_x_1 = fabs((*it).x() - x_1);
+      float diff_y_1 = fabs((*it).y() - y_1);
+      bool end_point_1_equal = (diff_x_1 < eps) && (diff_y_1 < eps);
+      float diff_x_2 = fabs((*it).x() - x_2);
+      float diff_y_2 = fabs((*it).y() - y_2);
+      bool end_point_2_equal = (diff_x_2 < eps) && (diff_y_2 < eps);
+      // Remove end point from list if we found a match
+      if (end_point_1_equal) {
+        it = end_points_.erase(it);
         found_end_point_1 = true;
-      } else if ((*it).x() == x_2 && (*it).y() == y_2) {
-        it = end_points_.erase(it++);
+      } else if (end_point_2_equal) {
+        it = end_points_.erase(it);
         found_end_point_2 = true;
       } else {
-        ++it;
+        it++;
       };
     };
+    // Add end points to list if we didn't find a match.
     if (!found_end_point_1) {
-      Eigen::Vector2f end_point;
-      end_point[0] = x_1;
-      end_point[1] = y_1;
-      end_points_.push_back(end_point);
+      Eigen::Vector2f end_point_1;
+      end_point_1[0] = x_1;
+      end_point_1[1] = y_1;
+      end_points_.push_back(end_point_1);
     };
     if (!found_end_point_2) {
-      Eigen::Vector2f end_point;
-      end_point[0] = x_2;
-      end_point[1] = y_2;
-      end_points_.push_back(end_point);
+      Eigen::Vector2f end_point_2;
+      end_point_2[0] = x_2;
+      end_point_2[1] = y_2;
+      end_points_.push_back(end_point_2);
     };
   }
 }
