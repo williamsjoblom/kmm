@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <script src="jquery.min.js"></script>
+    <script src="roslib.js"></script>
     <link href="web.css" rel="stylesheet">
   </head>
   <body>
@@ -61,6 +62,35 @@
 
         <tr>
           <td colspan="6">
+            <center>Velocity</center>
+          </td>
+        </tr>
+        <tr>
+          <td>X:</td>
+          <td id="vel-x"></td>
+          <td>Y:</td>
+          <td id="vel-y"></td>
+          <td>W:</td>
+          <td id="vel-w"></td>
+        </tr>
+
+        <tr>
+          <td colspan="6">
+            <center>Acceleration</center>
+          </td>
+        </tr>
+
+        <tr>
+          <td>AccX:</td>
+          <td id="acc-x"></td>
+          <td>AccY:</td>
+          <td id="acc-y"></td>
+          <td>AccW:</td>
+          <td id="acc-w"></td>
+        </tr>
+
+        <tr>
+          <td colspan="6">
             <center>Target Position</center>
           </td>
         </tr>
@@ -90,5 +120,6 @@
     </div>
 
     <script src="web.js"></script>
+    <script src="gamepad.js"></script>
   </body>
 </html>

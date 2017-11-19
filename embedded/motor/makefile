@@ -11,13 +11,17 @@ stepper: $(OBJ)
 	avr-gcc -mmcu=atmega328p $(OBJ) -o $@
 
 %.o: %.c
-	avr-gcc -Os -DF_CPU=16000000 -std=gnu99 -mmcu=atmega328p -c $< -o $@
+	avr-gcc -Os -DF_CPU=16000000 -fgnu89-inline -std=gnu99 -mmcu=atmega328p -c $< -o $@
 
-prog:
-	avrdude -v -p atmega328p -c arduino -P /dev/ttyUSB0 -b 57600 -D -U flash:w:stepper.hex:i
+prog: stepper.hex
+	avrdude -c atmelice_isp -p atmega328p -U flash:w:stepper.hex -U lfuse:w:0xe0:m -U hfuse:w:0xd9:m -U efuse:w:0xff:m
+
+deploy: stepper.hex
+	avrdeploy 1 stepper.hex
 
 clean:
 	rm -f *.o
 	rm stepper.hex stepper
 
-.PHONY: all build prog clean
+
+.PHONY: all build prog clean test

@@ -7,21 +7,29 @@
 #include "timer.h"
 #include "serial.h"
 #include "packet.h"
+#include "spi.h"
 
 
 /**
  * Step pins.
  */
-#define MOTOR0_STP 0b00000001
-#define MOTOR1_STP 0b00000010
-#define MOTOR2_STP 0b00000100
+#define MOTOR0_STP 0b00000010 // PB1
+#define MOTOR1_STP 0b00001000 // PD3
+#define MOTOR2_STP 0b01000000 // PD6
 
 /**
  * Direction pins.
  */
-#define MOTOR0_BCK 0b00001000
-#define MOTOR1_BCK 0b00010000
-#define MOTOR2_BCK 0b00100000
+#define MOTOR0_BCK 0b00000001 // PC0
+#define MOTOR1_BCK 0b00010000 // PD4
+#define MOTOR2_BCK 0b10000000 // PD7
+
+/**
+ * Enable pins.
+ */
+#define MOTOR0_DISABLE 0b00000001 // PB0
+#define MOTOR1_DISABLE 0b00000100 // PD0
+#define MOTOR2_DISABLE 0b00100000 // PD5
 
 /**
  * Timer interval (us).
@@ -62,17 +70,18 @@ volatile unsigned int motor2_remaining = 0;
  * Main.
  */
 int main() {
-    // Set PORTB as output.
-    DDRB = 0xFF;
-
-    serial_init();
+    DDRB = 0b00010011;
+    DDRC = 0b00111111;
+    DDRD = 0b11111110;
     
-    install_timer(TIMER_INTERVAL);
+    spi_slave_init();
         
+    install_timer(TIMER_INTERVAL);
+    
     while (1) {
 	read_packet();
     }
-    
+
     return 1;
 }
 
@@ -120,7 +129,7 @@ ISR(TIMER1_COMPA_vect) {
     int motor0_step = 0;
     int motor1_step = 0;
     int motor2_step = 0;
-    
+
     if (motor0_ticks != UINT_MAX) {
 	motor0_remaining--;
 	if (motor0_remaining == 0) {
@@ -145,7 +154,22 @@ ISR(TIMER1_COMPA_vect) {
 	}
     }
 
-    PORTB = direction | motor2_step | motor1_step | motor0_step;
+    PORTB =
+	0b00000000 /* ENABLE MOTOR0 */ | motor0_step;
+    PORTC =
+	motor0_direction;
+    
+    PORTD =
+	0b00000000 /* ENABLE MOTOR1 */ | motor1_step | motor1_direction |
+	0b00000000 /* ENABLE MOTOR2 */ | motor2_step | motor2_direction;
+    
+    
     for (int i = 0; i < 20; i++) { asm("nop"); }
-    PORTB = direction;
+
+    
+    PORTB = 0b00000000 /* ENABLE MOTOR0 */;
+    
+    PORTD =
+	0b00000000 /* ENABLE MOTOR1 */ | motor1_direction |
+	0b00000000 /* ENABLE MOTOR2 */ | motor2_direction;
 }

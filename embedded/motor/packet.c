@@ -1,4 +1,5 @@
 
+#include "spi.h"
 #include "serial.h"
 #include "packet.h"
 #include "main.h"
@@ -24,7 +25,7 @@ struct packet read_packet() {
     struct packet p;
     
     for (unsigned int i = 0; i < sizeof(struct packet); i++) {
-	*((unsigned char*) ((void*) &p + i)) = serial_read();
+	*((unsigned char*) ((void*) &p + i)) = spi_slave_read();
     }
 
     if (verify_packet(&p)) {
