@@ -87,7 +87,6 @@ namespace kmm_position {
   void Position::broadcast_position(const ros::TimerEvent&) {
     Eigen::Vector3f state = kalman_.get_state();
     Eigen::Matrix3f state_cov = kalman_.get_state_cov();
-    ROS_INFO("angle %f", state[2]);
 
     tf::Vector3 position(state[0], state[1], 0);
     tf::Quaternion orientation;
@@ -116,5 +115,4 @@ namespace kmm_position {
     msg.pose.covariance[35] = state_cov(2,2);
     position_pub_.publish(msg);
   }
-
 }

@@ -1,5 +1,4 @@
 #include "kmm_mapping/Mapping.hpp"
-#include "geometry_msgs/Point.h"
 
 namespace kmm_mapping {
 
@@ -13,14 +12,15 @@ namespace kmm_mapping {
     // Subscribers
     mapping_sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
 
-    // Initialize wall array with 0's.
-		wall_arr_msg_.data.clear();
-		for (int i = 0; i < 5459; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
-			wall_arr_msg_.data.push_back(0);
+    // Initialize wall vector with 0's
+		for (int i = 0; i < 1500; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
+			wall_vec_.push_back(0);
     };
-
-    w_ = 51;
-    offset_ = (w_ - 1) / 2;
+    // Set dimensions of wall array in message
+    wall_arr_msg_.layout.dim.push_back(std_msgs::MultiArrayDimension());
+    wall_arr_msg_.layout.dim[0].size = wall_vec_.size();
+    wall_arr_msg_.layout.dim[0].stride = 1;
+    wall_arr_msg_.layout.dim[0].label = "x";
   }
 
   Mapping::~Mapping() {
@@ -30,7 +30,6 @@ namespace kmm_mapping {
    * Finally publishes the walls that have enough collisions.
    */
   void Mapping::mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg) {
-    ROS_INFO("wall_positions_node recieved a message from /aligned_scan");
     std::vector<Eigen::Vector2f> wall_points;
     for (const auto p : msg->points) {
       Eigen::Vector2f point;
@@ -38,7 +37,6 @@ namespace kmm_mapping {
       point[1] = p.y;
       wall_points.push_back(point);
     };
-
     // Iterate through wall points.
     for (int i = 0; i < wall_points.size(); i++) {
       float x = wall_points[i].x();
@@ -61,20 +59,11 @@ namespace kmm_mapping {
           x, y, std::remainder(std::fabs(x), 0.4),std::remainder(std::fabs(y), 0.4));
       };
     };
-    wall_positions_msg_.cnt = msg_cnt_;
-    ROS_INFO("wall_positions_node publishing message %d", wall_positions_msg_.cnt);
-    mapping_wall_pos_pub_.publish(wall_positions_msg_);
-    mapping_wall_arr_pub_.publish(wall_arr_msg_);
-    end_points_msg_.points.clear();
-    for (int i = 0; i < end_points_.size(); i++) {
-      geometry_msgs::Point32 point;
-      point.x = end_points_[i].x();
-      point.y = end_points_[i].y();
-      point.z = 0;
-      end_points_msg_.points.push_back(point);
-    };
-    mapping_end_points_pub_.publish(end_points_msg_);
-    ++msg_cnt_;
+    // Publish
+    publish_wall_positions();
+    publish_wall_array();
+    publish_end_points();
+
     reset_wall_point_counts();
 
     return;
@@ -82,9 +71,7 @@ namespace kmm_mapping {
 
   /* Create new WallPointCount object with given parameters*/
   WallPointCount Mapping::make_wall_point_count(int row, int col, int cnt) {
-    Eigen::Vector2f pos;
-    pos[0] = row;
-    pos[1] = col;
+    Eigen::Vector2f pos(row, col);
     WallPointCount wall_point_count;
     wall_point_count.position = pos;
     wall_point_count.pnt_cnt = cnt;
@@ -114,7 +101,7 @@ namespace kmm_mapping {
     int existing_wall_row;
     int existing_wall_col;
     for (std::vector<WallPointCount>::iterator it = wall_point_counts.begin();
-    it != wall_point_counts.end(); it++) {
+        it != wall_point_counts.end(); it++) {
       existing_wall_row = (*it).position[0];
       existing_wall_col = (*it).position[1];
       if ((existing_wall_row == row) && (existing_wall_col == col)) {
@@ -123,29 +110,32 @@ namespace kmm_mapping {
           (*it).times++;
           if ((*it).times == times_req_) {
             (*it).published = true;
-            geometry_msgs::Point wall;
-            wall.x = row;
-            wall.y = col;
-            wall.z = 0;
-            if (horizontal) {
-              ROS_INFO("Found horizontal wall!");
-              wall_positions_msg_.horizontal_walls.push_back(wall);
-              wall_arr_msg_.data[row*w_ + (w_ + 1)*row + offset_ + col] = 1;
-              update_end_points(row, col, true);
-            } else {
-              ROS_INFO("Found vertical wall!");
-              wall_positions_msg_.vertical_walls.push_back(wall);
-              wall_arr_msg_.data[row*w_ + (w_ + 1)*(row - 1) + offset_ + col + 1] = 1;
-              update_end_points(row, col, false);
-            };
+            add_wall(row, col, horizontal);
+            update_end_points(row, col, horizontal);
           };
         };
         return;
       };
     };
-    // We have to create new wall point count for (row,col). Set pnt_cnt to 1.
     wall_point_counts.push_back(make_wall_point_count(row, col, 1));
     return;
+  }
+
+  void Mapping::add_wall(int row, int col, bool horizontal) {
+    int w = 53; // Grid width
+    int offset = (w - 1) / 2;
+    geometry_msgs::Point wall;
+    wall.x = row;
+    wall.y = col;
+    wall.z = 0;
+    if (horizontal) {
+      wall_positions_msg_.horizontal_walls.push_back(wall);
+      int t = (col >= 1 ? 1 : 0);
+      wall_vec_[row*w + row*(w + 1) + offset + col - t] = 1;
+    } else {
+      wall_positions_msg_.vertical_walls.push_back(wall);
+      wall_vec_[row*w + (w + 1)*(row - 1) + offset + col] = 1;
+    };
   }
 
   void Mapping::update_end_points(int row, int col, bool horizontal) {
@@ -200,5 +190,31 @@ namespace kmm_mapping {
       end_point_2[1] = y_2;
       end_points_.push_back(end_point_2);
     };
+  }
+
+  void Mapping::publish_wall_positions() {
+    wall_positions_msg_.cnt = msg_cnt_;
+    mapping_wall_pos_pub_.publish(wall_positions_msg_);
+    ++msg_cnt_;
+  }
+
+  void Mapping::publish_wall_array() {
+    wall_arr_msg_.data.clear();
+    for (std::vector<int>::const_iterator it = wall_vec_.begin(); it != wall_vec_.end(); ++it) {
+        wall_arr_msg_.data.push_back(*it);
+    }
+    mapping_wall_arr_pub_.publish(wall_arr_msg_);
+  }
+
+  void Mapping::publish_end_points() {
+    end_points_msg_.points.clear();
+    for (int i = 0; i < end_points_.size(); i++) {
+      geometry_msgs::Point32 point;
+      point.x = end_points_[i].x();
+      point.y = end_points_[i].y();
+      point.z = 0;
+      end_points_msg_.points.push_back(point);
+    };
+    mapping_end_points_pub_.publish(end_points_msg_);
   }
 }

@@ -124,28 +124,22 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/kmm_mapping.cpp
-# )
+### Declare a C++ library
+##add_library(${PROJECT_NAME}
+##   src/Map.cpp
+##)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# add_dependencies(wall_positions_node ${kmm_mapping_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# add_dependencies(my_subscriber ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(wall_positions_node
-  nodes/wall_positions_node.cpp
+add_executable(kmm_mapping_node
+  nodes/kmm_mapping_node.cpp
   src/Mapping.cpp
 )
-
-# add_executable(${PROJECT_NAME}_node src/kmm_mapping_node.cpp)
-# add_executable(my_subscriber src/my_subscriber.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,7 +149,7 @@ add_executable(wall_positions_node
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(wall_positions_node
+add_dependencies(kmm_mapping_node
   ${kmm_mapping_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
@@ -164,7 +158,7 @@ add_dependencies(wall_positions_node
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(wall_positions_node
+target_link_libraries(kmm_mapping_node
   ${catkin_LIBRARIES}
 )
 # target_link_libraries(my_subscriber ${catkin_LIBRARIES})

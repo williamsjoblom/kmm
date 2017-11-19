@@ -34,7 +34,11 @@ public:
   void reset_wall_point_counts();
   void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
     bool horizontal, int row, int col);
+  void add_wall(int row, int col, bool horizontal);
   void update_end_points(int row, int col, bool horizontal);
+  void publish_wall_positions();
+  void publish_wall_array();
+  void publish_end_points();
 
 private:
   ros::NodeHandle nh_;
@@ -58,11 +62,9 @@ private:
   int times_req_ = 5;
 
   // Wall array
-  int w_; // Grid width
-  int offset_; // Used for wall_arr index calcs
+  std::vector<int> wall_vec_;
 
   // End points
   std::vector<Eigen::Vector2f> end_points_;
 };
-
 }

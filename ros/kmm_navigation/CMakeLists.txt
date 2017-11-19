@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(kmm_position)
+project(kmm_navigation)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -8,12 +8,12 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  laser_geometry
+  geometry_msgs
   roscpp
-  rospy
-  sensor_msgs
   std_msgs
-  tf
+  sensor_msgs
+  message_generation
+  laser_geometry
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,11 +50,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+ FILES
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +69,12 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  sensor_msgs
-#)
+generate_messages(
+ DEPENDENCIES
+ geometry_msgs
+ sensor_msgs
+ std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,12 +105,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-
 catkin_package(
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   INCLUDE_DIRS include
-  LIBRARIES kmm_position
-  CATKIN_DEPENDS laser_geometry roscpp rospy std_msgs sensor_msgs tf
-#  DEPENDS system_lib
+  LIBRARIES kmm_navigation
+  #  DEPENDS system_lib
 )
 
 ###########
@@ -124,53 +123,42 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-### POSITION NODE ###
-add_executable(kmm_position_node
-  nodes/kmm_position_node.cpp
-  src/Position.cpp
-  src/ils.cpp
-  src/Pose.cpp
-  src/Kalman.cpp
+### Declare a C++ library
+##add_library(${PROJECT_NAME}
+##   src/Map.cpp
+##)
+
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+
+## Declare a C++ executable
+## With catkin_make all packages are built within a single CMake context
+## The recommended prefix ensures that target names across packages don't collide
+add_executable(kmm_navigation_node
+  nodes/kmm_navigation_node.cpp
+  src/Navigation.cpp
+  src/Map.cpp
 )
 
-add_dependencies(kmm_position_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+## Rename C++ executable without prefix
+## The above recommended prefix causes long target names, the following renames the
+## target back to the shorter version for ease of user use
+## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
+# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(kmm_navigation_node
+  ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
 
-target_link_libraries(kmm_position_node
-   ${catkin_LIBRARIES}
-)
-
-### TEST KALMAN ###
-
-#add_executable(test_kalman_node
-#  nodes/test_kalman_node.cpp
-#  src/Kalman.cpp
-#)
-
-#add_dependencies(test_kalman_node
-#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-#  ${catkin_EXPORTED_TARGETS}
-#)
-
-#target_link_libraries(test_kalman_node
+## Specify libraries to link a library or executable target against
+# target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
-#)
-
-### TEST ILS ###
-
-add_executable(test_ils_node
-  nodes/test_ils_node.cpp
-  src/ils.cpp
-  src/Pose.cpp
+# )
+target_link_libraries(kmm_navigation_node
+  ${catkin_LIBRARIES}
 )
-
-add_dependencies(test_ils_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
-
-target_link_libraries(test_ils_node
-   ${catkin_LIBRARIES}
-)
+# target_link_libraries(my_subscriber ${catkin_LIBRARIES})

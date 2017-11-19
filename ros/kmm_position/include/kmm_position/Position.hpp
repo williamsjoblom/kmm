@@ -41,7 +41,6 @@ private:
 
   // State estimation
   Kalman kalman_;
-
 };
 
 }
