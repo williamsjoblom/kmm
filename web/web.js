@@ -43,6 +43,10 @@ function updateDom() {
   $("#pos-x").html(decimal(robot.position.x, 1));
   $("#pos-y").html(decimal(robot.position.y, 1));
   $("#theta").html(decimal(robot.position.angle, 1) + "rad");
+  //Target
+  $("#tar-pos-x").html(decimal(robot.position.x, 1));
+  $("#tar-pos-y").html(decimal(robot.position.y, 1));
+  $("#tar-theta").html(decimal(robot.position.angle, 1) + "rad");
   //Velocity
   $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
   $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
