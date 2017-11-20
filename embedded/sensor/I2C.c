@@ -23,15 +23,11 @@ uint8_t twst;
  * Note: if the AVR has a clock frequency lower than 3.6MHz, set the
  * TWBR to 10.
  */
-   #if defined(TWSP0)
-     TWSR = 0;
-   #endif
+#ifdef TWSP0
+  TWSR = 0;
+#endif
 
-   #if CPU_FREQ < 3600000UL
-     TWBR = 10;
-   #else
-     TWBR = (CPU_FREQ / SCL_FREQ - 16) / 2;
-   #endif
+// TWBR = (F_CPU / 100000UL - 16)/2;
 
  /*
 void ioinit(void){
@@ -94,8 +90,8 @@ unsigned char twi_transmit(unsigned char type){
 
 }
 
-int twi_read(uint8_t addr, uint8_t *buf, const uint8_t &sad){
-  TWDR = sla | TW_READ;
+int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad){
+  TWDR = sad | TW_READ;
   twst = twi_transmit(TWI_DATA);
   switch (twst) {
     case TW_MR_SLA_ACK:
@@ -140,7 +136,7 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t &sad){
 }
 
 /* Sends repeated start condition, #4 in event loop*/
-int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t &sad){
+int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad){
   twst = twi_transmit(TWI_START);
   switch(twst) {
     case TW_START:
@@ -158,7 +154,7 @@ int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t &sad){
 
 /* Selects which data register to read from,
   #3 in event loop*/
-int twi_select_register(uint8_t addr, const uint8_t &sad, uint8_t *buf){
+int twi_select_register(uint8_t addr, const uint8_t sad, uint8_t *buf){
   TWDR = addr | TW_READ; 
   twst = twi_transmit(TWI_DATA);
   switch(twst){
@@ -172,14 +168,14 @@ int twi_select_register(uint8_t addr, const uint8_t &sad, uint8_t *buf){
       return twi_assess_error(TWI_RESTART);
     
     default:
-      return twi_assess_error(TWI_ERROR)
+      return twi_assess_error(TWI_ERROR);
   }
 }
 
 /* Selects what sensor/slave to read from, either gyro or accelerometer
   #2 in event loop*/
-int twi_select_slave(const uint8_t &sad, uint8_t addr, uint8_t *buf){
-  TWDR = sad | TD_WRITE;
+int twi_select_slave(const uint8_t sad, uint8_t addr, uint8_t *buf){
+  TWDR = sad | TW_WRITE;
   twst = twi_transmit(TWI_DATA);
   switch(twst) {
     case TW_MT_SLA_ACK:
@@ -197,7 +193,7 @@ int twi_select_slave(const uint8_t &sad, uint8_t addr, uint8_t *buf){
 }
 
 /* Sends start condition, #1 in event loop*/
-int twi_send_start(const uint8_t &sad, uint8_t addr, uint8_t *buf){
+int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf){
   twst = twi_transmit(TWI_START);
   switch(twst) {
     case TW_REP_START:
@@ -214,7 +210,7 @@ int twi_send_start(const uint8_t &sad, uint8_t addr, uint8_t *buf){
 }
 
 /* Reads the data from the adafruit sensor, starts the event loop*/
-int twi_read_bytes(const uint8_t &sad, uint8_t *buf) {
+int twi_read_bytes(const uint8_t sad, uint8_t *buf) {
   uint8_t twcr, n, addr = 0;
   int return_value = -1;
 

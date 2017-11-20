@@ -1,5 +1,5 @@
-#include<sensor/spi.h>
 #include <avr/io.h>
+#include"spi.h"
 
 #define DDR_SPI DDRB
 #define DD_MISO DDB4
