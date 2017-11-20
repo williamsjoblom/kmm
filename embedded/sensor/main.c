@@ -1,6 +1,6 @@
-
 #include <stdlib.h>
 #include <avr/io.h>
+#include <util/twi.h>
 
 #include "main.h"
 #include "spi.h"
@@ -13,6 +13,8 @@
   DDRB = 0b11001000;
   DDRD = 0b01111111;
   DDRC = 0b11111100;
+
+  TWBR = (F_CPU / 100000UL - 16)/2;
   
   // Write cool logic to fetch data with I2C and then send that
   // over SPI to the pi yo.
@@ -22,6 +24,7 @@
   uint8_t data_out[6];
   int acc_return_value;
   int gyro_return_value;
+  int return_value;
   while (1) {
     acc_return_value = twi_read_bytes(ACC_START, buf);
     if (return_value == 0){

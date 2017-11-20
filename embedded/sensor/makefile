@@ -7,7 +7,7 @@ build: sensor.hex
 sensor.hex: sensor
 	avr-objcopy -O ihex -R .eeprom sensor sensor.hex
 
-stepper: $(OBJ)
+sensor: $(OBJ)
 	avr-gcc -mmcu=atmega328p $(OBJ) -o $@
 
 %.o: %.c
