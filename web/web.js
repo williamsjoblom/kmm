@@ -33,6 +33,11 @@ var robot = {
     x: 0,
     y: 0,
     angle: 0
+  },
+  target: {
+    x: 0,
+    y: 0,
+    angle: 0
   }
 };
 
@@ -44,9 +49,9 @@ function updateDom() {
   $("#pos-y").html(decimal(robot.position.y, 1));
   $("#theta").html(decimal(robot.position.angle, 1) + "rad");
   //Target
-  $("#tar-pos-x").html(decimal(robot.position.x, 1));
-  $("#tar-pos-y").html(decimal(robot.position.y, 1));
-  $("#tar-theta").html(decimal(robot.position.angle, 1) + "rad");
+  $("#tar-pos-x").html(decimal(robot.target.x, 1));
+  $("#tar-pos-y").html(decimal(robot.target.y, 1));
+  $("#tar-theta").html(decimal(robot.target.angle, 1) + "rad");
   //Velocity
   $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
   $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
@@ -401,6 +406,18 @@ function zoomOut() {
 /*
 LISTENERS
 */
+
+var targetPositionListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/target_position',
+  messageType: 'geometry_msgs/Twist'
+})
+
+targetPositionListener.subscribe(function(message) {
+  robot.target.x = message.linear.x;
+  robot.target.y = message.linear.y;
+  robot.target.angle = message.angular.z;
+});
 
 var robotPositionListener = new ROSLIB.Topic({
   ros: ros,
