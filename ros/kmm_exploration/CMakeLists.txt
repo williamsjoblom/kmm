@@ -108,7 +108,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES kmm_exploration
   CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
-#  DEPENDS system_lib
+  DEPENDS system_lib
 )
 
 ###########
@@ -149,8 +149,8 @@ add_executable(kmm_exploration_node
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_exploration_node
-${kmm_mapping_EXPORTED_TARGETS}
-${catkin_EXPORTED_TARGETS})
+  ${kmm_exploration_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_exploration_node

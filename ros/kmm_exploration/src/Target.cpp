@@ -20,8 +20,8 @@ namespace kmm_exploration{
 
   void Target::end_points_callback(sensor_msgs::PointCloud msg){
     geometry_msgs::Point32 closest;
-    closest.x = 0;
-    closest.y = 0;
+    closest.x = 1;
+    closest.y = 1;
     float min_distance = FLT_MAX;
     for (geometry_msgs::Point32 point : msg.points){
       float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
