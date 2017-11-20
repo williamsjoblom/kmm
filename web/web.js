@@ -174,14 +174,23 @@ function render() {
   updateView();
   //drawAcceleration();
   drawVelocity();
+  drawTarget();
   //drawLaserScan(laserScan);
 
   ctx.restore();
 }
 
 function clearScreen() {
-  ctx.fillStyle = "#fff";
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+function drawTarget() {
+  ctx.beginPath();
+  ctx.moveTo(robot.target.x, robot.target.y);
+  ctx.strokeStyle = "#00ff00";
+  ctx.arc(0, 0, 0.1, 0, 2*Math.PI);
+  ctx.stroke();
 }
 
 function drawGlobalFrame() {
