@@ -4,6 +4,9 @@
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/PointCloud.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <kmm_navigation/MoveToAction.h>
+#include <kmm_navigation/MoveToGoal.h>
+#include <actionlib/client/simple_action_client.h>
 
 namespace kmm_exploration {
 
@@ -22,6 +25,9 @@ private:
   float pos_y_;
   float angle_;
   geometry_msgs::Point32 target_;
+
+  //Action Client
+  actionlib::SimpleActionClient<actionlib_tutorials::FibonacciAction> navigation_client_;
 
   // Subscribers
   ros::Subscriber position_sub_;

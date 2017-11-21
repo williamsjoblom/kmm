@@ -154,3 +154,10 @@ add_dependencies(kmm_navigation_node
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
+
+## Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)

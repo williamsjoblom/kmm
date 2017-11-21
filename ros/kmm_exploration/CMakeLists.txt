@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   message_generation
+  kmm_navigation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -61,19 +62,17 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+#add_action_files(
+#  FILES
+#)
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  sensor_msgs
-  geometry_msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  std_msgs
+#  sensor_msgs
+#  geometry_msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -106,9 +105,9 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES kmm_exploration
-  CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs
-  DEPENDS system_lib
+  #     LIBRARIES kmm_exploration
+  #CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs actionlib actionlib_msgs
+  #DEPENDS systemlib
 )
 
 ###########

@@ -8,7 +8,7 @@
 namespace kmm_exploration{
 
   Target::Target(ros::NodeHandle nh)
-  : nh_(nh)
+  : nh_(nh), navigation_client_("navigation", true)
   {
     // Publishers
     target_pub_ = nh_.advertise<geometry_msgs::Twist>("target_position", 1);
@@ -44,6 +44,14 @@ namespace kmm_exploration{
       float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
       publish_target(closest.x + new_x, closest.y + new_y);
     }
+  }
+
+  void Target::send_goal(float x, float y){
+    move_base_msgs::MoveBaseAction goal;
+    goal.target_pose.pose.position.x = x;
+    goal.target_pose.pose.position.y = y;
+    goal.target_pose.pose.orientation.z = 0;
+    navigation_client_.sendGoal(goal);
   }
 
   void Target::position_callback(geometry_msgs::PoseWithCovarianceStamped msg){
