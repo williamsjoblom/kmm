@@ -10,6 +10,7 @@ namespace kmm_navigation {
     // Subscribers
     wall_array_sub_ = nh_.subscribe("wall_array", 1, &Navigation::wall_array_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
+    target_position_sub_ = nh_.subscribe("target_position", 1, &Navigation::target_position_callback, this);
 
     // Cells
     for (int row = 0; row <= 25; row++) {
@@ -39,33 +40,6 @@ namespace kmm_navigation {
     Eigen::Vector2f pos(msg.pose.pose.position.x, msg.pose.pose.position.y);
     pos_[0] = pos.x();
     pos_[1] = pos.y();
-
-    Eigen::Vector2f cell = map_.get_cell(pos);
-    bool above = map_.is_wall_above_cell(cell);
-    bool below = map_.is_wall_below_cell(cell);
-    bool right = map_.is_wall_right_cell(cell);
-    bool left = map_.is_wall_left_cell(cell);
-    ROS_INFO_THROTTLE(1, "----- POS: (%f,%f) -----", pos.x(), pos.y());
-    ROS_INFO_THROTTLE(1, "----- CELL: (%f,%f) -----", cell.x(), cell.y());
-    if (above) {
-      ROS_INFO_THROTTLE(1, "CELL ABOVE!");
-    };
-    if (below) {
-      ROS_INFO_THROTTLE(1, "CELL BELOW");
-    };
-    if (right) {
-      ROS_INFO_THROTTLE(1, "CELL RIGHT");
-    };
-    if (left) {
-      ROS_INFO_THROTTLE(1, "CELL LEFT");
-    };
-
-    // Target pos test
-    geometry_msgs::Twist target_msg;
-    target_msg.linear.x = 1.2;
-    target_msg.linear.y = 0.2;
-    target_msg.linear.z = 0;
-    target_position_callback(target_msg);
     return;
   }
 
@@ -153,7 +127,8 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
 
   void Navigation::reset_cells() {
     for (int row = 0; row <= 25; row++) {
-      for (int col = 0; col <= 50; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
+      // -25 <= col <= 25, extra 25 added to make non-negative!
+      for (int col = 0; col <= 50; col++) {
         cells_[row][col]->cost = std::numeric_limits<double>::infinity();
         cells_[row][col]->visited = false;
         cells_[row][col]->previous = nullptr;
@@ -166,22 +141,17 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     std::set<Cell*> neighbors;
     Eigen::Vector2f cell_vector(cell->row, cell->col);
     if (!map_.is_wall_above_cell(cell_vector) && cell->row < 25) {
-      //Cell* cell_above = cells_[cell->row + 1][cell->col + 25];
       neighbors.insert(cells_[cell->row + 1][cell->col + 25]);
     };
     if (!map_.is_wall_below_cell(cell_vector) && cell->row > 0) {
-      //Cell* cell_below = cells_[cell->row - 1][cell->col + 25];
       neighbors.insert(cells_[cell->row - 1][cell->col + 25]);
     };
     if (!map_.is_wall_left_cell(cell_vector) && cell->col < 25) {
-      //Cell* cell_left = cells_[cell->row][cell->col + 1 + 25];
       neighbors.insert(cells_[cell->row][cell->col + 1 + 25]);
     };
     if (!map_.is_wall_right_cell(cell_vector) && cell->col > -25) {
-      //Cell* cell_right = cells_[cell->row][cell->col - 1 + 25];
       neighbors.insert(cells_[cell->row][cell->col - 1 + 25]);
     };
-    //ROS_INFO("Neighbors: %d", neighbors.size()); CORRECT!
     return neighbors;
   }
 

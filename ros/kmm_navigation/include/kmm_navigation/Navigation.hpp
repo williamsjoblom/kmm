@@ -29,7 +29,6 @@ struct Cell {
   int col;
   bool operator<(const Cell& cell) const
   {
-      //return cost < cell.cost;
       return cell.cost < cost;
   }
 };
@@ -57,6 +56,7 @@ private:
   // Subscribers
   ros::Subscriber wall_array_sub_;
   ros::Subscriber position_sub_;
+  ros::Subscriber target_position_sub_;
 
   // Publishers
   ros::Publisher path_pub_;
