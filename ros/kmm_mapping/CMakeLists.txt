@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(kmm_mapping)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   laser_geometry
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -92,10 +93,9 @@ generate_messages(
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+   cfg/Mapping.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -107,7 +107,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime dynamic_reconfigure
   INCLUDE_DIRS include
   LIBRARIES kmm_mapping
   # DEPENDS system_lib
@@ -152,6 +152,7 @@ add_executable(kmm_mapping_node
 add_dependencies(kmm_mapping_node
   ${kmm_mapping_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg
 )
 
 ## Specify libraries to link a library or executable target against
@@ -210,10 +211,3 @@ target_link_libraries(kmm_mapping_node
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-############
-## CUSTOM ##
-############
-if(CMAKE_COMPILER_IS_GNUCXX)
-  add_definitions(-std=gnu++0x)
-endif()

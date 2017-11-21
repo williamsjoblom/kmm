@@ -39,6 +39,8 @@ public:
   void publish_wall_positions();
   void publish_wall_array();
   void publish_end_points();
+  void set_pnt_cnt_req(int pnt_cnt_req);
+  void set_times_req(int times_req);
 
 private:
   ros::NodeHandle nh_;

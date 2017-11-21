@@ -217,4 +217,12 @@ namespace kmm_mapping {
     };
     mapping_end_points_pub_.publish(end_points_msg_);
   }
+
+  void Mapping::set_pnt_cnt_req(int pnt_cnt_req) {
+    pnt_cnt_req_ = pnt_cnt_req;
+  }
+
+  void Mapping::set_times_req(int times_req) {
+    times_req_ = times_req;
+  }
 }
