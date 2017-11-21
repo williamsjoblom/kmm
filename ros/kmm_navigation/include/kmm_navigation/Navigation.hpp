@@ -51,6 +51,7 @@ private:
   void reset_cells();
   std::set<Cell*> get_neighbors(Cell* cell);
   std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);
+  std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
 
   Map map_;
 

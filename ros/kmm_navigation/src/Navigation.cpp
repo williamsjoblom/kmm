@@ -40,7 +40,7 @@ namespace kmm_navigation {
     while (true) {
       ROS_INFO("Navigating...");
 
-      if (action_server_.isPreemptRequested()) {
+      if (action_server_.isPreemptRequested() || !ros::ok()) {
         ROS_INFO("Navigation was preemted!");
         action_server_.setPreempted();
         return;
@@ -135,7 +135,9 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
       };
     };
   }
-  return get_path(start, end);
+  std::vector<Eigen::Vector2f> path = get_path(start, end);
+  std::vector<Eigen::Vector2f> smooth = make_smooth(path);
+  return smooth;
 }
 
   std::priority_queue<Cell> Navigation::get_resorted_queue(std::priority_queue<Cell> old_queue) {
@@ -187,12 +189,37 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     if (foundEnd) {
       Cell* backtracker = end;
       while (backtracker != start) {
-          path.push_back(Eigen::Vector2f(backtracker->row, backtracker->col));
+          path.push_back(Eigen::Vector2f(0.2 + 0.4 * backtracker->row, 0.2 + 0.4 * backtracker->col));
           backtracker = backtracker->previous;
       }
-      path.push_back(Eigen::Vector2f(start->row, start->col));
+      path.push_back(Eigen::Vector2f(0.2 + 0.4 * start->row, 0.2 + 0.4 * start->col));
       reverse(path.begin(), path.end());
     }
     return path;
+  }
+
+  std::vector<Eigen::Vector2f> Navigation::make_smooth(const std::vector<Eigen::Vector2f>& path) {
+
+    if (path.size() < 3) {
+      return path;
+    }
+
+    int resolution = 10;
+    std::vector<Eigen::Vector2f> smooth;
+
+    smooth.push_back(path[0]);
+    for (int i = 0; i < path.size() - 2; i++) {
+      for (int t = 0; t < resolution; t++) {
+        float s = 0.2 * t / resolution;
+        Eigen::Vector2f first = path[i+1] + (path[i] - path[i+1]).normalized() * (0.2 - s);
+        Eigen::Vector2f second = path[i+1] + (path[i+2] - path[i+1]).normalized() * s;
+        Eigen::Vector2f point = first + (second - first) * s / 0.2;
+        smooth.push_back(point);
+      }
+    }
+    smooth.push_back(path[path.size()-1]);
+
+    return smooth;
+
   }
 }

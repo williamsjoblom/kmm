@@ -174,8 +174,10 @@ function render() {
   updateView();
   //drawAcceleration();
   drawVelocity();
-  //drawLaserScan(laserScan);
+  drawLaserScan(laserScan);
   drawTarget();
+  drawPath();
+
 
   ctx.restore();
 }
@@ -185,11 +187,53 @@ function clearScreen() {
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
+function setLineStyle(type) {
+  if (type == "wall") {
+    ctx.lineWidth = 0.03;
+    ctx.strokeStyle = "#000000";
+  } else if (type == "path") {
+    ctx.lineWidth = 0.03;
+    ctx.strokeStyle = "#FF4500";
+  } else {
+    ctx.lineWidth = 0.01;
+    ctx.strokeStyle = "#AAAAAA";
+  };
+}
+
 function drawTarget() {
   ctx.beginPath();
   ctx.strokeStyle = "#00ff00";
   ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
   ctx.stroke();
+}
+
+function drawPath() {
+
+  setLineStyle("path");
+  ctx.beginPath();
+  if (plannedPath.length > 0) {
+    ctx.beginPath();
+    ctx.moveTo(plannedPath[0].x, plannedPath[0].y);
+    for (var i = 1; i < plannedPath.length; i++) {
+      ctx.lineTo(plannedPath[i].x, plannedPath[i].y);
+    }
+    ctx.stroke();
+  }
+
+  return;
+
+  if (robotPath.length > 0) {
+    ctx.save();
+    ctx.translate(0.2,0.2);
+    setLineStyle("path");
+    for (var i = 0; i < robotPath.length - 1; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0.4*robotPath[i].row, 0.4*robotPath[i].col);
+      ctx.lineTo(0.4*robotPath[i + 1].row, 0.4*robotPath[i + 1].col);
+      ctx.stroke();
+    };
+    ctx.restore();
+  };
 }
 
 function drawGlobalFrame() {
@@ -222,16 +266,6 @@ function drawLaserScan(laserScan) {
     };
   }
   ctx.restore();
-}
-
-function setLineStyle(type) {
-  if (type == "wall") {
-    ctx.lineWidth = 0.03;
-    ctx.strokeStyle = "#000000";
-  } else {
-    ctx.lineWidth = 0.01;
-    ctx.strokeStyle = "#AAAAAA";
-  };
 }
 
 function drawGrid() {
@@ -415,6 +449,19 @@ function zoomOut() {
 LISTENERS
 */
 
+var pathListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/path',
+  messageType: 'geometry_msgs/PoseArray'
+})
+
+var plannedPath = [];
+pathListener.subscribe(function(message) {
+  plannedPath = message.poses.map(function (pose) {
+    return { x: pose.position.x, y: pose.position.y };
+  });
+});
+
 var targetPositionListener = new ROSLIB.Topic({
   ros: ros,
   name: '/target_position',
@@ -476,7 +523,6 @@ var verticalWalls = [];
 
 /* Listener that listens to the /wall_positions topic. */
 wallPositionsListener.subscribe(function(message) {
-  console.log('Received message on ' + wallPositionsListener.name);
   horizontalWalls = [];
   verticalWalls = [];
   for (var i = 0; i < message.horizontal_walls.length; i++) {
@@ -501,7 +547,6 @@ var endPoints = [];
 
 /* Listener that listens to the /end_points topic. */
 endPointListener.subscribe(function(message) {
-  console.log('Received message on ' + endPointListener.name);
   endPoints = [];
   for (var i = 0; i < message.points.length; i++) {
     endPoints.push(message.points[i]);
@@ -518,6 +563,5 @@ var laserScanListener = new ROSLIB.Topic({
 
 /* Listener that listens to the /wall_positions topic. */
 laserScanListener.subscribe(function(message) {
-  console.log('Received message on ' + laserScanListener.name);
   laserScan = message.ranges;
 });
