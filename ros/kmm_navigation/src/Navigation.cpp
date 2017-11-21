@@ -1,9 +1,10 @@
 #include "kmm_navigation/Navigation.hpp"
+#include "kmm_navigation/MoveToGoal.h"
 
 namespace kmm_navigation {
 
   Navigation::Navigation(ros::NodeHandle nh)
-  : nh_(nh), map_(53) {
+  : nh_(nh), map_(53), action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
 
@@ -27,6 +28,24 @@ namespace kmm_navigation {
         delete cells_[row][col];
       };
     };
+  }
+
+  void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
+    ROS_INFO("Got new navigation request to x: %.2f, y: %.2f, angle: %.2f", goal->x, goal->y, goal->angle);
+
+    ros::Rate rate(3);
+
+    while (true) {
+      ROS_INFO("Navigating...");
+
+      if (action_server_.isPreemptRequested()) {
+        ROS_INFO("Navigation was preemted!");
+        action_server_.setPreempted();
+        break;
+      }
+    }
+
+    action_server_.setSucceeded(result_);
   }
 
   void Navigation::wall_array_callback(std_msgs::Int8MultiArray msg) {

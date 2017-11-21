@@ -18,6 +18,8 @@
 #include "std_msgs/MultiArrayLayout.h"
 #include "std_msgs/MultiArrayDimension.h"
 #include "std_msgs/Int8MultiArray.h"
+#include "kmm_navigation/MoveToAction.h"
+#include <actionlib/server/simple_action_server.h>
 
 namespace kmm_navigation {
 
@@ -39,6 +41,7 @@ public:
   ~Navigation();
 
 private:
+  void navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal);
   void wall_array_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   Cell* make_cell(int row, int col);
@@ -52,6 +55,9 @@ private:
   Map map_;
 
   ros::NodeHandle nh_;
+  actionlib::SimpleActionServer<kmm_navigation::MoveToAction> action_server_;
+  kmm_navigation::MoveToFeedback feedback_;
+  kmm_navigation::MoveToResult result_;
 
   // Subscribers
   ros::Subscriber wall_array_sub_;
