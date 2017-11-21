@@ -43,7 +43,7 @@ namespace kmm_navigation {
       if (action_server_.isPreemptRequested()) {
         ROS_INFO("Navigation was preemted!");
         action_server_.setPreempted();
-        break;
+        return;
       }
 
       rate.sleep();
