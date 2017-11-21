@@ -28,24 +28,44 @@ namespace kmm_navigation {
   bool Map::is_wall_above_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
-    return Map::wall_arr_[(x + 1)*(w_ + 1) + (x + 1)*w_ + offset_ + y];
+    int index = (x + 1)*(w_ + 1) + (x + 1)*w_ + offset_ + y;
+    if (index >= 1500) {
+      std::cout << "Function is_wall_above_cell() called with invalid cell!\n";
+      return true;
+    }
+    return Map::wall_arr_[index];
   }
 
   bool Map::is_wall_below_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
-    return wall_arr_[x*(w_ + 1) + x*w_ + offset_ + y];
+    int index = x*(w_ + 1) + x*w_ + offset_ + y;
+    if (index >= 1500) {
+      std::cout << "Function is_wall_below_cell() called with invalid cell!\n";
+      return true;
+    }
+    return wall_arr_[index];
   }
 
   bool Map::is_wall_right_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
-    return wall_arr_[x*(w_ + 1) + (x + 1)*w_ + offset_ + y];
+    int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y;
+    if (index >= 1500) {
+      std::cout << "Function is_wall_right_cell() called with invalid cell!\n";
+      return true;
+    }
+    return wall_arr_[index];
   }
 
   bool Map::is_wall_left_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
-    return wall_arr_[x*(w_ + 1) + (x + 1)*w_ + offset_ + y + 1];
+    int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y + 1;
+    if (index >= 1500) {
+      std::cout << "Function is_wall_left_cell() called with invalid cell!\n";
+      return true;
+    }
+    return wall_arr_[index];
   }
 }

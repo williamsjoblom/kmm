@@ -165,7 +165,7 @@ function render() {
   updateView();
   //drawAcceleration();
   drawVelocity();
-  //drawLaserScan(laserScan);
+  drawLaserScan(laserScan);
 
   ctx.restore();
 }
@@ -221,7 +221,7 @@ function drawGrid() {
   ctx.save();
   ctx.translate(0,0.2);
   var rows = 26; // (10 / 0.4) + 1
-  var cols = 51; // ((10 / 0.4) * 2) + 2
+  var cols = 51; // ((10 / 0.4) * 2) + 1
   setLineStyle("normal");
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
