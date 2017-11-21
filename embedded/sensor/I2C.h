@@ -12,8 +12,8 @@
      * GYRO_Z_L  0b0101100
      * GYRO_Z_H  0b0101101
      */
-    #define ACC_START 0b01010000 // + multiple read bit (MSB)
-    #define GYRO_START 0b01011000 // + multiple read bit (MSB)
+    #define ACC_START 0b10101000 
+    #define GYRO_START 0b10101100
     /*
     * Maximum no. iterations that we will wait for a selection to be
     * responded to by the slave. Used to be able to abort an infinte 
