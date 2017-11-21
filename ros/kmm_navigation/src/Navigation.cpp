@@ -37,11 +37,13 @@ namespace kmm_navigation {
 
     ros::Rate rate(3);
 
+    ROS_INFO("Räkna ut path med dijikstra...");
+
     while (true) {
-      ROS_INFO("Navigating...");
+      ROS_INFO("Gör aktiv reglering för att följa pathen...");
 
       if (action_server_.isPreemptRequested() || !ros::ok()) {
-        ROS_INFO("Navigation was preemted!");
+        ROS_INFO("Oj, navigeringen avbröts av klienten!");
         action_server_.setPreempted();
         return;
       }
@@ -49,6 +51,7 @@ namespace kmm_navigation {
       rate.sleep();
     }
 
+    ROS_INFO("Roboten åkte hela vägen fram till target!");
     action_server_.setSucceeded(result_);
   }
 
