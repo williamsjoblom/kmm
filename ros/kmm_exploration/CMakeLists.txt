@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   kmm_navigation
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -105,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  #     LIBRARIES kmm_exploration
+  #LIBRARIES kmm_exploration
   #CATKIN_DEPENDS message_runtime roscpp std_msgs geometry_msgs sensor_msgs actionlib actionlib_msgs
   #DEPENDS systemlib
 )

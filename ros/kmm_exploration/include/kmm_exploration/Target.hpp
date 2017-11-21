@@ -18,6 +18,7 @@ public:
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void publish_target(float x, float y);
+  void send_goal(float x, float y);
 
 private:
   ros::NodeHandle nh_;
@@ -27,7 +28,7 @@ private:
   geometry_msgs::Point32 target_;
 
   //Action Client
-  actionlib::SimpleActionClient<actionlib_tutorials::FibonacciAction> navigation_client_;
+  actionlib::SimpleActionClient<kmm_navigation::MoveToAction> navigation_client_;
 
   // Subscribers
   ros::Subscriber position_sub_;
