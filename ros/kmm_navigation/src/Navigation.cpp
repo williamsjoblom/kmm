@@ -19,6 +19,8 @@ namespace kmm_navigation {
         cells_[row][col] = make_cell(row, col - 25);
       };
     };
+
+    action_server_.start();
   }
 
   Navigation::~Navigation() {
@@ -43,6 +45,8 @@ namespace kmm_navigation {
         action_server_.setPreempted();
         break;
       }
+
+      rate.sleep();
     }
 
     action_server_.setSucceeded(result_);
