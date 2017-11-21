@@ -110,7 +110,7 @@ catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   INCLUDE_DIRS include
   LIBRARIES kmm_mapping
-  DEPENDS system_lib
+  # DEPENDS system_lib
 )
 
 ###########

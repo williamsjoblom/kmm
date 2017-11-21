@@ -109,7 +109,7 @@ catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   INCLUDE_DIRS include
   LIBRARIES kmm_navigation
-  #  DEPENDS system_lib
+  # DEPENDS system_lib
 )
 
 ###########
@@ -120,13 +120,10 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
+  #lib/StanfordCPPLib
+  #lib/StanfordCPPLib/private
   ${catkin_INCLUDE_DIRS}
 )
-
-### Declare a C++ library
-##add_library(${PROJECT_NAME}
-##   src/Map.cpp
-##)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -141,6 +138,11 @@ add_executable(kmm_navigation_node
   src/Map.cpp
 )
 
+## Specify libraries to link a library or executable target against
+target_link_libraries(kmm_navigation_node
+  ${catkin_LIBRARIES}
+)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -153,12 +155,3 @@ add_dependencies(kmm_navigation_node
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
-
-## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
-target_link_libraries(kmm_navigation_node
-  ${catkin_LIBRARIES}
-)
-# target_link_libraries(my_subscriber ${catkin_LIBRARIES})
