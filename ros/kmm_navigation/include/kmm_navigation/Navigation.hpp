@@ -44,7 +44,7 @@ private:
   Cell* make_cell(int row, int col);
   void target_position_callback(geometry_msgs::Twist msg);
   std::vector<Eigen::Vector2f> find_path(Cell* start, Cell* end);
-  std::priority_queue<Cell*> get_resorted_queue(std::priority_queue<Cell*> old_queue);
+  std::priority_queue<Cell> get_resorted_queue(std::priority_queue<Cell> old_queue);
   void reset_cells();
   std::set<Cell*> get_neighbors(Cell* cell);
   std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);

@@ -107,8 +107,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
-  INCLUDE_DIRS include lib/StanfordCPPLib
-  LIBRARIES kmm_navigation stanfordcpp
+  INCLUDE_DIRS include
+  LIBRARIES kmm_navigation
   # DEPENDS system_lib
 )
 
@@ -138,36 +138,9 @@ add_executable(kmm_navigation_node
   src/Map.cpp
 )
 
-### Declare a C++ library
-#add_library(stanfordcpp
-#   lib/StanfordCPPLib/console.cpp
-#   lib/StanfordCPPLib/direction.cpp
-#   lib/StanfordCPPLib/error.cpp
-#   lib/StanfordCPPLib/filelib.cpp
-#   lib/StanfordCPPLib/gevents.cpp
-#   lib/StanfordCPPLib/ginteractors.cpp
-#   lib/StanfordCPPLib/gmath.cpp
-#   lib/StanfordCPPLib/gobjects.cpp
-#   lib/StanfordCPPLib/gtimer.cpp
-#   lib/StanfordCPPLib/gtypes.cpp
-#   lib/StanfordCPPLib/gwindow.cpp
-#   lib/StanfordCPPLib/hashmap.cpp
-#   lib/StanfordCPPLib/lexicon.cpp
-#   lib/StanfordCPPLib/main.cpp
-#   lib/StanfordCPPLib/platform.cpp
-#   lib/StanfordCPPLib/point.cpp
-#   lib/StanfordCPPLib/random.cpp
-#   lib/StanfordCPPLib/simpio.cpp
-#   lib/StanfordCPPLib/sound.cpp
-#   lib/StanfordCPPLib/startup.cpp
-#   lib/StanfordCPPLib/strlib.cpp
-#   lib/StanfordCPPLib/tokenscanner.cpp
-#)
-
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_navigation_node
   ${catkin_LIBRARIES}
-  #stanfordcpp
 )
 
 ## Rename C++ executable without prefix
@@ -181,13 +154,4 @@ target_link_libraries(kmm_navigation_node
 add_dependencies(kmm_navigation_node
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  #stanfordcpp
 )
-
-##install(TARGETS stanfordcpp
-##  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-##  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-##  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-##install(DIRECTORY lib/StanfordCPPLib
-##  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

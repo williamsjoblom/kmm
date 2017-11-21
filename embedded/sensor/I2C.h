@@ -2,7 +2,7 @@
 #define _TWI_H
 
     #define ACC_ADDR  0b00110010 // + R/W bit
-    #define GYRO_ADDR 0b11010100 // + R/W bit
+    #define GYRO_ADDR 0b11010110 // + R/W bit
     
     /* Register adresses for each coordinate. Used in SUB.
      * ACC_X_L   0b0101000
@@ -12,8 +12,8 @@
      * GYRO_Z_L  0b0101100
      * GYRO_Z_H  0b0101101
      */
-    #define ACC_START 0b01010000 // + multiple read bit (MSB)
-    #define GYRO_START 0b01011000 // + multiple read bit (MSB)
+    #define ACC_START 0b10101000 // MSB READ + ADDR 
+    #define GYRO_START 0b10101100 // MSB READ + ADDRs
     /*
     * Maximum no. iterations that we will wait for a selection to be
     * responded to by the slave. Used to be able to abort an infinte 
@@ -37,6 +37,6 @@ int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad);
 int twi_select_register(uint8_t addr, const uint8_t sad, uint8_t *buf);
 int twi_select_slave(const uint8_t sad, uint8_t addr, uint8_t *buf);
 int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf);
-int twi_read_bytes(const uint8_t sad, uint8_t *buf);
+int twi_read_bytes(const uint8_t sad, uint8_t addr, uint8_t *buf);
 
 #endif

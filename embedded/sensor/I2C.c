@@ -75,7 +75,7 @@ int twi_assess_error(unsigned char type){
 unsigned char twi_transmit(unsigned char type){
   switch(type){
     case TWI_START:
-      TWCR = _BV(TWINT) | _BV(TWSTA) | _BV(TWEN);
+      TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWSTA);
       break;
     case TWI_DATA:
       TWCR = _BV(TWINT) | _BV(TWEN);
@@ -98,15 +98,19 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad){
         break;
 
     case TW_MR_SLA_NACK:
-      return twi_assess_error(TWI_ERROR);
+      //return twi_assess_error(TWI_ERROR);
+      twi_assess_error(TWI_ERROR);  
+      return -6;
 
     case TW_MR_ARB_LOST:
       return twi_assess_error(TWI_RESTART);
 
     default:
-      return twi_assess_error(TWI_ERROR);
+      //return twi_assess_error(TWI_ERROR);
+      twi_assess_error(TWI_ERROR);  
+      return -7;
   }
-  int iter = 0;
+  int iter;
   if (sad == ACC_ADDR) {
     iter = 4;     //Read X- and Y -data from accelerometer
   } else {
@@ -122,14 +126,17 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad){
     switch((twst = TW_STATUS)){
       case TW_MR_DATA_NACK:
         buf[i] = TWDR;
-        return twi_assess_error(TWI_ERROR);
-
+        //return twi_assess_error(TWI_ERROR);
+        twi_transmit(TWI_STOP);  
+        return 0;
       case TW_MR_DATA_ACK:
         buf[i] = TWDR;
         break;
 
       default:
-        return twi_assess_error(TWI_ERROR);
+        //return twi_assess_error(TWI_ERROR);
+        twi_assess_error(TWI_ERROR);  
+        return -9;
     }
   }
   return twi_transmit(TWI_STOP);
@@ -148,27 +155,33 @@ int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad){
       return twi_assess_error(TWI_RESTART);
 
     default:
-      return twi_assess_error(TWI_ERROR);
+      //return twi_assess_error(TWI_ERROR);
+      twi_assess_error(TWI_ERROR); 
+      return -5; 
   }
 }
 
 /* Selects which data register to read from,
   #3 in event loop*/
 int twi_select_register(uint8_t addr, const uint8_t sad, uint8_t *buf){
-  TWDR = addr | TW_READ; 
+  TWDR = addr; 
   twst = twi_transmit(TWI_DATA);
   switch(twst){
-    case TW_MT_SLA_ACK:
+    case TW_MT_DATA_ACK:
       return twi_repeat_start(addr, buf, sad);
 
-    case TW_MT_SLA_NACK:
-      return twi_assess_error(TWI_ERROR);
+    case TW_MT_DATA_NACK:
+      //return twi_assess_error(TWI_ERROR);
+      twi_assess_error(TWI_ERROR);  
+      return -3;
 
     case TW_MT_ARB_LOST:
       return twi_assess_error(TWI_RESTART);
     
     default:
-      return twi_assess_error(TWI_ERROR);
+      //return twi_assess_error(TWI_ERROR);
+      twi_assess_error(TWI_ERROR); 
+      return -4;
   }
 }
 
@@ -188,7 +201,9 @@ int twi_select_slave(const uint8_t sad, uint8_t addr, uint8_t *buf){
       return twi_assess_error(TWI_RESTART);
     
     default:
-      return twi_assess_error(TWI_ERROR);  
+      //return twi_assess_error(TWI_ERROR);  
+      twi_assess_error(TWI_ERROR); 
+      return -2; 
   }
 }
 
@@ -210,56 +225,14 @@ int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf){
 }
 
 /* Reads the data from the adafruit sensor, starts the event loop*/
-int twi_read_bytes(const uint8_t sad, uint8_t *buf) {
-  uint8_t twcr, n, addr = 0;
-  int return_value = -1;
+int twi_read_bytes(const uint8_t sad, uint8_t addr, uint8_t *buf) {
+  uint8_t n = 0;
+  int return_value = 0;
 
-  if(sad == ACC_ADDR) {
-    addr = ACC_START;
-  } else{
-    addr = GYRO_START;
-  }
   while(n++ <= MAX_ITER){
     return_value = twi_send_start(sad, addr, buf);
-    if (return_value == 0 || return_value == -1)
+    if (return_value <= 0)
       return return_value;
   }
-  return -1;
+  return -10;
 }
-
-
-  /*begin:
-  if(n++ >= MAX_ITER)
-    return -1;
-    
-  twst = twi_transmit(TWI_START);
-  switch(twst) {
-    case TW_REP_START:
-
-    case TW_START:
-      break;
-    
-    case TW_MT_ARB_LOST:
-      goto begin;
-    
-    default:
-      return -1;
-  }
-
-  TWDR = sad | TD_WRITE;
-  twst = twi_transmit(TWI_DATA);
-  switch(twst) {
-    case TW_MT_SLA_ACK:
-      break;
-    
-    case TW_MT_SLA_NACK:
-      goto begin;
-    
-    case TW_MT_ARB_LOST:
-      goto begin;
-    
-    default:
-      twi_transmit(TWI_STOP);
-      return_value = -1;
-      return return_value;
-  }*/

@@ -20,6 +20,12 @@ namespace kmm_navigation {
   }
 
   Navigation::~Navigation() {
+    // Delete cells
+    for (int row = 0; row <= 25; row++) {
+      for (int col = 0; col <= 50; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
+        delete cells_[row][col];
+      };
+    };
   }
 
   void Navigation::wall_array_callback(std_msgs::Int8MultiArray msg) {
@@ -53,17 +59,24 @@ namespace kmm_navigation {
     if (left) {
       ROS_INFO_THROTTLE(1, "CELL LEFT");
     };
+
+    // Target pos test
+    geometry_msgs::Twist target_msg;
+    target_msg.linear.x = 1.2;
+    target_msg.linear.y = 0.2;
+    target_msg.linear.z = 0;
+    target_position_callback(target_msg);
     return;
   }
 
   Cell* Navigation::make_cell(int row, int col) {
-    Cell cell;
-    cell.cost = std::numeric_limits<double>::infinity();
-    cell.visited = false;
-    cell.row = row;
-    cell.col = col;
-    Cell* cell_ptr = &cell;
-    return cell_ptr;
+    Cell* cell = new Cell;
+    cell->cost = std::numeric_limits<double>::infinity();
+    cell->visited = false;
+    cell->previous = nullptr;
+    cell->row = row;
+    cell->col = col;
+    return cell;
   }
 
   void Navigation::target_position_callback(geometry_msgs::Twist msg) {
@@ -93,53 +106,57 @@ namespace kmm_navigation {
  * Finds the cheapest path between start and end using the dijikstra algorithm.
  */
 std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
-    reset_cells();
-    std::priority_queue<Cell*> cell_queue;
-    start->cost = 0;
-    cell_queue.push(start);
-    Cell* curr_cell;
-    std::set<Cell*> curr_neighbors;
-    double alt_cost;
-    while (!cell_queue.empty()) {
-        curr_cell = cell_queue.top();
-        cell_queue.pop();
-        if (curr_cell == end) {
-            break;
+  reset_cells();
+  std::priority_queue<Cell> cell_queue;
+  start->cost = 0;
+  cell_queue.push(*start);
+  Cell* curr_cell;
+  std::set<Cell*> curr_neighbors;
+  double alt_cost;
+  while (!cell_queue.empty()) {
+    Cell next_cell = cell_queue.top();
+    curr_cell = cells_[next_cell.row][next_cell.col + 25];
+    cell_queue.pop();
+    if (curr_cell == end) {
+      break;
+    };
+    curr_neighbors = get_neighbors(curr_cell);
+    // Calculates and updates lowest costs and changes
+    // the priority of neighbors if needed.
+    alt_cost = curr_cell->cost + 1;
+    for (std::set<Cell*>::iterator neighbor_it = curr_neighbors.begin();
+       neighbor_it != curr_neighbors.end(); neighbor_it++) {
+      if (alt_cost < (*neighbor_it)->cost) {
+        (*neighbor_it)->cost = alt_cost;
+        (*neighbor_it)->previous = curr_cell;
+        if ((*neighbor_it)->visited) {
+          cell_queue = get_resorted_queue(cell_queue);
+        } else {
+          (*neighbor_it)->visited = true;
+          cell_queue.push(**neighbor_it);
         };
-        curr_neighbors = get_neighbors(curr_cell); // TODO write this
-        // Calculates and updates lowest costs and changes
-        // the priority of neighbors if needed.
-        for (std::set<Cell*>::iterator neighbor_it = curr_neighbors.begin();
-             neighbor_it != curr_neighbors.end(); neighbor_it++) {
-            alt_cost = curr_cell->cost + 1;
-            if (alt_cost < (*neighbor_it)->cost) {
-                (*neighbor_it)->cost = alt_cost;
-                (*neighbor_it)->previous = curr_cell;
-                if ((*neighbor_it)->visited) {
-                  cell_queue = get_resorted_queue(cell_queue);
-                } else {
-                  (*neighbor_it)->visited = true;
-                  cell_queue.push(*neighbor_it);
-                };
-            };
-        };
-    }
-    return get_path(start, end);
+      };
+    };
   }
+  return get_path(start, end);
+}
 
-  std::priority_queue<Cell*> Navigation::get_resorted_queue(std::priority_queue<Cell*> old_queue) {
-    std::priority_queue<Cell*> new_queue;
+  std::priority_queue<Cell> Navigation::get_resorted_queue(std::priority_queue<Cell> old_queue) {
+    std::priority_queue<Cell> new_queue;
     for (int i = 0; i < old_queue.size(); i++) {
-      new_queue.push(old_queue.top());
+      Cell cell = old_queue.top();
+      new_queue.push(*cells_[cell.row][cell.col + 25]);
       old_queue.pop();
     };
+    return new_queue;
   }
 
   void Navigation::reset_cells() {
     for (int row = 0; row <= 25; row++) {
       for (int col = 0; col <= 50; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
-        cells_[row][col]->cost = std::numeric_limits<int>::infinity();
+        cells_[row][col]->cost = std::numeric_limits<double>::infinity();
         cells_[row][col]->visited = false;
+        cells_[row][col]->previous = nullptr;
       };
     };
     return;
@@ -149,21 +166,22 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     std::set<Cell*> neighbors;
     Eigen::Vector2f cell_vector(cell->row, cell->col);
     if (!map_.is_wall_above_cell(cell_vector) && cell->row < 25) {
-      Cell* cell_above = cells_[cell->row + 1][cell->col + 25];
-      neighbors.insert(cell_above);
+      //Cell* cell_above = cells_[cell->row + 1][cell->col + 25];
+      neighbors.insert(cells_[cell->row + 1][cell->col + 25]);
     };
     if (!map_.is_wall_below_cell(cell_vector) && cell->row > 0) {
-      Cell* cell_below = cells_[cell->row - 1][cell->col + 25];
-      neighbors.insert(cell_below);
+      //Cell* cell_below = cells_[cell->row - 1][cell->col + 25];
+      neighbors.insert(cells_[cell->row - 1][cell->col + 25]);
     };
     if (!map_.is_wall_left_cell(cell_vector) && cell->col < 25) {
-      Cell* cell_left = cells_[cell->row][cell->col + 1 + 25];
-      neighbors.insert(cell_left);
+      //Cell* cell_left = cells_[cell->row][cell->col + 1 + 25];
+      neighbors.insert(cells_[cell->row][cell->col + 1 + 25]);
     };
     if (!map_.is_wall_right_cell(cell_vector) && cell->col > -25) {
-      Cell* cell_right = cells_[cell->row][cell->col - 1 + 25];
-      neighbors.insert(cell_right);
+      //Cell* cell_right = cells_[cell->row][cell->col - 1 + 25];
+      neighbors.insert(cells_[cell->row][cell->col - 1 + 25]);
     };
+    //ROS_INFO("Neighbors: %d", neighbors.size()); CORRECT!
     return neighbors;
   }
 
@@ -174,13 +192,13 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     std::vector<Eigen::Vector2f> path;
     bool foundEnd = end->previous != nullptr;
     if (foundEnd) {
-        Cell* backtracker = end;
-        while (backtracker != start) {
-            path.push_back(Eigen::Vector2f(backtracker->row, backtracker->col));
-            backtracker = backtracker->previous;
-        }
-        path.push_back(Eigen::Vector2f(start->row, start->col));
-        reverse(path.begin(), path.end());
+      Cell* backtracker = end;
+      while (backtracker != start) {
+          path.push_back(Eigen::Vector2f(backtracker->row, backtracker->col));
+          backtracker = backtracker->previous;
+      }
+      path.push_back(Eigen::Vector2f(start->row, start->col));
+      reverse(path.begin(), path.end());
     }
     return path;
   }
