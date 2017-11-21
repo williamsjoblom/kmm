@@ -7,30 +7,32 @@
 
 namespace kmm_exploration{
 
-  Target::Target(ros::NodeHandle nh) : nh_(nh){
+  Target::Target(ros::NodeHandle nh)
+  : nh_(nh)
+  {
     // Publishers
     target_pub_ = nh_.advertise<geometry_msgs::Twist>("target_position", 1);
 
     // Subscribers
-    end_points_sub_ = nh_.subscribe<sensor_msgs::PointCloud>("end_points", 1, &Target::end_points_callback, this);
-    position_sub_ = nh_.subscribe<geometry_msgs::PoseWithCovarianceStamped>("position", 1, &Target::position_callback, this);
+    end_points_sub_ = nh_.subscribe("end_points", 1, &Target::end_points_callback, this);
+    position_sub_ = nh_.subscribe("position", 1, &Target::position_callback, this);
   }
 
   Target::~Target(){}
 
   void Target::end_points_callback(sensor_msgs::PointCloud msg){
     geometry_msgs::Point32 closest;
-    closest.x = 1;
-    closest.y = 1;
+    bool not_null = false;
     float min_distance = FLT_MAX;
     for (geometry_msgs::Point32 point : msg.points){
       float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
       if (distance < min_distance){
+        not_null = true;
         closest = point;
         min_distance = distance;
       }
     }
-    if (closest.x == 0 && closest.y == 0){
+    if (!not_null){
       publish_target(0.2, 0.2);
     }
     else{

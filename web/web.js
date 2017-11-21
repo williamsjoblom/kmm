@@ -192,9 +192,8 @@ function clearScreen() {
 
 function drawTarget() {
   ctx.beginPath();
-  ctx.moveTo(robot.target.x, robot.target.y);
   ctx.strokeStyle = "#00ff00";
-  ctx.arc(0, 0, 0.1, 0, 2*Math.PI);
+  ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
   ctx.stroke();
 }
 
