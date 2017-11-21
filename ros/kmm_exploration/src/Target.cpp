@@ -40,8 +40,10 @@ namespace kmm_exploration{
     }
     else{
       target_ = closest;
-      float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
-      float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
+      //float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
+      float new_x = closest.x - pos_x_ > 0 ? 0.2 : - 0.2;
+      //float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
+      float new_y = closest.y - pos_y_ > 0 ? 0.2 : - 0.2;
       publish_target(closest.x + new_x, closest.y + new_y);
     }
   }
