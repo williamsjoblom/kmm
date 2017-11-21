@@ -22,20 +22,24 @@ namespace kmm_exploration{
 
   void Target::end_points_callback(sensor_msgs::PointCloud msg){
     geometry_msgs::Point32 closest;
-    bool not_null = false;
+    bool not_empty = false;
     float min_distance = FLT_MAX;
     for (geometry_msgs::Point32 point : msg.points){
       float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
       if (distance < min_distance){
-        not_null = true;
+        not_empty = true;
         closest = point;
         min_distance = distance;
+        if (point.x == target_.x && point.y == target_.y){
+          break;
+        }
       }
     }
-    if (!not_null){
+    if (!not_empty){
       publish_target(0.2, 0.2);
     }
     else{
+      target_ = closest;
       float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
       float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
       publish_target(closest.x + new_x, closest.y + new_y);
