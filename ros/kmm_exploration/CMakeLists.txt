@@ -122,9 +122,9 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/kmm_exploration.cpp
-# )
+#add_library(${PROJECT_NAME}
+#  src/${PROJECT_NAME}/kmm_navigation.cpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
