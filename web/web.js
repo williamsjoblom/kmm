@@ -174,12 +174,8 @@ function render() {
   updateView();
   //drawAcceleration();
   drawVelocity();
-<<<<<<< HEAD
-  drawLaserScan(laserScan);
-=======
-  drawTarget();
   //drawLaserScan(laserScan);
->>>>>>> 326f0fd28c36dd4ce20d7b482fc4eebc47d6e438
+  drawTarget();
 
   ctx.restore();
 }
@@ -441,18 +437,6 @@ robotPositionListener.subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
   robot.position.angle = message.pose.pose.orientation.z;
-});
-
-var robotTargetListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/target_position',
-  messageType: 'geometry_msgs/Twist'
-})
-
-robotTargetListener.subscribe(function(message) {
-  robot.target.x = message.linear.x;
-  robot.target.y = message.linear.y;
-  robot.target.angle = message.angluar.z;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({
