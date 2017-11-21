@@ -43,6 +43,8 @@ namespace kmm_navigation {
         action_server_.setPreempted();
         break;
       }
+
+      rate.sleep();
     }
 
     action_server_.setSucceeded(result_);
