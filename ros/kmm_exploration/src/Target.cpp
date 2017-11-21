@@ -46,12 +46,12 @@ namespace kmm_exploration{
     }
   }
 
-  void Target::send_goal(float x, float y){
-    move_base_msgs::MoveBaseAction goal;
-    goal.target_pose.pose.position.x = x;
-    goal.target_pose.pose.position.y = y;
-    goal.target_pose.pose.orientation.z = 0;
-    navigation_client_.sendGoal(goal);
+  void Target::send_goal(float x, float y) {
+    kmm_navigation::MoveToGoal goal;
+    goal.x = x;
+    goal.y = y;
+    goal.angle = 0;
+    //navigation_client_.sendGoal(goal);
   }
 
   void Target::position_callback(geometry_msgs::PoseWithCovarianceStamped msg){

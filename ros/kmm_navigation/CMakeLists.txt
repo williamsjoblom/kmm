@@ -105,8 +105,8 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   INCLUDE_DIRS include
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   LIBRARIES kmm_navigation
   # DEPENDS system_lib
 )
@@ -160,4 +160,9 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
+)
+
+# Declare a C++ library
+add_library(${PROJECT_NAME}
+  nodes/kmm_navigation_node.cpp
 )
