@@ -29,7 +29,8 @@ struct Cell {
   int col;
   bool operator<(const Cell& cell) const
   {
-      return cost < cell.cost;
+      //return cost < cell.cost;
+      return cell.cost < cost;
   }
 };
 
