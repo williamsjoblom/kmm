@@ -51,7 +51,7 @@ namespace kmm_exploration{
     goal.x = x;
     goal.y = y;
     goal.angle = 0;
-    //navigation_client_.sendGoal(goal);
+    navigation_client_.sendGoal(goal);
   }
 
   void Target::position_callback(geometry_msgs::PoseWithCovarianceStamped msg){
@@ -67,5 +67,6 @@ namespace kmm_exploration{
     float angle = 0; //calculate
     msg.angular.z = angle;
     target_pub_.publish(msg);
+    send_goal(x, y);
   }
 }
