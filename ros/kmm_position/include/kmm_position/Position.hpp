@@ -21,11 +21,13 @@ public:
   void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
   void cmd_vel_callback(geometry_msgs::Twist msg);
   void publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned);
-  void broadcast_position(const ros::TimerEvent&);
+  void broadcast_robot_pose(const ros::TimerEvent&);
+  void publish_robot_pose(const ros::TimerEvent&);
 
 private:
   ros::NodeHandle nh_;
-  ros::Timer broadcast_timer_;
+  ros::Timer broadcast_robot_pose_timer_;
+  ros::Timer publish_robot_pose_timer_;
   laser_geometry::LaserProjection projector_;
 
   // Subscribers

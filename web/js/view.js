@@ -35,7 +35,7 @@ function decimal(val, dec){
 
 
 function render() {
-  clearScreen();
+  clearCanvas();
 
   // Transform coordinate system to something that is practical to work with
   ctx.save();
@@ -69,22 +69,9 @@ function render() {
   ctx.restore();
 }
 
-function clearScreen() {
+function clearCanvas() {
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
-function setLineStyle(type) {
-  if (type == "wall") {
-    ctx.lineWidth = 0.03;
-    ctx.strokeStyle = "#000000";
-  } else if (type == "path") {
-    ctx.lineWidth = 0.03;
-    ctx.strokeStyle = "#FF4500";
-  } else {
-    ctx.lineWidth = 0.01;
-    ctx.strokeStyle = "#AAAAAA";
-  };
 }
 
 function drawTarget() {
@@ -95,8 +82,9 @@ function drawTarget() {
 }
 
 function drawPath() {
+  ctx.lineWidth = 0.03;
+  ctx.strokeStyle = "#FF4500";
 
-  setLineStyle("path");
   ctx.beginPath();
   if (plannedPath.length > 0) {
     ctx.beginPath();
@@ -106,21 +94,6 @@ function drawPath() {
     }
     ctx.stroke();
   }
-
-  return;
-
-  if (robotPath.length > 0) {
-    ctx.save();
-    ctx.translate(0.2,0.2);
-    setLineStyle("path");
-    for (var i = 0; i < robotPath.length - 1; i++) {
-      ctx.beginPath();
-      ctx.moveTo(0.4*robotPath[i].row, 0.4*robotPath[i].col);
-      ctx.lineTo(0.4*robotPath[i + 1].row, 0.4*robotPath[i + 1].col);
-      ctx.stroke();
-    };
-    ctx.restore();
-  };
 }
 
 function drawGlobalFrame() {
@@ -140,9 +113,9 @@ function drawGlobalFrame() {
 }
 
 function drawLaserScan() {
-  ctx.save();
   ctx.rotate(Math.PI);
   ctx.fillStyle = "#9C27B0";
+  ctx.save();
   var rectHeight = 0.02;
   var rectWidth = 0.02;
   for (var i = 0; i < 360; i++) {
@@ -155,11 +128,14 @@ function drawLaserScan() {
 }
 
 function drawGrid() {
+  ctx.lineWidth = 0.01;
+  ctx.strokeStyle = "#AAAAAA";
+
   ctx.save();
   ctx.translate(0,0.2);
   var rows = 26; // (10 / 0.4) + 1
   var cols = 51; // ((10 / 0.4) * 2) + 1
-  setLineStyle("normal");
+
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
     ctx.beginPath();
@@ -178,7 +154,9 @@ function drawGrid() {
 }
 
 function drawWalls() {
-  setLineStyle("wall");
+  ctx.lineWidth = 0.03;
+  ctx.strokeStyle = "#000000";
+
   var currRow;
   var currCol;
   // Horizontal walls
