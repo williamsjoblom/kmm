@@ -11,6 +11,7 @@ var view = {
   },
   isDragging: false,
   prevDragPos: { x: 0, y: 0 },
+  state: "global",
   PX_PER_METER: 120
 };
 

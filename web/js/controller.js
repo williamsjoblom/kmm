@@ -4,9 +4,6 @@ $(document).ready(function () {
   // Bind key, scroll, click events.
   bindEvents();
 
-  // Initiate view state.
-  toggleViewState();
-
   // Set initial canvas size.
   resizeCanvas();
   // Bind the window resize event. If the window
@@ -64,29 +61,19 @@ function resizeCanvas() {
 // Toggle view state of map between global and local.
 function toggleViewState() {
   var $viewStateElem = $("#view-state-button");
-  if ($viewStateElem.html() === "Global") {
+  if (view.state == "global") {
     $viewStateElem.html("Local");
+    view.state = "local";
   } else {
     $viewStateElem.html("Global");
-    view.pan.x = 0;
-    view.pan.y = 0;
+    view.state = "global";
+    centerView();
   }
-}
-
-function updateView() {
-  var $viewStateElem = $("#view-state-button");
-  if ($viewStateElem.html() === "Local") {
-    view.pan.x = -robot.position.x * view.zoom;
-    view.pan.y = -robot.position.y * view.zoom;
-  };
 }
 
 function centerView() {
-  var $viewStateElem = $("#view-state-button");
-  if ($viewStateElem.html() === "Global") {
-    view.pan.x = 0;
-    view.pan.y = 0;
-  }
+  view.pan.x = 0;
+  view.pan.y = 0;
 }
 
 function zoomIn() {

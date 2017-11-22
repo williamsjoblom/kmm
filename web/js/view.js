@@ -42,7 +42,14 @@ function render() {
   ctx.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
   ctx.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
   ctx.scale(-view.PX_PER_METER, view.PX_PER_METER);
-  ctx.translate(-2, 0);
+
+  // Different view states.
+  if (view.state == "global") {
+    ctx.translate(-2, 0);
+  } else {
+    view.pan.x = -robot.position.x * view.zoom;
+    view.pan.y = -robot.position.y * view.zoom;
+  }
 
   // View settings
   ctx.translate(view.pan.x, view.pan.y);
@@ -53,7 +60,6 @@ function render() {
   drawWalls();
   drawEndPoints();
   drawGlobalFrame();
-  drawVelocity();
   drawTarget();
   drawPath();
 
@@ -62,6 +68,7 @@ function render() {
     ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
     ctx.rotate(robot.position.angle);
     drawLaserScan();
+    drawVelocity();
     drawRobot();
     ctx.restore();
   }
@@ -94,22 +101,6 @@ function drawPath() {
     }
     ctx.stroke();
   }
-}
-
-function drawGlobalFrame() {
-  ctx.lineWidth = 0.03;
-  // Draw x axis in red
-  ctx.strokeStyle = "#FF0000";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0.6, 0);
-  ctx.stroke();
-  // Draw y axis in green
-  ctx.strokeStyle = "#00FF00";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, 0.6);
-  ctx.stroke();
 }
 
 function drawLaserScan() {
@@ -189,31 +180,26 @@ function drawEndPoints() {
 
 function drawGlobalFrame() {
   ctx.lineWidth = 0.02;
-  var arrowHeadOffset = 0.07;
   var axisLength = 0.8;
-  // Draw x axis in red
+
+  // Draw X axis in red.
   ctx.strokeStyle = "#FF0000";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(axisLength, 0);
-  ctx.lineTo(axisLength - arrowHeadOffset, arrowHeadOffset);
-  ctx.moveTo(axisLength, 0);
-  ctx.lineTo(axisLength - arrowHeadOffset, -arrowHeadOffset);
-  ctx.stroke();
-  // Draw y axis in green
+  drawArrow(
+    { x: 0, y: 0 },
+    { x: axisLength, y: 0 }
+  );
+
+  // Draw Y axis in green.
   ctx.strokeStyle = "#00FF00";
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(0, axisLength);
-  ctx.lineTo(arrowHeadOffset, axisLength - arrowHeadOffset);
-  ctx.moveTo(0, axisLength);
-  ctx.lineTo(-arrowHeadOffset, axisLength - arrowHeadOffset);
-  ctx.stroke();
+  drawArrow(
+    { x: 0, y: 0 },
+    { x: 0, y: axisLength }
+  );
 }
 
 function drawRobot() {
   ctx.save();
-  ctx.rotate(Math.PI / 2);
+  ctx.rotate(-Math.PI / 2);
   var width_height_proportions = 0.9;
   var width = 0.3;
   var height = width * width_height_proportions;
@@ -221,43 +207,48 @@ function drawRobot() {
   ctx.restore();
 }
 
-function drawArrow(fromx, fromy, tox, toy){
-  var headlen = 0.1;   // length of head in pixels
-  var angle = Math.atan2(toy-fromy,tox-fromx);
+function drawArrow(from, to){
+  var headlen = 0.1;
+  var angle = Math.atan2(to.y - from.y, to.x - from.x);
+  var cos1 = Math.cos(angle - Math.PI / 6);
+  var sin1 = Math.sin(angle - Math.PI / 6);
+  var cos2 = Math.cos(angle + Math.PI / 6);
+  var sin2 = Math.sin(angle + Math.PI / 6);
 
+  ctx.beginPath();
+  ctx.moveTo(from.x, from.y);
+  ctx.lineTo(to.x, to.y);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(to.x, to.y);
+  ctx.lineTo(to.x - headlen * cos1, to.y - headlen * sin1);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(to.x, to.y);
+  ctx.lineTo(to.x - headlen * cos2, to.y - headlen * sin2);
+  ctx.stroke();
+}
+
+function drawAcceleration() {
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 0.02;
-
-  ctx.beginPath();
-  ctx.moveTo(fromx, fromy);
-  ctx.lineTo(tox, toy);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(tox, toy);
-  ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(tox, toy);
-  ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
-  ctx.stroke();
+  var from = { x: 0, y: 0 };
+  var to = robot.acceleration;
+  drawArrow(from, to);
 }
 
-function drawAcceleration(){
-  var fromx = robot.position.x;
-  var fromy = robot.position.y;
-  var tox = fromx + robot.acceleration.x;
-  var toy = fromy + robot.acceleration.y;
-
-  drawArrow(fromx, fromy, tox, toy);
-}
-
-function drawVelocity(){
-  var fromx = robot.position.x;
-  var fromy = robot.position.y;
-  var tox = fromx + robot.velocity.x * 2;
-  var toy = fromy + robot.velocity.y * 2;
-
-  drawArrow(fromx, fromy, tox, toy);
+function drawVelocity() {
+  ctx.strokeStyle = "#000000";
+  ctx.lineWidth = 0.02;
+  var from = { x: 0, y: 0 };
+  var to = {
+    x: robot.velocity.x * 2,
+    y: robot.velocity.y * 2
+  };
+  ctx.save();
+  ctx.rotate(Math.PI);
+  drawArrow(from, to);
+  ctx.restore();
 }
