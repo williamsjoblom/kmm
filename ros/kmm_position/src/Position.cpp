@@ -12,7 +12,8 @@ namespace kmm_position {
     // Publishers
     aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
     position_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("position", 1);
-    broadcast_timer_ = nh_.createTimer(ros::Duration(0.05), &Position::broadcast_position, this);
+    broadcast_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 50), &Position::broadcast_robot_pose, this);
+    publish_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 10), &Position::publish_robot_pose, this);
 
     // Subscribers
     laser_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(nh_, "scan", 10);
@@ -56,13 +57,15 @@ namespace kmm_position {
       float x = cloud.points[i].x;
       float y = cloud.points[i].y;
       Eigen::Vector2f p(x, y);
-      if ((p - pos).norm() < 2) {
+      // Only use data points that are within a certain proximity.
+      float proximity = 2;
+      if ((p - pos).norm() < proximity) {
         scan.push_back(p);
       }
     }
 
     std::vector<Eigen::Vector2f> aligned;
-    Pose result = get_transform_pose(scan, aligned, 10);
+    Pose result = get_transform_pose(scan, aligned, 5);
     state[0] = result.pos[0];
     state[1] = result.pos[1];
     state[2] = result.angle;
@@ -84,18 +87,29 @@ namespace kmm_position {
     aligned_scan_pub_.publish(cloud);
   }
 
-  void Position::broadcast_position(const ros::TimerEvent&) {
+  void Position::broadcast_robot_pose(const ros::TimerEvent&) {
+    // Get robot state (x, y, angle).
     Eigen::Vector3f state = kalman_.get_state();
-    Eigen::Matrix3f state_cov = kalman_.get_state_cov();
-
     tf::Vector3 position(state[0], state[1], 0);
     tf::Quaternion orientation;
     orientation.setEuler(0, 0, state[2]);
+
+    // Broadcast to TF.
     tf_broadcaster_.sendTransform(
       tf::StampedTransform(
         tf::Transform(orientation, position),
         ros::Time::now(), "map", "base_link"));
+  }
 
+  void Position::publish_robot_pose(const ros::TimerEvent&) {
+    // Get robot state (x, y, angle).
+    Eigen::Vector3f state = kalman_.get_state();
+    Eigen::Matrix3f state_cov = kalman_.get_state_cov();
+    tf::Vector3 position(state[0], state[1], 0);
+    tf::Quaternion orientation;
+    orientation.setEuler(0, 0, state[2]);
+
+    // Create message and publish.
     geometry_msgs::PoseWithCovarianceStamped msg;
     msg.header.frame_id = "map";
     msg.pose.pose.position.x = state[0];
