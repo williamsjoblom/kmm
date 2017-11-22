@@ -72,6 +72,11 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+# Declare a C++ library
+add_library(${PROJECT_NAME}
+  nodes/kmm_navigation_node.cpp
+)
+
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
@@ -88,14 +93,14 @@ add_dependencies(kmm_navigation_node
   ${catkin_EXPORTED_TARGETS}
 )
 
+## Specify libraries to link a library or executable target against
+target_link_libraries(kmm_navigation_node
+  ${catkin_LIBRARIES}
+)
+
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
   PATTERN ".svn" EXCLUDE
-)
-
-# Declare a C++ library
-add_library(${PROJECT_NAME}
-  nodes/kmm_navigation_node.cpp
 )
