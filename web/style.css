@@ -123,6 +123,6 @@ html, body {
   height: 36px;
   cursor: pointer;
   background: rgba(0,0,0,0);
-  background: url("centerViewButton.png") center no-repeat;
+  background: url("img/centerViewButton.png") center no-repeat;
   background-size: cover;
 }

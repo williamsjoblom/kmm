@@ -36,8 +36,11 @@ var robot = {
     x: 0,
     y: 0,
     angle: 0
-  }
+  },
+  image: new Image()
 };
+
+robot.image.src = "img/robot.png";
 
 // Setup ROS connection
 var ros = new ROSLIB.Ros({

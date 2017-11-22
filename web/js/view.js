@@ -48,18 +48,23 @@ function render() {
   ctx.translate(view.pan.x, view.pan.y);
   ctx.scale(view.zoom, view.zoom);
 
+  // Global frame
   drawGrid();
   drawWalls();
   drawEndPoints();
   drawGlobalFrame();
-  drawRobot();
-  updateView();
-  //drawAcceleration();
   drawVelocity();
-  drawLaserScan(laserScan);
   drawTarget();
   drawPath();
 
+  { // Robot frame
+    ctx.save();
+    ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
+    ctx.rotate(robot.position.angle);
+    drawLaserScan();
+    drawRobot();
+    ctx.restore();
+  }
 
   ctx.restore();
 }
@@ -134,10 +139,9 @@ function drawGlobalFrame() {
   ctx.stroke();
 }
 
-function drawLaserScan(laserScan) {
+function drawLaserScan() {
   ctx.save();
-  ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-  ctx.rotate(robot.position.angle - Math.PI);
+  ctx.rotate(Math.PI);
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
@@ -230,14 +234,13 @@ function drawGlobalFrame() {
 }
 
 function drawRobot() {
-  ctx.fillStyle = "#0000FF";
+  ctx.save();
+  ctx.rotate(Math.PI / 2);
   var width_height_proportions = 0.9;
   var width = 0.3;
   var height = width * width_height_proportions;
-
-  var img=document.getElementById("robot");
-
-  ctx.drawImage(img, robot.position.x - width / 2, robot.position.y - height / 2, width, height)
+  ctx.drawImage(robot.image, width / -2, height / -2, width, height);
+  ctx.restore();
 }
 
 function drawArrow(fromx, fromy, tox, toy){
