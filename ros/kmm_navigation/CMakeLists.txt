@@ -14,6 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   laser_geometry
+  actionlib_msgs
+  actionlib
+  nav_msgs
 )
 
 ################################################
@@ -25,13 +28,17 @@ find_package(catkin REQUIRED COMPONENTS
 # FILES
 #)
 
+## Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  MoveTo.action
+)
+
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(
-# DEPENDENCIES
-# geometry_msgs
-# sensor_msgs
-# std_msgs
-#)
+generate_messages(
+ DEPENDENCIES
+ actionlib_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -48,8 +55,8 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   INCLUDE_DIRS include
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime
   LIBRARIES kmm_navigation
   # DEPENDS system_lib
 )
@@ -79,9 +86,26 @@ target_link_libraries(kmm_navigation_node
   ${catkin_LIBRARIES}
 )
 
+add_executable(kmm_smooth_node
+  nodes/kmm_smooth_node.cpp
+  src/Smooth.cpp
+  src/Map.cpp
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_navigation_node
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
+
+# Declare a C++ library
+add_library(${PROJECT_NAME}
+  nodes/kmm_navigation_node.cpp
 )

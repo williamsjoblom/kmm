@@ -208,6 +208,20 @@ function drawTarget() {
 }
 
 function drawPath() {
+
+  setLineStyle("path");
+  ctx.beginPath();
+  if (plannedPath.length > 0) {
+    ctx.beginPath();
+    ctx.moveTo(plannedPath[0].x, plannedPath[0].y);
+    for (var i = 1; i < plannedPath.length; i++) {
+      ctx.lineTo(plannedPath[i].x, plannedPath[i].y);
+    }
+    ctx.stroke();
+  }
+
+  return;
+
   if (robotPath.length > 0) {
     ctx.save();
     ctx.translate(0.2,0.2);
@@ -441,15 +455,11 @@ var pathListener = new ROSLIB.Topic({
   messageType: 'geometry_msgs/PoseArray'
 })
 
-var robotPath = [];
+var plannedPath = [];
 pathListener.subscribe(function(message) {
-  var cell;
-  robotPath = [];
-  for (var i = 0; i < message.poses.length; i++) {
-    cell = Object.freeze({'row': Math.round(message.poses[i].position.x),
-      'col': Math.round(message.poses[i].position.y)});
-    robotPath.push(cell);
-  };
+  plannedPath = message.poses.map(function (pose) {
+    return { x: pose.position.x, y: pose.position.y };
+  });
 });
 
 var targetPositionListener = new ROSLIB.Topic({
@@ -474,18 +484,6 @@ robotPositionListener.subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
   robot.position.angle = message.pose.pose.orientation.z;
-});
-
-var robotTargetListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/target_position',
-  messageType: 'geometry_msgs/Twist'
-})
-
-robotTargetListener.subscribe(function(message) {
-  robot.target.x = message.linear.x;
-  robot.target.y = message.linear.y;
-  robot.target.angle = message.angular.z;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({

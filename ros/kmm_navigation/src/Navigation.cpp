@@ -1,9 +1,10 @@
 #include "kmm_navigation/Navigation.hpp"
+#include "kmm_navigation/MoveToGoal.h"
 
 namespace kmm_navigation {
 
   Navigation::Navigation(ros::NodeHandle nh)
-  : nh_(nh), map_(53) {
+  : nh_(nh), map_(53), action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
 
@@ -18,6 +19,8 @@ namespace kmm_navigation {
         cells_[row][col] = make_cell(row, col - 25);
       };
     };
+
+    action_server_.start();
   }
 
   Navigation::~Navigation() {
@@ -27,6 +30,29 @@ namespace kmm_navigation {
         delete cells_[row][col];
       };
     };
+  }
+
+  void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
+    ROS_INFO("Got new navigation request to x: %.2f, y: %.2f, angle: %.2f", goal->x, goal->y, goal->angle);
+
+    ros::Rate rate(3);
+
+    ROS_INFO("Räkna ut path med dijikstra...");
+
+    while (true) {
+      ROS_INFO("Gör aktiv reglering för att följa pathen...");
+
+      if (action_server_.isPreemptRequested() || !ros::ok()) {
+        ROS_INFO("Oj, navigeringen avbröts av klienten!");
+        action_server_.setPreempted();
+        return;
+      }
+
+      rate.sleep();
+    }
+
+    ROS_INFO("Roboten åkte hela vägen fram till target!");
+    action_server_.setSucceeded(result_);
   }
 
   void Navigation::wall_array_callback(std_msgs::Int8MultiArray msg) {
@@ -102,9 +128,11 @@ namespace kmm_navigation {
         };
       };
     }
-    return get_path(start, end);
+    std::vector<Eigen::Vector2f> path = get_path(start, end);
+    std::vector<Eigen::Vector2f> smooth = make_smooth(path);
+    return smooth;
   }
-
+  
   /*
    * Sort old_queue by reconstructing it and returning new_queue.
    */
@@ -164,13 +192,34 @@ namespace kmm_navigation {
     if (foundEnd) {
       Cell* backtracker = end;
       while (backtracker != start) {
-          path.push_back(Eigen::Vector2f(backtracker->row, backtracker->col));
+          path.push_back(Eigen::Vector2f(0.2 + 0.4 * backtracker->row, 0.2 + 0.4 * backtracker->col));
           backtracker = backtracker->previous;
       }
-      path.push_back(Eigen::Vector2f(start->row, start->col));
+      path.push_back(Eigen::Vector2f(0.2 + 0.4 * start->row, 0.2 + 0.4 * start->col));
       reverse(path.begin(), path.end());
     }
     return path;
+  }
+
+  std::vector<Eigen::Vector2f> Navigation::make_smooth(const std::vector<Eigen::Vector2f>& path) {
+    if (path.size() < 3) {
+      return path;
+    }
+    int resolution = 10;
+    std::vector<Eigen::Vector2f> smooth;
+    smooth.push_back(path[0]);
+    for (int i = 0; i < path.size() - 2; i++) {
+      for (int t = 0; t < resolution; t++) {
+        float s = 0.2 * t / resolution;
+        Eigen::Vector2f first = path[i+1] + (path[i] - path[i+1]).normalized() * (0.2 - s);
+        Eigen::Vector2f second = path[i+1] + (path[i+2] - path[i+1]).normalized() * s;
+        Eigen::Vector2f point = first + (second - first) * s / 0.2;
+        smooth.push_back(point);
+      }
+    }
+    smooth.push_back(path[path.size()-1]);
+
+    return smooth;
   }
 
   void Navigation::publish_path(std::vector<Eigen::Vector2f> path) {
