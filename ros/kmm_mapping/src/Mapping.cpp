@@ -21,6 +21,10 @@ namespace kmm_mapping {
     wall_arr_msg_.layout.dim[0].size = wall_vec_.size();
     wall_arr_msg_.layout.dim[0].stride = 1;
     wall_arr_msg_.layout.dim[0].label = "x";
+
+    // Wall point count requirements
+    pnt_cnt_req_ = 7;
+    times_req_ = 5;
   }
 
   Mapping::~Mapping() {
@@ -94,22 +98,27 @@ namespace kmm_mapping {
     };
   }
 
-  /* Increment the wall point count of a wall. Creates a new one with count 1 if missing. */
+  /*
+   * Increment the wall point count (pnt_cnt) of a wall.
+   * Creates a new one with pnt_cnt 1 if WallPointCount is missing.
+   * If pnt_cnt gets high enough, increment times.
+   * If times gets high enough, add wall and update end points.
+   */
   void Mapping::increment_wall_point_count(
       std::vector<WallPointCount>& wall_point_counts,
       bool horizontal, int row, int col) {
     int existing_wall_row;
     int existing_wall_col;
-    for (std::vector<WallPointCount>::iterator it = wall_point_counts.begin();
-        it != wall_point_counts.end(); it++) {
-      existing_wall_row = (*it).position[0];
-      existing_wall_col = (*it).position[1];
+    for (int i = 0; i < wall_point_counts.size(); i++) {
+      existing_wall_row = wall_point_counts[i].position[0];
+      existing_wall_col = wall_point_counts[i].position[1];
       if ((existing_wall_row == row) && (existing_wall_col == col)) {
-        (*it).pnt_cnt++;
-        if ((*it).pnt_cnt == pnt_cnt_req_ && !(*it).published) {
-          (*it).times++;
-          if ((*it).times == times_req_) {
-            (*it).published = true;
+        wall_point_counts[i].pnt_cnt++;
+        if (wall_point_counts[i].pnt_cnt == pnt_cnt_req_ &&
+            !wall_point_counts[i].published) {
+          wall_point_counts[i].times++;
+          if (wall_point_counts[i].times == times_req_) {
+            wall_point_counts[i].published = true;
             add_wall(row, col, horizontal);
             update_end_points(row, col, horizontal);
           };
@@ -121,6 +130,9 @@ namespace kmm_mapping {
     return;
   }
 
+  /*
+   * Add wall to wall_positions_msg_ and wall_vec_.
+   */
   void Mapping::add_wall(int row, int col, bool horizontal) {
     int w = 53; // Grid width
     int offset = (w - 1) / 2;
@@ -200,8 +212,8 @@ namespace kmm_mapping {
 
   void Mapping::publish_wall_array() {
     wall_arr_msg_.data.clear();
-    for (std::vector<int>::const_iterator it = wall_vec_.begin(); it != wall_vec_.end(); ++it) {
-        wall_arr_msg_.data.push_back(*it);
+    for (int i = 0; i < wall_vec_.size(); ++i) {
+        wall_arr_msg_.data.push_back(wall_vec_[i]);
     }
     mapping_wall_arr_pub_.publish(wall_arr_msg_);
   }
