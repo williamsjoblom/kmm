@@ -81,16 +81,6 @@ add_executable(kmm_navigation_node
   src/Map.cpp
 )
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(kmm_navigation_node
-  ${catkin_LIBRARIES}
-)
-
-add_executable(kmm_smooth_node
-  nodes/kmm_smooth_node.cpp
-  src/Smooth.cpp
-  src/Map.cpp
-
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_navigation_node

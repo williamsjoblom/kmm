@@ -151,7 +151,9 @@ add_executable(kmm_exploration_node
 ## same as for the library above
 add_dependencies(kmm_exploration_node
   ${kmm_exploration_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS})
+  ${catkin_EXPORTED_TARGETS}
+  kmm_navigation # MoveTo.action
+)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_exploration_node
