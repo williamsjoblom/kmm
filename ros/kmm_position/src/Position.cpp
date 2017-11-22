@@ -62,7 +62,7 @@ namespace kmm_position {
     }
 
     std::vector<Eigen::Vector2f> aligned;
-    Pose result = get_transform_pose(scan, aligned, 5);
+    Pose result = get_transform_pose(scan, aligned, 10);
     state[0] = result.pos[0];
     state[1] = result.pos[1];
     state[2] = result.angle;

@@ -45,17 +45,17 @@ setInterval(updateDom, 100);
 
 function updateDom() {
   //Position
-  $("#pos-x").html(decimal(robot.position.x, 1));
-  $("#pos-y").html(decimal(robot.position.y, 1));
-  $("#theta").html(decimal(robot.position.angle, 1) + " rad");
+  $("#pos-x").html(decimal(robot.position.x, 2));
+  $("#pos-y").html(decimal(robot.position.y, 2));
+  $("#theta").html(decimal(robot.position.angle, 2) + " rad");
   //Target
   $("#tar-pos-x").html(decimal(robot.target.x, 1));
   $("#tar-pos-y").html(decimal(robot.target.y, 1));
-  $("#tar-theta").html(decimal(robot.target.angle, 1) + " rad");
+  $("#tar-theta").html(decimal(robot.target.angle, 2) + " rad");
   //Velocity
-  $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
-  $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
-  $("#vel-w").html(decimal(robot.velocity.w, 1) + " rad/s");
+  $("#vel-x").html(decimal(robot.velocity.x, 2) + " m/s");
+  $("#vel-y").html(decimal(robot.velocity.y, 2) + " m/s");
+  $("#vel-w").html(decimal(robot.velocity.w, 2) + " rad/s");
   //Wheel velocity
   $("#w-vel-1").html(decimal(robot.wheelVelocities[0], 1) + " rad/s");
   $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 1) + " rad/s");
@@ -255,7 +255,8 @@ function drawGlobalFrame() {
 function drawLaserScan(laserScan) {
   ctx.save();
   ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-  ctx.rotate(robot.position.angle - Math.PI);
+  var rotation = robot.position.angle*Math.PI + Math.PI;
+  ctx.rotate(rotation);
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
