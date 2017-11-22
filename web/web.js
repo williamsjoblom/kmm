@@ -349,8 +349,13 @@ function drawGlobalFrame() {
 
 function drawRobot() {
   ctx.fillStyle = "#0000FF";
-  var sideLength = 0.1;
-  ctx.fillRect(robot.position.x - sideLength / 2, robot.position.y - sideLength / 2, sideLength, sideLength);
+  var width_height_proportions = 0.9;
+  var width = 0.3;
+  var height = width * width_height_proportions;
+
+  var img=document.getElementById("robot");
+
+  ctx.drawImage(img, robot.position.x - width / 2, robot.position.y - height / 2, width, height)
 }
 
 function drawArrow(fromx, fromy, tox, toy){
