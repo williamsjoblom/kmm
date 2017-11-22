@@ -23,7 +23,7 @@ private:
   Map map_;
   ros::NodeHandle nh_;
   ros::Timer timer_;
-  ros::Publisher path_pub_;
+  ros::Publisher not_smooth_pub_;
   ros::Publisher smooth_pub_;
 };
 

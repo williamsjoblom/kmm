@@ -8,7 +8,7 @@ namespace kmm_navigation {
     // Fill map here...
     // map_.....
 
-    path_pub_ = nh_.advertise<nav_msgs::Path>("path", 1);
+    not_smooth_pub_ = nh_.advertise<nav_msgs::Path>("not_smooth", 1);
     smooth_pub_ = nh_.advertise<nav_msgs::Path>("smooth", 1);
     timer_ = nh_.createTimer(ros::Duration(1), &Smooth::timer_callback, this);
   }
@@ -19,21 +19,15 @@ namespace kmm_navigation {
 
   void Smooth::timer_callback(const ros::TimerEvent&) {
 
-
-
     std::vector<Eigen::Vector2f> not_smooth;
     not_smooth.push_back(Eigen::Vector2f(0.2, 0.2));
     not_smooth.push_back(Eigen::Vector2f(0.2 + 0.4, 0.2));
     not_smooth.push_back(Eigen::Vector2f(0.2 + 0.4, 0.2 + 0.4));
 
-    // Do shit
     std::vector<Eigen::Vector2f> smooth = make_smooth(not_smooth);
 
-    path_pub_.publish(path_to_msg(not_smooth));
+    not_smooth_pub_.publish(path_to_msg(not_smooth));
     smooth_pub_.publish(path_to_msg(smooth));
-
-
-
 
   }
 
