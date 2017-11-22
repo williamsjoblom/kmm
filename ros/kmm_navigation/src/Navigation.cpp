@@ -54,67 +54,60 @@ namespace kmm_navigation {
   }
 
   void Navigation::target_position_callback(geometry_msgs::Twist msg) {
-    // Find path from current postion to target position
+    // Get pointers to start and end cells from current position to target.
     Eigen::Vector2f start_cell = map_.get_cell(pos_);
     Eigen::Vector2f end_position(msg.linear.x, msg.linear.y);
     Eigen::Vector2f end_cell = map_.get_cell(end_position);
     Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + 25];
     Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + 25];
+    // Find path
     std::vector<Eigen::Vector2f> path = find_path(start, end);
-    // Construct message
-    path_msg_.poses.clear();
-    for (int i = 0; i < path.size(); i++) {
-      geometry_msgs::Pose pose;
-      geometry_msgs::Point cell;
-      cell.x = path[i].x();
-      cell.y = path[i].y();
-      cell.z = 0;
-      pose.position = cell;
-      path_msg_.poses.push_back(pose);
-    }
-    path_pub_.publish(path_msg_);
+    publish_path(path);
     return;
   }
 
   /*
- * Finds the cheapest path between start and end using the dijikstra algorithm.
- */
-std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
-  reset_cells();
-  std::priority_queue<Cell> cell_queue;
-  start->cost = 0;
-  cell_queue.push(*start);
-  Cell* curr_cell;
-  std::set<Cell*> curr_neighbors;
-  double alt_cost;
-  while (!cell_queue.empty()) {
-    Cell next_cell = cell_queue.top();
-    curr_cell = cells_[next_cell.row][next_cell.col + 25];
-    cell_queue.pop();
-    if (curr_cell == end) {
-      break;
-    };
-    curr_neighbors = get_neighbors(curr_cell);
-    // Calculates and updates lowest costs and changes
-    // the priority of neighbors if needed.
-    alt_cost = curr_cell->cost + 1;
-    for (std::set<Cell*>::iterator neighbor_it = curr_neighbors.begin();
-       neighbor_it != curr_neighbors.end(); neighbor_it++) {
-      if (alt_cost < (*neighbor_it)->cost) {
-        (*neighbor_it)->cost = alt_cost;
-        (*neighbor_it)->previous = curr_cell;
-        if ((*neighbor_it)->visited) {
-          cell_queue = get_resorted_queue(cell_queue);
-        } else {
-          (*neighbor_it)->visited = true;
-          cell_queue.push(**neighbor_it);
+   * Finds the cheapest path between start and end using the dijikstra algorithm.
+   */
+  std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
+    reset_cells();
+    std::priority_queue<Cell> cell_queue;
+    start->cost = 0;
+    cell_queue.push(*start);
+    Cell* curr_cell;
+    std::set<Cell*> curr_neighbors;
+    double alt_cost;
+    while (!cell_queue.empty()) {
+      Cell next_cell = cell_queue.top();
+      curr_cell = cells_[next_cell.row][next_cell.col + 25];
+      cell_queue.pop();
+      if (curr_cell == end) {
+        break;
+      };
+      curr_neighbors = get_neighbors(curr_cell);
+      // Calculates and updates lowest costs and changes
+      // the priority of neighbors if needed.
+      alt_cost = curr_cell->cost + 1;
+      for (std::set<Cell*>::iterator neighbor_it = curr_neighbors.begin();
+         neighbor_it != curr_neighbors.end(); neighbor_it++) {
+        if (alt_cost < (*neighbor_it)->cost) {
+          (*neighbor_it)->cost = alt_cost;
+          (*neighbor_it)->previous = curr_cell;
+          if ((*neighbor_it)->visited) {
+            cell_queue = get_resorted_queue(cell_queue);
+          } else {
+            (*neighbor_it)->visited = true;
+            cell_queue.push(**neighbor_it);
+          };
         };
       };
-    };
+    }
+    return get_path(start, end);
   }
-  return get_path(start, end);
-}
 
+  /*
+   * Sort old_queue by reconstructing it and returning new_queue.
+   */
   std::priority_queue<Cell> Navigation::get_resorted_queue(std::priority_queue<Cell> old_queue) {
     std::priority_queue<Cell> new_queue;
     for (int i = 0; i < old_queue.size(); i++) {
@@ -125,6 +118,9 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     return new_queue;
   }
 
+  /*
+   * Reset Cells that have been used for path finding so they can be used again.
+   */
   void Navigation::reset_cells() {
     for (int row = 0; row <= 25; row++) {
       // -25 <= col <= 25, extra 25 added to make non-negative!
@@ -137,6 +133,10 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
     return;
   }
 
+  /*
+   * Returns a set of neighbors of cell. A Neighbor is cell we can get to
+   * from cell. In other words an adjacent cell with no wall in between.
+   */
   std::set<Cell*> Navigation::get_neighbors(Cell* cell) {
     std::set<Cell*> neighbors;
     Eigen::Vector2f cell_vector(cell->row, cell->col);
@@ -171,5 +171,20 @@ std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
       reverse(path.begin(), path.end());
     }
     return path;
+  }
+
+  void Navigation::publish_path(std::vector<Eigen::Vector2f> path) {
+    path_msg_.poses.clear();
+    for (int i = 0; i < path.size(); i++) {
+      geometry_msgs::Pose pose;
+      geometry_msgs::Point cell;
+      cell.x = path[i].x();
+      cell.y = path[i].y();
+      cell.z = 0;
+      pose.position = cell;
+      path_msg_.poses.push_back(pose);
+    }
+    path_pub_.publish(path_msg_);
+    return;
   }
 }

@@ -21,6 +21,7 @@
 
 namespace kmm_navigation {
 
+// Represents cell in grid and used for path finding
 struct Cell {
   double cost;
   bool visited;
@@ -48,6 +49,7 @@ private:
   void reset_cells();
   std::set<Cell*> get_neighbors(Cell* cell);
   std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);
+  void publish_path(std::vector<Eigen::Vector2f> path);
 
   Map map_;
 
