@@ -120,8 +120,6 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   include
-  #lib/StanfordCPPLib
-  #lib/StanfordCPPLib/private
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -140,18 +138,6 @@ add_executable(kmm_navigation_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_navigation_node
-  ${catkin_LIBRARIES}
-)
-
-# Smooth node
-add_executable(kmm_smooth_node
-  nodes/kmm_smooth_node.cpp
-  src/Smooth.cpp
-  src/Map.cpp
-)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(kmm_smooth_node
   ${catkin_LIBRARIES}
 )
 
