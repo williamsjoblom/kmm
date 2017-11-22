@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   actionlib_msgs
   actionlib
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -139,6 +140,18 @@ add_executable(kmm_navigation_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_navigation_node
+  ${catkin_LIBRARIES}
+)
+
+# Smooth node
+add_executable(kmm_smooth_node
+  nodes/kmm_smooth_node.cpp
+  src/Smooth.cpp
+  src/Map.cpp
+)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(kmm_smooth_node
   ${catkin_LIBRARIES}
 )
 
