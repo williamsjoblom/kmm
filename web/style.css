@@ -19,6 +19,8 @@ html, body {
   height: 50px;
   background: #222;
   color: #fff;
+  overflow: visible;
+  z-index: 9999;
 }
 
 .menu-option {
@@ -26,10 +28,25 @@ html, body {
   color: #f2f2f2;
   padding: 17px;
   cursor: pointer;
+  position: abolute;
 }
 
 .menu-option:hover {
   background-color: rgba(156, 39, 176, 0.8);
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  background: red;
+  width: 200px;
+  padding: 10px;
+  left: 0;
+  top: 50px;
+}
+
+.menu-option:hover .dropdown {
+  display: block;
 }
 
 .sidebar {

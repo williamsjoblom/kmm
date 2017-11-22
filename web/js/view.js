@@ -110,7 +110,7 @@ function drawLaserScan() {
   var rectHeight = 0.02;
   var rectWidth = 0.02;
   for (var i = 0; i < 360; i++) {
-    ctx.rotate(Math.PI/180);
+    ctx.rotate(Math.PI / 180);
     if (laserScan[i] > 0.1) {
       ctx.fillRect(laserScan[i] + (rectHeight/2), (rectWidth/2), rectWidth, rectHeight);
     };
