@@ -52,6 +52,13 @@ unsigned char motor1_direction = 0;
 unsigned char motor2_direction = 0;
 
 /**
+ * Enable.
+ */
+unsigned char motor0_enable = 0;
+unsigned char motor1_enable = 0;
+unsigned char motor2_enable = 0;
+
+/**
  * Speed.
  */
 unsigned int motor0_ticks = UINT_MAX;
@@ -112,7 +119,23 @@ void set_motor_speed(unsigned char motor, int speed) {
     }
 
     direction = motor2_direction | motor1_direction | motor0_direction;
-
+    
+    /* Disable motor drivers when all motors are stopped. */
+    int disable =
+	motor0_ticks == UINT_MAX &&
+	motor1_ticks == UINT_MAX &&
+	motor2_ticks == UINT_MAX;
+	
+    if (disable) {
+	motor0_enable = MOTOR0_DISABLE;
+	motor1_enable = MOTOR1_DISABLE;
+	motor2_enable = MOTOR2_DISABLE;
+    } else {
+	motor0_enable = 0;
+	motor1_enable = 0;
+	motor2_enable = 0;
+    }
+    
 #if ENABLE_TRACES
     printf("motor %i = %i rps/1000\r\n", motor, speed);
     printf("N time quanta = %u\r\n", ticks);
@@ -155,21 +178,21 @@ ISR(TIMER1_COMPA_vect) {
     }
 
     PORTB =
-	0b00000000 /* ENABLE MOTOR0 */ | motor0_step;
+	motor0_enable /* ENABLE MOTOR0 */ | motor0_step;
     PORTC =
 	motor0_direction;
     
     PORTD =
-	0b00000000 /* ENABLE MOTOR1 */ | motor1_step | motor1_direction |
-	0b00000000 /* ENABLE MOTOR2 */ | motor2_step | motor2_direction;
+	motor1_enable /* ENABLE MOTOR1 */ | motor1_step | motor1_direction |
+	motor2_enable /* ENABLE MOTOR2 */ | motor2_step | motor2_direction;
     
     
     for (int i = 0; i < 20; i++) { asm("nop"); }
 
     
-    PORTB = 0b00000000 /* ENABLE MOTOR0 */;
+    PORTB = motor0_enable /* ENABLE MOTOR0 */;
     
     PORTD =
-	0b00000000 /* ENABLE MOTOR1 */ | motor1_direction |
-	0b00000000 /* ENABLE MOTOR2 */ | motor2_direction;
+	motor1_enable /* ENABLE MOTOR1 */ | motor1_direction |
+	motor2_enable /* ENABLE MOTOR2 */ | motor2_direction;
 }
