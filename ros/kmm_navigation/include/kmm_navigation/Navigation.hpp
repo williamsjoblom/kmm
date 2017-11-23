@@ -18,8 +18,8 @@
 #include "std_msgs/MultiArrayLayout.h"
 #include "std_msgs/MultiArrayDimension.h"
 #include "std_msgs/Int8MultiArray.h"
-#include "kmm_navigation/MoveToAction.h"
 #include <actionlib/server/simple_action_server.h>
+#include <kmm_navigation/MoveToAction.h>
 
 namespace kmm_navigation {
 
@@ -43,7 +43,7 @@ public:
 
 private:
   void navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal);
-  void wall_array_callback(std_msgs::Int8MultiArray msg);
+  void walls_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   Cell* make_cell(int row, int col);
   void target_position_callback(geometry_msgs::Twist msg);
@@ -55,7 +55,7 @@ private:
   std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
   void publish_path(std::vector<Eigen::Vector2f> path);
 
-  Map map_;
+  Map* map_;
 
   ros::NodeHandle nh_;
   actionlib::SimpleActionServer<kmm_navigation::MoveToAction> action_server_;
@@ -63,12 +63,17 @@ private:
   kmm_navigation::MoveToResult result_;
 
   // Subscribers
-  ros::Subscriber wall_array_sub_;
+  ros::Subscriber walls_sub_;
   ros::Subscriber position_sub_;
   ros::Subscriber target_position_sub_;
 
   // Publishers
   ros::Publisher path_pub_;
+
+  // Map variables
+  int map_rows_;
+  int map_cols_;
+  float cell_size_;
 
   // Postition
   Eigen::Vector2f pos_;

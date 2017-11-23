@@ -4,19 +4,31 @@
 namespace kmm_navigation {
 
   Navigation::Navigation(ros::NodeHandle nh)
-  : nh_(nh), map_(53), action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
+  : nh_(nh),
+    action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
-
     // Subscribers
-    wall_array_sub_ = nh_.subscribe("wall_array", 1, &Navigation::wall_array_callback, this);
+    walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
     target_position_sub_ = nh_.subscribe("target_position", 1, &Navigation::target_position_callback, this);
 
+    // Get map variables
+    if (!nh_.getParam("/map_rows", map_rows_)) {
+        ROS_ERROR("Couldn't set map_rows!");
+    }
+    if (!nh_.getParam("/map_cols", map_cols_)) {
+        ROS_ERROR("Couldn't set map_cols!");
+    }
+    if (!nh_.getParam("/cell_size", cell_size_)) {
+        ROS_ERROR("Couldn't set cell_size!");
+    }
+    map_ = new Map(map_rows_, map_cols_, cell_size_);
+
     // Cells
-    for (int row = 0; row <= 25; row++) {
-      for (int col = 0; col <= 50; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
-        cells_[row][col] = make_cell(row, col - 25);
+    for (int row = 0; row < map_rows_; row++) {
+      for (int col = 0; col < map_cols_; col++) {
+        cells_[row][col] = make_cell(row, col - map_->offset_);
       };
     };
 
@@ -25,17 +37,18 @@ namespace kmm_navigation {
 
   Navigation::~Navigation() {
     // Delete cells
-    for (int row = 0; row <= 25; row++) {
-      for (int col = 0; col <= 50; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
+    for (int row = 0; row < map_rows_; row++) {
+      for (int col = 0; col < map_cols_; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
         delete cells_[row][col];
       };
     };
+    delete map_;
   }
 
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
     ROS_INFO("Got new navigation request to x: %.2f, y: %.2f, angle: %.2f", goal->x, goal->y, goal->angle);
 
-    ros::Rate rate(3);
+    ros::Rate rate(3); // 3 Hz
 
     ROS_INFO("Räkna ut path med dijikstra...");
 
@@ -55,9 +68,9 @@ namespace kmm_navigation {
     action_server_.setSucceeded(result_);
   }
 
-  void Navigation::wall_array_callback(std_msgs::Int8MultiArray msg) {
-    for (int i = 0; i < 1500; i++) {
-      map_.wall_arr_[i] = msg.data[i];
+  void Navigation::walls_callback(std_msgs::Int8MultiArray msg) {
+    for (int i = 0; i < map_->walls_size_; i++) {
+      map_->walls_[i] = msg.data[i];
     };
     return;
   }
@@ -81,11 +94,11 @@ namespace kmm_navigation {
 
   void Navigation::target_position_callback(geometry_msgs::Twist msg) {
     // Get pointers to start and end cells from current position to target.
-    Eigen::Vector2f start_cell = map_.get_cell(pos_);
+    Eigen::Vector2f start_cell = map_->get_cell(pos_);
     Eigen::Vector2f end_position(msg.linear.x, msg.linear.y);
-    Eigen::Vector2f end_cell = map_.get_cell(end_position);
-    Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + 25];
-    Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + 25];
+    Eigen::Vector2f end_cell = map_->get_cell(end_position);
+    Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->offset_];
+    Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + map_->offset_];
     // Find path
     std::vector<Eigen::Vector2f> path = find_path(start, end);
     publish_path(path);
@@ -105,7 +118,7 @@ namespace kmm_navigation {
     double alt_cost;
     while (!cell_queue.empty()) {
       Cell next_cell = cell_queue.top();
-      curr_cell = cells_[next_cell.row][next_cell.col + 25];
+      curr_cell = cells_[next_cell.row][next_cell.col + map_->offset_];
       cell_queue.pop();
       if (curr_cell == end) {
         break;
@@ -114,16 +127,15 @@ namespace kmm_navigation {
       // Calculates and updates lowest costs and changes
       // the priority of neighbors if needed.
       alt_cost = curr_cell->cost + 1;
-      for (std::set<Cell*>::iterator neighbor_it = curr_neighbors.begin();
-         neighbor_it != curr_neighbors.end(); neighbor_it++) {
-        if (alt_cost < (*neighbor_it)->cost) {
-          (*neighbor_it)->cost = alt_cost;
-          (*neighbor_it)->previous = curr_cell;
-          if ((*neighbor_it)->visited) {
+      for (Cell* neighbor : curr_neighbors) {
+        if (alt_cost < neighbor->cost) {
+          neighbor->cost = alt_cost;
+          neighbor->previous = curr_cell;
+          if (neighbor->visited) {
             cell_queue = get_resorted_queue(cell_queue);
           } else {
-            (*neighbor_it)->visited = true;
-            cell_queue.push(**neighbor_it);
+            neighbor->visited = true;
+            cell_queue.push(*neighbor);
           };
         };
       };
@@ -132,7 +144,7 @@ namespace kmm_navigation {
     std::vector<Eigen::Vector2f> smooth = make_smooth(path);
     return smooth;
   }
-  
+
   /*
    * Sort old_queue by reconstructing it and returning new_queue.
    */
@@ -140,7 +152,7 @@ namespace kmm_navigation {
     std::priority_queue<Cell> new_queue;
     for (int i = 0; i < old_queue.size(); i++) {
       Cell cell = old_queue.top();
-      new_queue.push(*cells_[cell.row][cell.col + 25]);
+      new_queue.push(*cells_[cell.row][cell.col + map_->offset_]);
       old_queue.pop();
     };
     return new_queue;
@@ -150,9 +162,8 @@ namespace kmm_navigation {
    * Reset Cells that have been used for path finding so they can be used again.
    */
   void Navigation::reset_cells() {
-    for (int row = 0; row <= 25; row++) {
-      // -25 <= col <= 25, extra 25 added to make non-negative!
-      for (int col = 0; col <= 50; col++) {
+    for (int row = 0; row < map_rows_; row++) {
+      for (int col = 0; col < map_cols_; col++) {
         cells_[row][col]->cost = std::numeric_limits<double>::infinity();
         cells_[row][col]->visited = false;
         cells_[row][col]->previous = nullptr;
@@ -168,17 +179,25 @@ namespace kmm_navigation {
   std::set<Cell*> Navigation::get_neighbors(Cell* cell) {
     std::set<Cell*> neighbors;
     Eigen::Vector2f cell_vector(cell->row, cell->col);
-    if (!map_.is_wall_above_cell(cell_vector) && cell->row < 25) {
-      neighbors.insert(cells_[cell->row + 1][cell->col + 25]);
+    bool cell_above_reachable = !map_->is_wall_above_cell(cell_vector) && cell->row < (map_rows_ - 1);
+    if (cell_above_reachable) {
+      Cell* above_neighbor = cells_[cell->row + 1][cell->col + map_->offset_];
+      neighbors.insert(above_neighbor);
     };
-    if (!map_.is_wall_below_cell(cell_vector) && cell->row > 0) {
-      neighbors.insert(cells_[cell->row - 1][cell->col + 25]);
+    bool cell_below_reachable = !map_->is_wall_below_cell(cell_vector) && cell->row > 0;
+    if (cell_below_reachable) {
+      Cell* below_neighbor = cells_[cell->row - 1][cell->col + map_->offset_];
+      neighbors.insert(below_neighbor);
     };
-    if (!map_.is_wall_left_cell(cell_vector) && cell->col < 25) {
-      neighbors.insert(cells_[cell->row][cell->col + 1 + 25]);
+    bool cell_left_reachable = !map_->is_wall_left_cell(cell_vector) && cell->col < map_->offset_;
+    if (cell_left_reachable) {
+      Cell* left_neighbor = cells_[cell->row][cell->col + 1 + map_->offset_];
+      neighbors.insert(left_neighbor);
     };
-    if (!map_.is_wall_right_cell(cell_vector) && cell->col > -25) {
-      neighbors.insert(cells_[cell->row][cell->col - 1 + 25]);
+    bool cell_right_reachable = !map_->is_wall_right_cell(cell_vector) && cell->col > -map_->offset_;
+    if (cell_right_reachable) {
+      Cell* right_neighbor = cells_[cell->row][cell->col - 1 + map_->offset_];
+      neighbors.insert(right_neighbor);
     };
     return neighbors;
   }
@@ -187,15 +206,21 @@ namespace kmm_navigation {
   * Backtracks from end to start and returns resulting path.
   */
   std::vector<Eigen::Vector2f> Navigation::get_path(Cell* start, Cell* end) {
+    float cell_center_x;
+    float cell_center_y;
     std::vector<Eigen::Vector2f> path;
     bool foundEnd = end->previous != nullptr;
     if (foundEnd) {
       Cell* backtracker = end;
       while (backtracker != start) {
-          path.push_back(Eigen::Vector2f(0.2 + 0.4 * backtracker->row, 0.2 + 0.4 * backtracker->col));
-          backtracker = backtracker->previous;
-      }
-      path.push_back(Eigen::Vector2f(0.2 + 0.4 * start->row, 0.2 + 0.4 * start->col));
+        cell_center_x = cell_size_/2 + cell_size_ * backtracker->row;
+        cell_center_y = cell_size_/2 + cell_size_ * backtracker->col;
+        path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
+        backtracker = backtracker->previous;
+      };
+      cell_center_x = cell_size_/2 + cell_size_ * start->row;
+      cell_center_y = cell_size_/2 + cell_size_ * start->col;
+      path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
       reverse(path.begin(), path.end());
     }
     return path;
@@ -224,11 +249,11 @@ namespace kmm_navigation {
 
   void Navigation::publish_path(std::vector<Eigen::Vector2f> path) {
     path_msg_.poses.clear();
-    for (int i = 0; i < path.size(); i++) {
+    for (Eigen::Vector2f& p : path) {
       geometry_msgs::Pose pose;
       geometry_msgs::Point cell;
-      cell.x = path[i].x();
-      cell.y = path[i].y();
+      cell.x = p.x();
+      cell.y = p.y();
       cell.z = 0;
       pose.position = cell;
       path_msg_.poses.push_back(pose);

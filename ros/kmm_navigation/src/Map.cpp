@@ -2,12 +2,16 @@
 
 namespace kmm_navigation {
 
-  Map::Map(int grid_width)
-  : w_(grid_width) {
+  Map::Map(int map_rows, int map_cols, float cell_size)
+  : h_(map_rows),
+    w_(map_cols),
+    cs_(cell_size) {
     offset_ = (w_ - 1) / 2;
-    // Initialize wall array with 0's.
-		for (int i = 0; i < 1500; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
-			wall_arr_[i] = 0;
+    walls_size_ = (w_ + (w_ + 1)) * h_ + w_;
+
+    // Initialize wall vector with 0's.
+		for (int i = 0; i < walls_size_; i++) {
+			walls_.push_back(0);
     };
   }
 
@@ -17,8 +21,8 @@ namespace kmm_navigation {
   Eigen::Vector2f Map::get_cell(Eigen::Vector2f grid_pos) {
     float x = grid_pos.x();
     float y = grid_pos.y();
-    float cell_x = ((x - 0.2) - remainder(x - 0.2, 0.4)) / 0.4;
-    float cell_y = ((y - 0.2) - remainder(y - 0.2, 0.4)) / 0.4;
+    float cell_x = ((x - (cs_/2)) - remainder(x - (cs_/2), cs_)) / cs_;
+    float cell_y = ((y - (cs_/2)) - remainder(y - (cs_/2), cs_)) / cs_;
     Eigen::Vector2f cell_pos;
     cell_pos[0] = cell_x;
     cell_pos[1] = cell_y;
@@ -29,43 +33,43 @@ namespace kmm_navigation {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = (x + 1)*(w_ + 1) + (x + 1)*w_ + offset_ + y;
-    if (index >= 1500) {
+    if (index >= walls_size_) {
       std::cout << "Function is_wall_above_cell() called with invalid cell!\n";
       return true;
     }
-    return Map::wall_arr_[index];
+    return Map::walls_[index];
   }
 
   bool Map::is_wall_below_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + x*w_ + offset_ + y;
-    if (index >= 1500) {
+    if (index >= walls_size_) {
       std::cout << "Function is_wall_below_cell() called with invalid cell!\n";
       return true;
     }
-    return wall_arr_[index];
+    return walls_[index];
   }
 
   bool Map::is_wall_right_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y;
-    if (index >= 1500) {
+    if (index >= walls_size_) {
       std::cout << "Function is_wall_right_cell() called with invalid cell!\n";
       return true;
     }
-    return wall_arr_[index];
+    return walls_[index];
   }
 
   bool Map::is_wall_left_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y + 1;
-    if (index >= 1500) {
+    if (index >= walls_size_) {
       std::cout << "Function is_wall_left_cell() called with invalid cell!\n";
       return true;
     }
-    return wall_arr_[index];
+    return walls_[index];
   }
 }
