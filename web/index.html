@@ -27,6 +27,7 @@
           </div>
         </div>
       </div>
+
       <div class="menu-option">
         Go to
       </div>
@@ -81,11 +82,11 @@
           </td>
         </tr>
         <tr>
-          <td>X:</td>
+          <td>X<sub>tar</sub>:</td>
           <td id="tar-pos-x"></td>
-          <td>Y:</td>
+          <td>Y<sub>tar</sub>:</td>
           <td id="tar-pos-y"></td>
-          <td>&theta;:</td>
+          <td>&theta;<sub>tar</sub>:</td>
           <td id="tar-theta"></td>
         </tr>
 
@@ -120,20 +121,6 @@
 
         <tr>
           <td colspan="6">
-            <center>Target Position</center>
-          </td>
-        </tr>
-        <tr>
-          <td>X<sub>tar</sub>:</td>
-          <td id="tar-pos-x"></td>
-          <td>Y<sub>tar</sub>:</td>
-          <td id="tar-pos-y"></td>
-          <td>&theta;<sub>tar</sub>:</td>
-          <td id="tar-theta"></td>
-        </tr>
-
-        <tr>
-          <td colspan="6">
             <center>Wheel Velocity</center>
           </td>
         </tr>
@@ -145,9 +132,23 @@
           <td>W<sub>3</sub>:</td>
           <td id="w-vel-3"></td>
         </tr>
+        <tr>
+          <td colspan="6">
+            <center>Mode</center>
+          </td>
+        </tr>
+        <tr>
+          <td id="manual-mode" colspan="2">Manual</td>
+          <td colspan="2">
+            <!-- Mode slider -->
+            <label class="switch">
+              <input id="mode-slider" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </td>
+          <td id="auto-mode" colspan="2">Autonomous</td>
       </table>
     </div>
-
     <script src="lib/jquery.min.js"></script>
     <script src="lib/roslib.js"></script>
     <script src="js/model.js"></script>

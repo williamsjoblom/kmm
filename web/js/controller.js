@@ -15,6 +15,7 @@ $(document).ready(function () {
 function bindEvents() {
   bindCanvasEvents();
   bindMenuEvents();
+  bindSidebarEvents();
 }
 
 function bindCanvasEvents() {
@@ -55,6 +56,15 @@ function bindMenuEvents() {
   });
 }
 
+function bindSidebarEvents() {
+  // Bind mode slider.
+  $("#mode-slider").click(toggleMode);
+  var bool = new ROSLIB.Message({
+    data : false
+  });
+  btnStatePub.publish(bool);
+}
+
 function resizeCanvas() {
   var $container = $("#map-container");
   ctx.canvas.width = $container.width();
@@ -71,7 +81,7 @@ function toggleViewState() {
     $viewStateElem.html("Global");
     view.state = "global";
     centerView();
-  }
+  };
 }
 
 function centerView() {
@@ -85,4 +95,12 @@ function zoomIn() {
 
 function zoomOut() {
   view.zoom *= 0.8;
+}
+
+function toggleMode() {
+  btnState = !btnState;
+  var bool = new ROSLIB.Message({
+    data : btnState
+  });
+  btnStatePub.publish(bool);
 }

@@ -200,3 +200,29 @@ var laserScanListener = new ROSLIB.Topic({
 laserScanListener.subscribe(function(message) {
   laserScan = message.points;
 });
+
+/* Subscriber and publisher for button state */
+var btnState = false;
+
+var btnStateSub = new ROSLIB.Topic({ // Subscriber
+  ros : ros,
+  name : '/btn_state',
+  messageType : 'std_msgs/Bool'
+});
+
+btnStateSub.subscribe(function(message) {
+  btnState = message.data;
+  if (btnState) {
+    console.log("Checked");
+    $("#mode-slider").prop("checked", true);
+  } else {
+    console.log("Unchecked");
+    $("#mode-slider").prop("checked", false);
+  };
+});
+
+var btnStatePub = new ROSLIB.Topic({ // Publisher
+  ros : ros,
+  name : '/btn_state',
+  messageType : 'std_msgs/Bool'
+});
