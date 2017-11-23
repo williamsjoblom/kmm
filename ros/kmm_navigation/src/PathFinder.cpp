@@ -1,90 +1,28 @@
-#include "kmm_navigation/Navigation.hpp"
+#include "kmm_navigation/PathFinder.hpp"
 #include "kmm_navigation/MoveToGoal.h"
 
 namespace kmm_navigation {
 
-  Navigation::Navigation(ros::NodeHandle nh)
-  : nh_(nh),
-    action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
+  PathFinder::PathFinder(Map* map) : map_(map) {
 
-    // Publishers
-    path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
-
-    // Subscribers
-    walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
-    position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
-    target_position_sub_ = nh_.subscribe("target_position", 1, &Navigation::target_position_callback, this);
-
-    // Get map variables
-    if (!nh_.getParam("/map_rows", map_rows_)) {
-        ROS_ERROR("Couldn't set map_rows!");
-    }
-    if (!nh_.getParam("/map_cols", map_cols_)) {
-        ROS_ERROR("Couldn't set map_cols!");
-    }
-    if (!nh_.getParam("/cell_size", cell_size_)) {
-        ROS_ERROR("Couldn't set cell_size!");
-    }
-    map_ = new Map(map_rows_, map_cols_, cell_size_);
-
-    // Cells
-    for (int row = 0; row < map_rows_; row++) {
-      for (int col = 0; col < map_cols_; col++) {
-        cells_[row][col] = make_cell(row, col - map_->offset_);
+    // Initiate cell array.
+    for (int row = 0; row < map_->getRows(); row++) {
+      for (int col = 0; col < map_->getCols(); col++) {
+        cells_[row][col] = make_cell(row, col - map_->getOffset());
       };
     };
-
-    action_server_.start();
   }
 
-  Navigation::~Navigation() {
+  PathFinder::~PathFinder() {
     // Delete cells
-    for (int row = 0; row < map_rows_; row++) {
-      for (int col = 0; col < map_cols_; col++) { // -25 <= col <= 25, extra 25 added to make non-negative!
+    for (int row = 0; row < map_->getRows(); row++) {
+      for (int col = 0; col < map_->getCols(); col++) {
         delete cells_[row][col];
       };
     };
-    delete map_;
   }
 
-  void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
-    ROS_INFO("Got new navigation request to x: %.2f, y: %.2f, angle: %.2f", goal->x, goal->y, goal->angle);
-
-    ros::Rate rate(3); // 3 Hz
-
-    ROS_INFO("Räkna ut path med dijikstra...");
-
-    while (true) {
-      ROS_INFO("Gör aktiv reglering för att följa pathen...");
-
-      if (action_server_.isPreemptRequested() || !ros::ok()) {
-        ROS_INFO("Oj, navigeringen avbröts av klienten!");
-        action_server_.setPreempted();
-        return;
-      }
-
-      rate.sleep();
-    }
-
-    ROS_INFO("Roboten åkte hela vägen fram till target!");
-    action_server_.setSucceeded(result_);
-  }
-
-  void Navigation::walls_callback(std_msgs::Int8MultiArray msg) {
-    for (int i = 0; i < map_->walls_size_; i++) {
-      map_->walls_[i] = msg.data[i];
-    };
-    return;
-  }
-
-  void Navigation::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
-    Eigen::Vector2f pos(msg.pose.pose.position.x, msg.pose.pose.position.y);
-    pos_[0] = pos.x();
-    pos_[1] = pos.y();
-    return;
-  }
-
-  Cell* Navigation::make_cell(int row, int col) {
+  Cell* PathFinder::make_cell(int row, int col) {
     Cell* cell = new Cell;
     cell->cost = std::numeric_limits<double>::infinity();
     cell->visited = false;
@@ -94,23 +32,10 @@ namespace kmm_navigation {
     return cell;
   }
 
-  void Navigation::target_position_callback(geometry_msgs::Twist msg) {
-    // Get pointers to start and end cells from current position to target.
-    Eigen::Vector2f start_cell = map_->get_cell(pos_);
-    Eigen::Vector2f end_position(msg.linear.x, msg.linear.y);
-    Eigen::Vector2f end_cell = map_->get_cell(end_position);
-    Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->offset_];
-    Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + map_->offset_];
-    // Find path
-    std::vector<Eigen::Vector2f> path = find_path(start, end);
-    publish_path(path);
-    return;
-  }
-
   /*
    * Finds the cheapest path between start and end using the dijikstra algorithm.
    */
-  std::vector<Eigen::Vector2f> Navigation::find_path(Cell* start, Cell* end) {
+  std::vector<Eigen::Vector2f> PathFinder::find_path(Cell* start, Cell* end) {
     reset_cells();
     std::priority_queue<Cell> cell_queue;
     start->cost = 0;
@@ -150,7 +75,7 @@ namespace kmm_navigation {
   /*
    * Sort old_queue by reconstructing it and returning new_queue.
    */
-  std::priority_queue<Cell> Navigation::get_resorted_queue(std::priority_queue<Cell> old_queue) {
+  std::priority_queue<Cell> PathFinder::get_resorted_queue(std::priority_queue<Cell> old_queue) {
     std::priority_queue<Cell> new_queue;
     for (int i = 0; i < old_queue.size(); i++) {
       Cell cell = old_queue.top();
@@ -163,7 +88,7 @@ namespace kmm_navigation {
   /*
    * Reset Cells that have been used for path finding so they can be used again.
    */
-  void Navigation::reset_cells() {
+  void PathFinder::reset_cells() {
     for (int row = 0; row < map_rows_; row++) {
       for (int col = 0; col < map_cols_; col++) {
         cells_[row][col]->cost = std::numeric_limits<double>::infinity();
@@ -171,14 +96,13 @@ namespace kmm_navigation {
         cells_[row][col]->previous = nullptr;
       };
     };
-    return;
   }
 
   /*
    * Returns a set of neighbors of cell. A Neighbor is cell we can get to
    * from cell. In other words an adjacent cell with no wall in between.
    */
-  std::set<Cell*> Navigation::get_neighbors(Cell* cell) {
+  std::set<Cell*> PathFinder::get_neighbors(Cell* cell) {
     std::set<Cell*> neighbors;
     Eigen::Vector2f current_cell(cell->row, cell->col);
 
@@ -212,7 +136,7 @@ namespace kmm_navigation {
   /*
   * Backtracks from end to start and returns resulting path.
   */
-  std::vector<Eigen::Vector2f> Navigation::get_path(Cell* start, Cell* end) {
+  std::vector<Eigen::Vector2f> PathFinder::get_path(Cell* start, Cell* end) {
     float cell_center_x;
     float cell_center_y;
     std::vector<Eigen::Vector2f> path;
@@ -233,7 +157,7 @@ namespace kmm_navigation {
     return path;
   }
 
-  std::vector<Eigen::Vector2f> Navigation::make_smooth(const std::vector<Eigen::Vector2f>& path) {
+  std::vector<Eigen::Vector2f> PathFinder::make_smooth(const std::vector<Eigen::Vector2f>& path) {
     if (path.size() < 3) {
       return path;
     }
@@ -252,20 +176,5 @@ namespace kmm_navigation {
     smooth.push_back(path[path.size()-1]);
 
     return smooth;
-  }
-
-  void Navigation::publish_path(std::vector<Eigen::Vector2f> path) {
-    path_msg_.poses.clear();
-    for (Eigen::Vector2f& p : path) {
-      geometry_msgs::Pose pose;
-      geometry_msgs::Point cell;
-      cell.x = p.x();
-      cell.y = p.y();
-      cell.z = 0;
-      pose.position = cell;
-      path_msg_.poses.push_back(pose);
-    }
-    path_pub_.publish(path_msg_);
-    return;
   }
 }

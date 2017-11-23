@@ -23,19 +23,6 @@
 
 namespace kmm_navigation {
 
-// Represents cell in grid and used for path finding
-struct Cell {
-  double cost;
-  bool visited;
-  Cell* previous;
-  int row;
-  int col;
-  bool operator<(const Cell& cell) const
-  {
-      return cell.cost < cost;
-  }
-};
-
 class Navigation {
 public:
   Navigation(ros::NodeHandle nh);
@@ -45,14 +32,7 @@ private:
   void navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal);
   void walls_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
-  Cell* make_cell(int row, int col);
   void target_position_callback(geometry_msgs::Twist msg);
-  std::vector<Eigen::Vector2f> find_path(Cell* start, Cell* end);
-  std::priority_queue<Cell> get_resorted_queue(std::priority_queue<Cell> old_queue);
-  void reset_cells();
-  std::set<Cell*> get_neighbors(Cell* cell);
-  std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);
-  std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
   void publish_path(std::vector<Eigen::Vector2f> path);
 
   Map* map_;
@@ -70,18 +50,9 @@ private:
   // Publishers
   ros::Publisher path_pub_;
 
-  // Map variables
-  int map_rows_;
-  int map_cols_;
-  float cell_size_;
-
   // Postition
   Eigen::Vector2f pos_;
 
-  // Cells
-  Cell* cells_[26][51]; // 26 is rows, 51 is cols
-
-  // Path message
   geometry_msgs::PoseArray path_msg_;
 };
 }

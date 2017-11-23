@@ -1,0 +1,58 @@
+#pragma once
+
+#include <ros/ros.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Point.h>
+#include <Eigen/Dense>
+#include <iostream>
+#include <vector>
+#include <set>
+#include <queue>
+#include <math.h>
+#include <algorithm>
+#include <limits>
+#include "kmm_navigation/Map.hpp"
+#include "std_msgs/MultiArrayLayout.h"
+#include "std_msgs/MultiArrayDimension.h"
+#include "std_msgs/Int8MultiArray.h"
+#include <actionlib/server/simple_action_server.h>
+#include <kmm_navigation/MoveToAction.h>
+
+namespace kmm_navigation {
+
+// Represents cell in grid and used for path finding
+struct Cell {
+  double cost;
+  bool visited;
+  Cell* previous;
+  int row;
+  int col;
+  bool operator<(const Cell& cell) const
+  {
+      return cell.cost < cost;
+  }
+};
+
+class PathFinder {
+public:
+  PathFinder(Map* map);
+  ~PathFinder();
+
+private:
+  Cell* make_cell(int row, int col);
+  std::vector<Eigen::Vector2f> find_path(Cell* start, Cell* end);
+  std::priority_queue<Cell> get_resorted_queue(std::priority_queue<Cell> old_queue);
+  void reset_cells();
+  std::set<Cell*> get_neighbors(Cell* cell);
+  std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);
+  std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
+
+  Map* map_;
+
+  // Cells
+  Cell* cells_[26][51]; // 26 is rows, 51 is cols
+};
+}
