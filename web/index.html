@@ -11,8 +11,19 @@
         Debug options
         <div class="dropdown">
           <div class="dropdown-row">
-            <div class="dropdown-text">Show laser scan</div>
-            <input id="debug-scan" type="checkbox" class="dropdown-checkbox"/>
+            <label for="debug-scan" class="dropdown-text">Show laser scan</label>
+            <input id="debug-scan" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-velocity" class="dropdown-text">Show robot velocity</label>
+            <input id="debug-velocity" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-path" class="dropdown-text">Show planned path</label>
+            <input id="debug-path" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
           </div>
         </div>
       </div>

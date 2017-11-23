@@ -38,15 +38,31 @@ html, body {
 .dropdown {
   display: none;
   position: absolute;
-  background: red;
   width: 200px;
-  padding: 10px;
   left: 0;
   top: 50px;
+  background: #222;
 }
 
 .menu-option:hover .dropdown {
   display: block;
+}
+
+.dropdown-row {
+  padding: 5px 20px;
+}
+
+.dropdown-text {
+  float: left;
+  cursor: pointer;
+}
+
+.dropdown-checkbox {
+  float: right;
+}
+
+.clear {
+  clear: both;
 }
 
 .sidebar {
