@@ -15,7 +15,9 @@
   DDRC = 0xBF;
 
   TWSR = 0xF8; // Initial value for TWSR
-  TWBR = 0x48; // Bit rate set to 72
+  // TWBR @ 100kHz is 0x48 (72)
+  // half the speed yields 0x98 (152).
+  TWBR = 0x48; 
   
   spi_slave_init();
   uint8_t buf[4];
