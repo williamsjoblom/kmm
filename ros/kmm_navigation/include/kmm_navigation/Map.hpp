@@ -13,6 +13,11 @@ namespace kmm_navigation {
     Map(int map_rows, int map_cols, float cell_size);
     ~Map();
 
+    int get_rows();
+    int get_cols();
+    int get_offset();
+    float get_cell_size();
+
     Eigen::Vector2f get_cell(Eigen::Vector2f grid_pos);
     bool is_wall_north_of_cell(Eigen::Vector2f cell);
     bool is_wall_south_of_cell(Eigen::Vector2f cell);

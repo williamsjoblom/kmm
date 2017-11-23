@@ -20,6 +20,7 @@
 #include "std_msgs/Int8MultiArray.h"
 #include <actionlib/server/simple_action_server.h>
 #include <kmm_navigation/MoveToAction.h>
+#include "PathFinder.hpp"
 
 namespace kmm_navigation {
 
@@ -32,7 +33,6 @@ private:
   void navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal);
   void walls_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
-  void target_position_callback(geometry_msgs::Twist msg);
   void publish_path(std::vector<Eigen::Vector2f> path);
 
   Map* map_;
@@ -45,7 +45,6 @@ private:
   // Subscribers
   ros::Subscriber walls_sub_;
   ros::Subscriber position_sub_;
-  ros::Subscriber target_position_sub_;
 
   // Publishers
   ros::Publisher path_pub_;
@@ -53,6 +52,6 @@ private:
   // Postition
   Eigen::Vector2f pos_;
 
-  geometry_msgs::PoseArray path_msg_;
+  PathFinder* path_finder_;
 };
 }

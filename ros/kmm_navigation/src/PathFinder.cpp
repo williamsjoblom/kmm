@@ -6,17 +6,17 @@ namespace kmm_navigation {
   PathFinder::PathFinder(Map* map) : map_(map) {
 
     // Initiate cell array.
-    for (int row = 0; row < map_->getRows(); row++) {
-      for (int col = 0; col < map_->getCols(); col++) {
-        cells_[row][col] = make_cell(row, col - map_->getOffset());
+    for (int row = 0; row < map_->get_rows(); row++) {
+      for (int col = 0; col < map_->get_cols(); col++) {
+        cells_[row][col] = make_cell(row, col - map_->get_offset());
       };
     };
   }
 
   PathFinder::~PathFinder() {
     // Delete cells
-    for (int row = 0; row < map_->getRows(); row++) {
-      for (int col = 0; col < map_->getCols(); col++) {
+    for (int row = 0; row < map_->get_rows(); row++) {
+      for (int col = 0; col < map_->get_cols(); col++) {
         delete cells_[row][col];
       };
     };
@@ -35,8 +35,29 @@ namespace kmm_navigation {
   /*
    * Finds the cheapest path between start and end using the dijikstra algorithm.
    */
-  std::vector<Eigen::Vector2f> PathFinder::find_path(Cell* start, Cell* end) {
+  std::vector<Eigen::Vector2f> PathFinder::find_path(Eigen::Vector2f from, Eigen::Vector2f to) {
+
+    ROS_INFO("Find path!");
+
+    ROS_INFO_STREAM("from " << from);
+    ROS_INFO_STREAM("to " << to);
+
+    // Get pointers to start and end cells from current position to target.
+    Eigen::Vector2f start_cell = map_->get_cell(from);
+    Eigen::Vector2f end_cell = map_->get_cell(to);
+
+    ROS_INFO("start.x: %f, start.y: %f", start_cell[0], start_cell[1]);
+    ROS_INFO("end.x: %f, end.y: %f", end_cell[0], end_cell[1]);
+
+    Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->get_offset()];
+    Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + map_->get_offset()];
+
+    ROS_INFO("1");
+
     reset_cells();
+
+    ROS_INFO("2");
+
     std::priority_queue<Cell> cell_queue;
     start->cost = 0;
     cell_queue.push(*start);
@@ -67,8 +88,27 @@ namespace kmm_navigation {
         };
       };
     }
+
+    ROS_INFO("3");
+
+    ROS_INFO("end row col %d, %d", end->row, end->col);
+
     std::vector<Eigen::Vector2f> path = get_path(start, end);
+
+    for (Eigen::Vector2f p : path) {
+      ROS_INFO("p x: %f, py: %f", p.x(), p.y());
+    }
+
+    ROS_INFO("4");
+
     std::vector<Eigen::Vector2f> smooth = make_smooth(path);
+
+    for (Eigen::Vector2f s : smooth) {
+      ROS_INFO("s x: %f, sy: %f", s.x(), s.y());
+    }
+
+    ROS_INFO("5");
+
     return smooth;
   }
 
@@ -89,8 +129,8 @@ namespace kmm_navigation {
    * Reset Cells that have been used for path finding so they can be used again.
    */
   void PathFinder::reset_cells() {
-    for (int row = 0; row < map_rows_; row++) {
-      for (int col = 0; col < map_cols_; col++) {
+    for (int row = 0; row < map_->get_rows(); row++) {
+      for (int col = 0; col < map_->get_cols(); col++) {
         cells_[row][col]->cost = std::numeric_limits<double>::infinity();
         cells_[row][col]->visited = false;
         cells_[row][col]->previous = nullptr;
@@ -144,13 +184,16 @@ namespace kmm_navigation {
     if (foundEnd) {
       Cell* backtracker = end;
       while (backtracker != start) {
-        cell_center_x = cell_size_/2 + cell_size_ * backtracker->row;
-        cell_center_y = cell_size_/2 + cell_size_ * backtracker->col;
+        ROS_INFO("b->r: %d, b->c: %d", backtracker->row, backtracker->col);
+        cell_center_x = map_->get_cell_size()/2 + map_->get_cell_size() * backtracker->row;
+        cell_center_y = map_->get_cell_size()/2 + map_->get_cell_size() * backtracker->col;
+        ROS_INFO("center %f, %f", cell_center_x, cell_center_y);
         path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
         backtracker = backtracker->previous;
       };
-      cell_center_x = cell_size_/2 + cell_size_ * start->row;
-      cell_center_y = cell_size_/2 + cell_size_ * start->col;
+      cell_center_x = map_->get_cell_size()/2 + map_->get_cell_size() * start->row;
+      cell_center_y = map_->get_cell_size()/2 + map_->get_cell_size() * start->col;
+      ROS_INFO("center %f, %f", cell_center_x, cell_center_y);
       path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
       reverse(path.begin(), path.end());
     }

@@ -1,4 +1,5 @@
 #include "kmm_navigation/Map.hpp"
+#include "ros/ros.h"
 
 namespace kmm_navigation {
 
@@ -18,7 +19,24 @@ namespace kmm_navigation {
   Map::~Map() {
   }
 
+  int Map::get_rows() {
+    return h_;
+  }
+
+  int Map::get_cols() {
+    return w_;
+  }
+
+  int Map::get_offset() {
+    return offset_;
+  }
+
+  float Map::get_cell_size() {
+    return cs_;
+  }
+
   Eigen::Vector2f Map::get_cell(Eigen::Vector2f grid_pos) {
+    ROS_INFO_STREAM("cs_ " << cs_);
     float x = grid_pos.x();
     float y = grid_pos.y();
     float cell_x = ((x - (cs_/2)) - remainder(x - (cs_/2), cs_)) / cs_;
