@@ -13,34 +13,9 @@
  */
 uint8_t twst;
 
-/*
- * Set TWBR to a value higher than 10 to produce the correct SDA and
- * SCL output as master on the TWI. Can be set dynamically with the
- * following equation:
- *
- * TWBR = (CPU_FREQUENCY/SCL_FREQUENCY-16)/2
- * 
- * Note: if the AVR has a clock frequency lower than 3.6MHz, set the
- * TWBR to 10.
- */
 #ifdef TWSP0
   TWSR = 0;
 #endif
-
-// TWBR = (F_CPU / 100000UL - 16)/2;
-
- /*
-void ioinit(void){
-  #if defined(TWSP0)
-    TWSR = 0;
-  #endif
-
-  #if CPU_FREQ < 3600000UL
-    TWBR = 10;
-  #else
-    TWBR = (CPU_FREQ / SCL_FREQ - 16) / 2;
-  #endif
-}*/
 
 
 /* Acceleration data is composed of 16-bit values per coordinate.

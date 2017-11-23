@@ -10,19 +10,16 @@
  * Main.
  */
  int main() {
-  DDRB = 0b11001000;
-  DDRD = 0b01111111;
-  DDRC = 0b11111100;
+  DDRB = 0x93;
+  DDRD = 0xFF;
+  DDRC = 0xBF;
 
-  TWBR = (F_CPU / 100000UL - 16)/2;
-  
-  // Write cool logic to fetch data with I2C and then send that
-  // over SPI to the pi yo.
+  TWSR = 0xF8; // Initial value for TWSR
+  TWBR = 0x48; // Bit rate set to 72
   
   spi_slave_init();
   uint8_t buf[4];
-  uint8_t data_out[7];
-  uint8_t tst[4];
+  uint8_t data_out[6];
   int acc_return_value;
   int gyro_return_value;
   int n = 0;
@@ -42,8 +39,8 @@
       if (gyro_return_value == 0) {
         data_out[4] = buf[0];
         data_out[5] = buf[1];
-        data_out[6] = (uint8_t)n;
-        spi_slave_write(data_out, 7);
+        //data_out[6] = (uint8_t)n;
+        spi_slave_write(data_out, 6);
 
       } 
     }
