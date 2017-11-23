@@ -15,6 +15,12 @@ var view = {
   PX_PER_METER: 120
 };
 
+var debug = {
+  scan: true,
+  velocity: true,
+  path: true
+}
+
 // Information about the robot
 var robot = {
   position: {

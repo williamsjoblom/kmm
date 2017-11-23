@@ -13,34 +13,7 @@
  */
 uint8_t twst;
 
-/*
- * Set TWBR to a value higher than 10 to produce the correct SDA and
- * SCL output as master on the TWI. Can be set dynamically with the
- * following equation:
- *
- * TWBR = (CPU_FREQUENCY/SCL_FREQUENCY-16)/2
- * 
- * Note: if the AVR has a clock frequency lower than 3.6MHz, set the
- * TWBR to 10.
- */
-#ifdef TWSP0
-  TWSR = 0;
-#endif
 
-// TWBR = (F_CPU / 100000UL - 16)/2;
-
- /*
-void ioinit(void){
-  #if defined(TWSP0)
-    TWSR = 0;
-  #endif
-
-  #if CPU_FREQ < 3600000UL
-    TWBR = 10;
-  #else
-    TWBR = (CPU_FREQ / SCL_FREQ - 16) / 2;
-  #endif
-}*/
 
 
 /* Acceleration data is composed of 16-bit values per coordinate.
@@ -98,6 +71,7 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad){
         break;
 
     case TW_MR_SLA_NACK:
+      PORTD = _BV(PD5);
       //return twi_assess_error(TWI_ERROR);
       twi_assess_error(TWI_ERROR);  
       return -6;
@@ -130,6 +104,7 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad){
         twi_transmit(TWI_STOP);  
         return 0;
       case TW_MR_DATA_ACK:
+        PORTD = _BV(PD6);
         buf[i] = TWDR;
         break;
 
@@ -171,6 +146,7 @@ int twi_select_register(uint8_t addr, const uint8_t sad, uint8_t *buf){
       return twi_repeat_start(addr, buf, sad);
 
     case TW_MT_DATA_NACK:
+      //PORTD = _BV(PD7);
       //return twi_assess_error(TWI_ERROR);
       twi_assess_error(TWI_ERROR);  
       return -3;
@@ -196,7 +172,7 @@ int twi_select_slave(const uint8_t sad, uint8_t addr, uint8_t *buf){
 
     case TW_MT_SLA_NACK:
       /*FALLTHROUGH*/
-
+      PORTB = _BV(PB0);
     case TW_MT_ARB_LOST:
       return twi_assess_error(TWI_RESTART);
     
@@ -228,10 +204,11 @@ int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf){
 int twi_read_bytes(const uint8_t sad, uint8_t addr, uint8_t *buf) {
   uint8_t n = 0;
   int return_value = 0;
-
+  PORTD = _BV(PB0);
   while(n++ <= MAX_ITER){
     return_value = twi_send_start(sad, addr, buf);
     if (return_value <= 0)
+      PORTD = 0x00;
       return return_value;
   }
   return -10;

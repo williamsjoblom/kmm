@@ -49,7 +49,10 @@ function bindCanvasEvents() {
 }
 
 function bindMenuEvents() {
-  // TODO
+  $("#debug-scan").click(function () {
+    debug.scan = !debug.scan;
+    alert("debug scan = " + (debug.scan ? "true" : "false"));
+  });
 }
 
 function resizeCanvas() {
