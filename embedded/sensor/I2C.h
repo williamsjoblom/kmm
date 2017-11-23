@@ -14,7 +14,6 @@
      */
     #define ACC_START 0b01010000 // + multiple read bit (MSB)
     #define GYRO_START 0b01011000 // + multiple read bit (MSB)
-
     /*
     * Maximum no. iterations that we will wait for a selection to be
     * responded to by the slave. Used to be able to abort an infinte 
@@ -33,11 +32,11 @@
 void ioinit(void);
 int twi_assess_error(unsigned char type);
 unsigned char twi_transmit(unsigned char type);
-int twi_read(uint8_t addr, uint8_t *buf, const uint8_t &sad);
-int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t &sad);
-int twi_select_register(uint8_t addr, const uint8_t &sad, uint8_t *buf);
-int twi_select_slave(const uint8_t &sad, uint8_t addr, uint8_t *buf);
-int twi_send_start(const uint8_t &sad, uint8_t addr, uint8_t *buf);
-int twi_read_bytes(const uint8_t &sad, uint8_t *buf);
+int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad);
+int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad);
+int twi_select_register(uint8_t addr, const uint8_t sad, uint8_t *buf);
+int twi_select_slave(const uint8_t sad, uint8_t addr, uint8_t *buf);
+int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf);
+int twi_read_bytes(const uint8_t sad, uint8_t *buf);
 
 #endif
