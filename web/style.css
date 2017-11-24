@@ -79,7 +79,7 @@ html, body {
   top: 50px;
   right: 0;
   bottom: 0;
-  width: 400px;
+  width: 450px;
   background: #CE93D8;
   padding: 20px;
 }
@@ -112,7 +112,7 @@ html, body {
   position: fixed;
   top: 50px;
   left: 0;
-  right: 400px;
+  right: 450px;
   bottom: 0;
 }
 

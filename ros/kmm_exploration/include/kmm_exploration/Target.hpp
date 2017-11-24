@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/PointCloud.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
@@ -15,6 +16,7 @@ public:
   Target(ros::NodeHandle nh);
   ~Target();
 
+  void btn_state_callback(std_msgs::Bool msg);
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void publish_target();
@@ -23,6 +25,8 @@ public:
 
 private:
   ros::NodeHandle nh_;
+  // Bool for manual or autonomous mode
+  bool is_in_manual_mode_;
   //Stores the returned target position
   float x_;
   float y_;
@@ -38,6 +42,7 @@ private:
 
   // Subscribers
   ros::Subscriber position_sub_;
+  ros::Subscriber btn_state_sub_;
   ros::Subscriber end_points_sub_;
 
   // Publishers

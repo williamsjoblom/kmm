@@ -66,7 +66,7 @@ function render() {
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
   if (debug.path) {drawPath();};
-  if (debug.target) {drawTarget();};
+  if (debug.target && !isInManualMode) {drawTarget();};
   if (debug.goToTarget && goToPos) {drawGoToTarget();};
 
   { // Robot frame
