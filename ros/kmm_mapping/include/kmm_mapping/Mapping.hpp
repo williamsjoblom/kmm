@@ -25,10 +25,12 @@ struct WallPointCount {
 
 class Mapping {
 public:
-
   Mapping(ros::NodeHandle nh);
   ~Mapping();
+  void set_pnt_cnt_req(int pnt_cnt_req);
+  void set_times_req(int times_req);
 
+private:
   void mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col, int cnt);
   void reset_wall_point_counts();
@@ -40,7 +42,6 @@ public:
   void publish_wall_array();
   void publish_end_points();
 
-private:
   ros::NodeHandle nh_;
   // Subscribers
   ros::Subscriber mapping_sub_;
@@ -58,8 +59,8 @@ private:
   // Wall point counts
   std::vector<WallPointCount> hor_wall_point_counts_;
   std::vector<WallPointCount> ver_wall_point_counts_;
-  int pnt_cnt_req_ = 7;
-  int times_req_ = 5;
+  int pnt_cnt_req_; // Number of points on wall required to increment times count
+  int times_req_; // Number of times times has to be incremented for wall to be added
 
   // Wall array
   std::vector<int> wall_vec_;
