@@ -1,6 +1,9 @@
 
 // The canvas 2d context used to draw stuff.
+//var ctx = $("#map")[0].getContext("2d");
 var ctx = $("#map")[0].getContext("2d");
+var matrix = new Matrix(ctx);
+var globalFrame = new Matrix();
 
 // Information about the viewport.
 var view = {
@@ -22,8 +25,13 @@ var debug = {
   velocity: true,
   acceleration: true,
   target: true,
+  goToTarget: true,
   path: true
 }
+
+var isUsingGoTo = false;
+
+var goToPos = null;
 
 // Information about the robot
 var robot = {
@@ -218,8 +226,7 @@ alignedScanListener.subscribe(function(message) {
 /**/
 
 /* Subscriber and publisher for button state */
-var btnState = false;
-
+var isInManualMode = true;
 var btnStateSub = new ROSLIB.Topic({ // Subscriber
   ros : ros,
   name : '/btn_state',
@@ -227,13 +234,11 @@ var btnStateSub = new ROSLIB.Topic({ // Subscriber
 });
 
 btnStateSub.subscribe(function(message) {
-  btnState = message.data;
-  if (btnState) {
-    console.log("Checked");
-    $("#mode-slider").prop("checked", true);
-  } else {
-    console.log("Unchecked");
+  isInManualMode = message.data;
+  if (isInManualMode) {
     $("#mode-slider").prop("checked", false);
+  } else {
+    $("#mode-slider").prop("checked", true);
   };
 });
 
@@ -242,3 +247,11 @@ var btnStatePub = new ROSLIB.Topic({ // Publisher
   name : '/btn_state',
   messageType : 'std_msgs/Bool'
 });
+
+/* Action client for target position */
+var navigationClient = new ROSLIB.ActionClient({
+  ros : ros,
+  serverName : '/navigation',
+  actionName : 'kmm_navigation/MoveToAction'
+});
+/**/

@@ -41,6 +41,11 @@
             <div class="clear"></div>
           </div>
           <div class="dropdown-row">
+            <label for="debug-go-to-target" class="dropdown-text">Show go to target</label>
+            <input id="debug-go-to-target" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
             <label for="debug-path" class="dropdown-text">Show planned path</label>
             <input id="debug-path" checked type="checkbox" class="dropdown-checkbox"/>
             <div class="clear"></div>
@@ -48,7 +53,7 @@
         </div>
       </div>
 
-      <div class="menu-option">
+      <div class="menu-option" id="go-to">
         Go to
       </div>
     </div>
@@ -169,6 +174,7 @@
           <td id="auto-mode" colspan="2">Autonomous</td>
       </table>
     </div>
+    <script src="lib/matrix.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/roslib.js"></script>
     <script src="js/model.js"></script>

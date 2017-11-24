@@ -35,7 +35,7 @@ namespace kmm_mapping {
     walls_msg_.layout.dim[0].label = "x";
 
     // Wall point count requirements
-    pnt_cnt_req_ = 7;
+    pnt_cnt_req_ = 5;
     times_req_ = 5;
   }
 
