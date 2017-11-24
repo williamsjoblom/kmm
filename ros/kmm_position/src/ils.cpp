@@ -53,7 +53,7 @@ void build_pairs(
     float y_round = std::round(point[1] / 0.4) * 0.4;
     float x_diff = std::abs(x_round - point[0]);
     float y_diff = std::abs(y_round - point[1]);
-    const float magic = 0.05;
+    const float magic = 0.08;
 
     if ( !(x_diff < magic && y_diff < magic) ) {
       a.push_back(point);

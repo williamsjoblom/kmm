@@ -141,6 +141,8 @@ namespace kmm_navigation {
       neighbors.insert(east_neighbor);
     };
 
+    // if(map_->is_noth_west_reachable_from_cell)
+
     return neighbors;
   }
 

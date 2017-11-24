@@ -18,6 +18,10 @@ function bindEvents() {
   bindSidebarEvents();
 }
 
+function getMousePos(e) {
+
+}
+
 function bindCanvasEvents() {
   // Bind map buttons.
   $("#zoom-in-button").click(zoomIn);
@@ -27,6 +31,29 @@ function bindCanvasEvents() {
 
   // Bind map scoll zoom and mouse pan.
   $("#map")
+  .click(function(e) {
+    if (isInManualMode && isUsingGoTo) {
+      $("#map").css('cursor', 'default');
+      isUsingGoTo = false;
+
+      var offset = $("#map-container").offset();
+
+      goToPos = globalMatrix.applyToPoint(
+        e.pageX - offset.left,
+        e.pageY - offset.top
+      );
+
+      var targetPositionGoal = new ROSLIB.Goal({
+        actionClient : navigationClient,
+        goalMessage : {
+          x : goToPos.x,
+          y : goToPos.y,
+          angle : 0,
+        }
+      });
+      targetPositionGoal.send();
+    };
+  })
   .mousedown(function(e) {
     view.isDragging = true;
     view.prevDragPos.x = e.screenX;
@@ -82,8 +109,21 @@ function bindMenuEvents() {
     debug.target = !debug.target;
   });
 
+  $("#debug-go-to-target").click(function () {
+    debug.goToTarget = !debug.goToTarget;
+  });
+
   $("#debug-path").click(function () {
     debug.path = !debug.path;
+  });
+
+  $("#go-to").click(function () {
+    isUsingGoTo = !isUsingGoTo;
+    if (isInManualMode && isUsingGoTo) {
+      $("#map").css('cursor', 'crosshair');
+    } else {
+      $("#map").css('cursor', 'default');
+    };
   });
 }
 
@@ -125,9 +165,9 @@ function zoomOut() {
 }
 
 function toggleMode() {
-  btnState = !btnState;
+  isInManualMode = !isInManualMode;
   var bool = new ROSLIB.Message({
-    data : btnState
+    data : isInManualMode
   });
   btnStatePub.publish(bool);
 }

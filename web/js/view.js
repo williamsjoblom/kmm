@@ -37,26 +37,27 @@ function render() {
   clearCanvas();
 
   // Transform coordinate system to something that is practical to work with
-  ctx.save();
-  ctx.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
-  ctx.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
-  ctx.scale(-view.PX_PER_METER, view.PX_PER_METER);
+  matrix.save();
+  matrix.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
+  matrix.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
+  matrix.scale(-view.PX_PER_METER, view.PX_PER_METER);
 
-  var restore = false;
   // Different view states.
   if (view.state == "global") {
-    ctx.translate(-2, 0);
+    matrix.translate(-2, 0);
   } else {
-    restore = true;
     view.pan.x = -robot.position.x * view.zoom;
     view.pan.y = -robot.position.y * view.zoom;
     view.rotation = -robot.position.angle;
   }
 
   // View settings
-  ctx.rotate(view.rotation);
-  ctx.translate(view.pan.x, view.pan.y);
-  ctx.scale(view.zoom, view.zoom);
+  matrix.rotate(view.rotation);
+  matrix.translate(view.pan.x, view.pan.y);
+  matrix.scale(view.zoom, view.zoom);
+
+  // This is used to transform mouse position.
+  globalMatrix = Matrix.fromMatrix(matrix).inverse();
 
   // Global frame
   drawGrid();
@@ -64,20 +65,22 @@ function render() {
   drawGlobalFrame();
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
-  if (debug.path) {drawPath();};
   if (debug.target) {drawTarget();};
+  if (debug.goToTarget && goToPos) {drawGoToTarget();};
+  if (debug.path) {drawPath();};
 
   { // Robot frame
-    ctx.save();
-    ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-    ctx.rotate(robot.position.angle);
+    matrix.save();
+    matrix.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
+    matrix.rotate(robot.position.angle);
     if (debug.velocity) {drawVelocity();};
     if (debug.scan) {drawLaserScan();};
     if (debug.acceleration) {drawAcceleration();};
     drawRobot();
-    ctx.restore();
+    matrix.restore();
   }
-  ctx.restore();
+
+  matrix.restore();
 }
 
 function clearCanvas() {
@@ -87,14 +90,21 @@ function clearCanvas() {
 
 function drawTarget() {
   ctx.beginPath();
-  ctx.fillStyle = "#00ff00";
+  ctx.strokeStyle = "#00ff00"; // Green
   ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
   ctx.fill();
 }
 
+function drawGoToTarget() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#2196F3"; // Blue
+  ctx.arc(goToPos.x, goToPos.y, 0.05, 0, 2*Math.PI);
+  ctx.stroke();
+}
+
 function drawPath() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#004400";
+  ctx.strokeStyle = "#ffa500";
 
   ctx.beginPath();
   if (plannedPath.length > 0) {
@@ -113,17 +123,17 @@ Draws real time laser scan.
 function drawLaserScan() {
   var rectSize = 0.02;
   ctx.fillStyle = "#0000ff";
-  ctx.save();
-  ctx.rotate(laserScan.angle_min + Math.PI);
+  matrix.save();
+  matrix.rotate(laserScan.angle_min + Math.PI);
   for (var i = 0; i < laserScan.ranges.length; i++){
     ctx.fillRect(laserScan.ranges[i] + (rectSize/2), (rectSize/2), rectSize, rectSize);
     ctx.rotate(laserScan.angle_increment);
   }
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawAlignedScan() {
-  ctx.save();
+  matrix.save();
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
@@ -132,15 +142,15 @@ function drawAlignedScan() {
       ctx.fillRect(alignedScan[i].x + (rectHeight/2), alignedScan[i].y + (rectWidth/2), rectWidth, rectHeight);
     };
   }
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
 
-  ctx.save();
-  ctx.translate(0,0.2);
+  matrix.save();
+  matrix.translate(0,0.2);
   var rows = 26; // (10 / 0.4) + 1
   var cols = 51; // ((10 / 0.4) * 2) + 1
 
@@ -158,7 +168,7 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawWalls() {
@@ -202,13 +212,13 @@ function drawGlobalFrame() {
 }
 
 function drawRobot() {
-  ctx.save();
-  ctx.rotate(Math.PI / 2);
+  matrix.save();
+  matrix.rotate(Math.PI / 2);
   var scale = 0.001;
   var pixels = 300;
   var picSize = pixels * scale;
   ctx.drawImage(robot.image, picSize / -2, picSize / -2, picSize, picSize);
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawArrow(from, to){
