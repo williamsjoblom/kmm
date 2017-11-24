@@ -18,6 +18,26 @@ namespace kmm_navigation {
   Map::~Map() {
   }
 
+  int Map::get_rows() {
+    return h_;
+  }
+
+  int Map::get_cols() {
+    return w_;
+  }
+
+  int Map::get_offset() {
+    return offset_;
+  }
+
+  float Map::get_cell_size() {
+    return cs_;
+  }
+
+  void Map::set_walls(std::vector<int> walls) {
+    walls_ = walls;
+  }
+
   Eigen::Vector2f Map::get_cell(Eigen::Vector2f grid_pos) {
     float x = grid_pos.x();
     float y = grid_pos.y();
@@ -29,47 +49,59 @@ namespace kmm_navigation {
     return cell_pos;
   }
 
-  bool Map::is_wall_above_cell(Eigen::Vector2f cell) {
+  bool Map::is_wall_north_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = (x + 1)*(w_ + 1) + (x + 1)*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_above_cell() called with invalid cell!\n";
       return true;
     }
     return Map::walls_[index];
   }
 
-  bool Map::is_wall_below_cell(Eigen::Vector2f cell) {
+  bool Map::is_wall_south_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + x*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_below_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];
   }
 
-  bool Map::is_wall_right_cell(Eigen::Vector2f cell) {
+  bool Map::is_wall_east_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_right_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];
   }
 
-  bool Map::is_wall_left_cell(Eigen::Vector2f cell) {
+  bool Map::is_wall_west_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y + 1;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_left_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];
+  }
+
+  bool Map::is_north_reachable_from_cell(Eigen::Vector2f cell) {
+    return !is_wall_north_of_cell(cell) && cell.x() < (h_ - 1);
+  }
+
+  bool Map::is_south_reachable_from_cell(Eigen::Vector2f cell) {
+    return !is_wall_south_of_cell(cell) && cell.x() > 0;
+  }
+
+  bool Map::is_west_reachable_from_cell(Eigen::Vector2f cell) {
+    return !is_wall_west_of_cell(cell) && cell.y() < offset_;
+  }
+
+  bool Map::is_east_reachable_from_cell(Eigen::Vector2f cell) {
+    return !is_wall_east_of_cell(cell) && cell.y() > -offset_;
   }
 }
