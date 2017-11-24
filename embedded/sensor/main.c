@@ -38,7 +38,7 @@
         data_out[4] = buf[0];
         data_out[5] = buf[1];
         //data_out[6] = (uint8_t)n;
-        spi_slave_write(data_out, 6);
+        //spi_slave_write(data_out, 6);
 
       }
     }
