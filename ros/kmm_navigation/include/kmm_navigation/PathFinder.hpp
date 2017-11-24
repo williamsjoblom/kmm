@@ -15,6 +15,7 @@ namespace kmm_navigation {
 // Represents cell in grid and used for path finding
 struct Cell {
   double cost;
+  double path_cost;
   bool visited;
   Cell* previous;
   int row;

@@ -25,6 +25,7 @@ namespace kmm_navigation {
   Cell* PathFinder::make_cell(int row, int col) {
     Cell* cell = new Cell;
     cell->cost = std::numeric_limits<double>::infinity();
+    cell->path_cost = std::numeric_limits<double>::infinity();
     cell->visited = false;
     cell->previous = nullptr;
     cell->row = row;
@@ -62,8 +63,8 @@ namespace kmm_navigation {
       curr_neighbors = get_neighbors(curr_cell);
       // Calculates and updates lowest costs and changes
       // the priority of neighbors if needed.
-      alt_cost = curr_cell->cost + 1;
       for (Cell* neighbor : curr_neighbors) {
+        alt_cost = curr_cell->cost + neighbor->path_cost;
         if (alt_cost < neighbor->cost) {
           neighbor->cost = alt_cost;
           neighbor->previous = curr_cell;
@@ -117,31 +118,53 @@ namespace kmm_navigation {
     std::set<Cell*> neighbors;
     Eigen::Vector2f current_cell(cell->row, cell->col);
 
-    // North
     if (map_->is_north_reachable_from_cell(current_cell)) {
       Cell* north_neighbor = cells_[cell->row + 1][cell->col + map_->get_offset()];
+      north_neighbor->path_cost = 1;
       neighbors.insert(north_neighbor);
     };
 
-    // South
-    if (map_->is_south_reachable_from_cell(current_cell)) {
-      Cell* south_neighbor = cells_[cell->row - 1][cell->col + map_->get_offset()];
-      neighbors.insert(south_neighbor);
+    if (map_->is_north_east_reachable_from_cell(current_cell)) {
+      Cell* north_east_neighbor = cells_[cell->row + 1][cell->col - 1 + map_->get_offset()];
+      north_east_neighbor->path_cost = sqrt(2);
+      neighbors.insert(north_east_neighbor);
     };
 
-    // West
-    if (map_->is_west_reachable_from_cell(current_cell)) {
-      Cell* west_neighbor = cells_[cell->row][cell->col + 1 + map_->get_offset()];
-      neighbors.insert(west_neighbor);
-    };
-
-    // East
     if (map_->is_east_reachable_from_cell(current_cell)) {
       Cell* east_neighbor = cells_[cell->row][cell->col - 1 + map_->get_offset()];
+      east_neighbor->path_cost = 1;
       neighbors.insert(east_neighbor);
     };
 
-    // if(map_->is_noth_west_reachable_from_cell)
+    if (map_->is_south_east_reachable_from_cell(current_cell)) {
+      Cell* south_east_neighbor = cells_[cell->row - 1][cell->col - 1 + map_->get_offset()];
+      south_east_neighbor->path_cost = sqrt(2);
+      neighbors.insert(south_east_neighbor);
+    };
+
+    if (map_->is_south_reachable_from_cell(current_cell)) {
+      Cell* south_neighbor = cells_[cell->row - 1][cell->col + map_->get_offset()];
+      south_neighbor->path_cost = 1;
+      neighbors.insert(south_neighbor);
+    };
+
+    if (map_->is_south_west_reachable_from_cell(current_cell)) {
+      Cell* south_west_neighbor = cells_[cell->row - 1][cell->col + 1 + map_->get_offset()];
+      south_west_neighbor->path_cost = sqrt(2);
+      neighbors.insert(south_west_neighbor);
+    };
+
+    if (map_->is_west_reachable_from_cell(current_cell)) {
+      Cell* west_neighbor = cells_[cell->row][cell->col + 1 + map_->get_offset()];
+      west_neighbor->path_cost = 1;
+      neighbors.insert(west_neighbor);
+    };
+
+    if (map_->is_north_west_reachable_from_cell(current_cell)) {
+      Cell* north_west_neighbor = cells_[cell->row + 1][cell->col + 1 + map_->get_offset()];
+      north_west_neighbor->path_cost = sqrt(2);
+      neighbors.insert(north_west_neighbor);
+    };
 
     return neighbors;
   }
