@@ -86,6 +86,8 @@ function bindMenuEvents() {
   $("#debug-aligned").click(function () {
     debug.aligned = !debug.aligned;
   });
+  $('#debug-aligned').removeAttr('checked');
+  debug.aligned = false;
 
   $("#debug-end-points").click(function () {
     debug.endPoints = !debug.endPoints;
@@ -94,6 +96,8 @@ function bindMenuEvents() {
   $("#debug-velocity").click(function () {
     debug.velocity = !debug.velocity;
   });
+  $('#debug-velocity').removeAttr('checked');
+  debug.velocity = false;
 
   $("#debug-acceleration").click(function () {
     debug.acceleration = !debug.acceleration;

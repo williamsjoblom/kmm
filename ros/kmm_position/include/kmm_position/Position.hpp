@@ -23,6 +23,7 @@ public:
   void publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned);
   void broadcast_robot_pose(const ros::TimerEvent&);
   void publish_robot_pose(const ros::TimerEvent&);
+  void publish_scan_cloud(sensor_msgs::PointCloud& cloud);
 
 private:
   ros::NodeHandle nh_;
@@ -39,6 +40,7 @@ private:
   // Publishers
   ros::Publisher aligned_scan_pub_;
   ros::Publisher position_pub_;
+  ros::Publisher scan_point_cloud_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
 
   // State estimation
