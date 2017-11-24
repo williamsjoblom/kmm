@@ -105,7 +105,7 @@ var robotPositionListener = new ROSLIB.Topic({
 robotPositionListener.subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
-  robot.position.angle = message.pose.pose.orientation.z * Math.PI;
+  robot.position.angle = message.pose.pose.orientation.z;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({
