@@ -23,6 +23,7 @@
     */
     #define MAX_ITER 200
 
+
     #define TWI_START 0
     #define TWI_DATA 1
     #define TWI_STOP 2
@@ -30,8 +31,7 @@
     #define TWI_RESTART 4
     #define TWI_REP_STOP 5
 
-
-
+uint8_t i2c_enable_reading(uint8_t address, uint16_t enable);
 void i2c_init(void);
 int twi_assess_error(unsigned char type);
 unsigned char twi_transmit(unsigned char type);

@@ -12,6 +12,7 @@ var view = {
   isDragging: false,
   prevDragPos: { x: 0, y: 0 },
   state: "global",
+  rotation: 0,
   PX_PER_METER: 120
 };
 
@@ -25,16 +26,22 @@ var debug = {
   path: true
 }
 
+var laserScan = {
+  angle_min: 0,
+  angle_increment: 0,
+  ranges: []
+};
+
 // Information about the robot
 var robot = {
   position: {
-    x: 0,
-    y: 0,
+    x: 0.2,
+    y: 0.2,
     angle: 0
   },
   target: {
-    x: 0,
-    y: 0,
+    x: 0.2,
+    y: 0.2,
     angle: 0
   },
   velocity: {
@@ -105,7 +112,9 @@ var robotPositionListener = new ROSLIB.Topic({
 robotPositionListener.subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
-  robot.position.angle = message.pose.pose.orientation.z * Math.PI;
+  var q = message.pose.pose.orientation;
+  var angle = Math.atan2(2*(q.x*q.y+q.z*q.w), 1-2*(Math.pow(q.y, 2)+Math.pow(q.z, 2)));
+  robot.position.angle = angle;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({
@@ -196,12 +205,14 @@ endPointListener.subscribe(function(message) {
 /* Listener that listens to the /scan topic. */
 var laserScanListener = new ROSLIB.Topic({
   ros: ros,
-  name: '/scan_point_cloud',
-  messageType: 'sensor_msgs/PointCloud'
+  name: '/scan',
+  messageType: 'sensor_msgs/LaserScan'
 });
-var laserScan = [];
 laserScanListener.subscribe(function(message) {
-  laserScan = message.points;
+  console.log(message);
+  laserScan.angle_min = message.angle_min;
+  laserScan.angle_increment = message.angle_increment;
+  laserScan.ranges = message.ranges;
 });
 /**/
 

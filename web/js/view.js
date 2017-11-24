@@ -15,9 +15,9 @@ function updateDOM() {
   $("#tar-pos-y").html(decimal(robot.target.y, 1));
   $("#tar-theta").html(decimal(robot.target.angle, 2) + " rad");
   //Velocity
-  $("#vel-x").html(decimal(robot.velocity.x, 1) + " m/s");
-  $("#vel-y").html(decimal(robot.velocity.y, 1) + " m/s");
-  $("#vel-w").html(decimal(robot.velocity.w, 1) + " rad/s");
+  $("#vel-x").html(decimal(robot.velocity.x, 2) + " m/s");
+  $("#vel-y").html(decimal(robot.velocity.y, 2) + " m/s");
+  $("#vel-w").html(decimal(robot.velocity.w, 2) + " rad/s");
   //Wheel velocity
   $("#w-vel-1").html(decimal(robot.wheelVelocities[0], 2) + " rad/s");
   $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 2) + " rad/s");
@@ -42,15 +42,19 @@ function render() {
   ctx.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
   ctx.scale(-view.PX_PER_METER, view.PX_PER_METER);
 
+  var restore = false;
   // Different view states.
   if (view.state == "global") {
     ctx.translate(-2, 0);
   } else {
+    restore = true;
     view.pan.x = -robot.position.x * view.zoom;
     view.pan.y = -robot.position.y * view.zoom;
+    view.rotation = -robot.position.angle;
   }
 
   // View settings
+  ctx.rotate(view.rotation);
   ctx.translate(view.pan.x, view.pan.y);
   ctx.scale(view.zoom, view.zoom);
 
@@ -58,18 +62,18 @@ function render() {
   drawGrid();
   drawWalls();
   drawGlobalFrame();
-  if (debug.scan) {drawLaserScan();};
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
-  if (debug.velocity) {drawVelocity();};
-  if (debug.target) {drawTarget();};
   if (debug.path) {drawPath();};
-  if (debug.acceleration) {drawAcceleration();};
+  if (debug.target) {drawTarget();};
 
   { // Robot frame
     ctx.save();
     ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
     ctx.rotate(robot.position.angle);
+    if (debug.velocity) {drawVelocity();};
+    if (debug.scan) {drawLaserScan();};
+    if (debug.acceleration) {drawAcceleration();};
     drawRobot();
     ctx.restore();
   }
@@ -83,14 +87,14 @@ function clearCanvas() {
 
 function drawTarget() {
   ctx.beginPath();
-  ctx.strokeStyle = "#00ff00";
+  ctx.fillStyle = "#00ff00";
   ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
-  ctx.stroke();
+  ctx.fill();
 }
 
 function drawPath() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#FF4500";
+  ctx.strokeStyle = "#004400";
 
   ctx.beginPath();
   if (plannedPath.length > 0) {
@@ -103,14 +107,19 @@ function drawPath() {
   };
 }
 
+/*
+Draws real time laser scan.
+*/
 function drawLaserScan() {
   var rectSize = 0.02;
   ctx.fillStyle = "#0000ff";
-  for (var i = 0; i < laserScan.length; i++) {
-    if (laserScan[i].x + laserScan[i].y > 0.1) {
-      ctx.fillRect(laserScan[i].x + (rectSize/2), laserScan[i].y + (rectSize/2), rectSize, rectSize);
-    }
+  ctx.save();
+  ctx.rotate(laserScan.angle_min + Math.PI);
+  for (var i = 0; i < laserScan.ranges.length; i++){
+    ctx.fillRect(laserScan.ranges[i] + (rectSize/2), (rectSize/2), rectSize, rectSize);
+    ctx.rotate(laserScan.angle_increment);
   }
+  ctx.restore();
 }
 
 function drawAlignedScan() {
@@ -154,7 +163,7 @@ function drawGrid() {
 
 function drawWalls() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#000000";
+  ctx.strokeStyle = "#884422";
   for (var i = 0; i < walls.length; i++) {
     ctx.beginPath();
     ctx.moveTo(walls[i].from.x, walls[i].from.y);
@@ -164,10 +173,12 @@ function drawWalls() {
 }
 
 function drawEndPoints() {
-  ctx.fillStyle = "#FF0000";
-  var sideLength = 0.1;
+  var radius = 0.05;
+  ctx.fillStyle = "#ffff00";
   for (var i = 0; i < endPoints.length; i++) {
-    ctx.fillRect(endPoints[i].x - sideLength / 2, endPoints[i].y - sideLength / 2, sideLength, sideLength);
+    ctx.beginPath();
+    ctx.arc(endPoints[i].x, endPoints[i].y, radius, 0, 2*Math.PI);
+    ctx.fill();
   };
 }
 
@@ -193,10 +204,10 @@ function drawGlobalFrame() {
 function drawRobot() {
   ctx.save();
   ctx.rotate(Math.PI / 2);
-  var width_height_proportions = 0.9;
-  var width = 0.3;
-  var height = width * width_height_proportions;
-  ctx.drawImage(robot.image, width / -2, height / -2, width, height);
+  var scale = 0.001;
+  var pixels = 300;
+  var picSize = pixels * scale;
+  ctx.drawImage(robot.image, picSize / -2, picSize / -2, picSize, picSize);
   ctx.restore();
 }
 
@@ -226,7 +237,7 @@ function drawArrow(from, to){
 
 function drawAcceleration() {
   ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 0.02;
+  ctx.lineWidth = 0.005;
   var from = { x: 0, y: 0 };
   var to = robot.acceleration;
   drawArrow(from, to);
@@ -235,14 +246,10 @@ function drawAcceleration() {
 function drawVelocity() {
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 0.02;
-  var above_90 = Math.abs(robot.position.angle) > Math.PI/2 ? 1 : 1;
-  var from = { x: -robot.position.x, y: -robot.position.y };
+  var from = { x: 0, y: 0 };
   var to = {
-    x: above_90*(-robot.velocity.x * 2) -robot.position.x,
-    y: above_90*(-robot.velocity.y * 2) -robot.position.y
+    x: robot.velocity.x * 4,
+    y: robot.velocity.y * 4
   };
-  ctx.save();
-  ctx.rotate(Math.PI);
   drawArrow(from, to);
-  ctx.restore();
 }

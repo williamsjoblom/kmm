@@ -13,6 +13,7 @@ void i2c_init(){
   TWCR = 0x00;    // Reset control register
   TWBR = 0x48;    // TWBR @ 100kHz is 0x48 (72)
                   // half the speed yields 0x98 (152).
+
 }
 
 void i2c_stop(){
