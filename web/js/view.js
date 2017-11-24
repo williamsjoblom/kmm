@@ -71,6 +71,7 @@ function render() {
     ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
     ctx.rotate(robot.position.angle);
     drawRobot();
+    drawVelocity();
     ctx.restore();
   }
   ctx.restore();
@@ -235,14 +236,10 @@ function drawAcceleration() {
 function drawVelocity() {
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 0.02;
-  var above_90 = Math.abs(robot.position.angle) > Math.PI/2 ? 1 : 1;
-  var from = { x: -robot.position.x, y: -robot.position.y };
+  var from = { x: 0, y: 0 };
   var to = {
-    x: above_90*(-robot.velocity.x * 2) -robot.position.x,
-    y: above_90*(-robot.velocity.y * 2) -robot.position.y
+    x: robot.velocity.x,
+    y: robot.velocity.y
   };
-  ctx.save();
-  ctx.rotate(Math.PI);
   drawArrow(from, to);
-  ctx.restore();
 }
