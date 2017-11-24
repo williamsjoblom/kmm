@@ -5,10 +5,7 @@
     cell_size: 0.4
   </rosparam>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-  <node name="neato_laser_broadcaster" pkg="tf" type="static_transform_publisher" args="0 0 -0.01 0 0 180 1 base_link neato_laser 100" />
-  <!-- Jag tänkte att devel.launch skulle va för utveckling på laptop så då
-      går det ju inte att ha denna. Borde ligga i robot.launch istället.
-  <node name="kmm_input" pkg="kmm_drivers" type="kmm_input_node.py"/>-->
+  <node name="tf_rplidar_laser" pkg="tf" type="static_transform_publisher" args="0 0 -0.01 0 0 180 1 base_link laser 100" />
   <node name="kmm_position" pkg="kmm_position" type="kmm_position_node"/>
   <node name="kmm_mapping" pkg="kmm_mapping" type="kmm_mapping_node"/>
   <node name="kmm_navigation" pkg="kmm_navigation" type="kmm_navigation_node"/>

@@ -68,6 +68,9 @@ unsigned char twi_transmit(unsigned char type){
     case TWI_STOP:
       TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWSTO);
       return 0;
+    case TWI_REP_STOP:
+      TWCR = _BV(TWINT) | _BV(TWEN) | _BV(TWSTO);
+      break;
   }
 
   while((TWCR & _BV(TWINT)) == 0);
@@ -137,9 +140,9 @@ int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad, int iter){
   _delay_ms(0.001);
   twst = twi_transmit(TWI_START);
   switch(twst) {
-    case TW_START:
-      /*FALLTHROUGH (Is okay, but should not happen)*/
     case TW_REP_START:
+      /*FALLTHROUGH (Is okay, but should not happen)*/
+    case TW_START:
       return twi_read(addr, buf, sad, iter);
 
     case TW_MT_ARB_LOST:
