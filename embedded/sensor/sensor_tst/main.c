@@ -48,7 +48,6 @@ int main(){
     i2c_select_register(ACC_START);
 
     i2c_stop();
-    _delay_us(1); // Delay after stop condition
     i2c_start();
     i2c_select_slave(ACC_READ);
     get_acc_data(data_out);
@@ -60,7 +59,6 @@ int main(){
     i2c_select_register(GYRO_START);
 
     i2c_stop();
-    _delay_us(1); // Delay after stop condition
     i2c_start();
     i2c_select_slave(GYRO_READ);
     get_gyro_data(data_out);

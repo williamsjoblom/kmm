@@ -14,6 +14,7 @@
 
 void i2c_init();
 void i2c_stop();
+void i2c_error();
 uint8_t i2c_start();
 uint8_t i2c_select_slave(uint8_t address);
 uint8_t i2c_select_register(uint8_t reg);
