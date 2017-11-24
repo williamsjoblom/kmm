@@ -4,6 +4,9 @@
 #include <util/twi.h>
 #include <avr/interrupt.h>
 
+#define F_CPU 16000000UL
+#include <util/delay.h>
+
 #include "I2C.h"
 
 
@@ -130,6 +133,8 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad, int iter){
 
 /* Sends repeated start condition, #4 in event loop*/
 int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad, int iter){
+  twi_transmit(TWI_STOP);
+  _delay_ms(0.001);
   twst = twi_transmit(TWI_START);
   switch(twst) {
     case TW_START:
@@ -215,6 +220,7 @@ int twi_send_start(const uint8_t sad, uint8_t addr, uint8_t *buf, int iter){
 /* Reads the data from the adafruit sensor, starts the event loop*/
 int twi_read_bytes(const uint8_t sad, uint8_t addr, uint8_t *buf, int iter) {
   uint8_t n = 0;
+  _delay_ms(0.005);
   int return_value = 0;
   PORTD = PORTD | 0x04; //PD2
   while(n++ <= MAX_ITER){
