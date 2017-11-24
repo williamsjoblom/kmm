@@ -146,25 +146,10 @@ function drawGrid() {
 function drawWalls() {
   ctx.lineWidth = 0.03;
   ctx.strokeStyle = "#000000";
-
-  var currRow;
-  var currCol;
-  // Horizontal walls
-  for (var i = 0; i < horizontalWalls.length; i++) {
-    currRow = horizontalWalls[i].row;
-    currCol = horizontalWalls[i].col;
+  for (var i = 0; i < walls.length; i++) {
     ctx.beginPath();
-    ctx.moveTo(0.4*currRow, 0.4*currCol);
-    ctx.lineTo(0.4*currRow, 0.4*currCol - 0.4*(currCol/Math.abs(currCol)));
-    ctx.stroke();
-  };
-  // Vertical walls
-  for (var i = 0; i < verticalWalls.length; i++) {
-    currRow = verticalWalls[i].row;
-    currCol = verticalWalls[i].col;
-    ctx.beginPath();
-    ctx.moveTo(0.4*currRow, 0.4*currCol);
-    ctx.lineTo(0.4*currRow - 0.4*(currRow/Math.abs(currRow)), 0.4*currCol);
+    ctx.moveTo(walls[i].from.x, walls[i].from.y);
+    ctx.lineTo(walls[i].to.x, walls[i].to.y);
     ctx.stroke();
   };
 }

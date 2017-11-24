@@ -128,30 +128,47 @@ wheelVelocityListener.subscribe(function(message) {
   robot.wheelVelocities[2] = message.wheel_2;
 });
 
-var wallPositionsListener = new ROSLIB.Topic({
+var wallsListener = new ROSLIB.Topic({
   ros: ros,
-  name: '/wall_positions',
-  messageType: 'kmm_mapping/wall_positions'
+  name: '/walls',
+  messageType: 'std_msgs/Int8MultiArray'
 });
 
-var horizontalWall;
-var horizontalWalls = [];
-var verticalWall;
-var verticalWalls = [];
-
-/* Listener that listens to the /wall_positions topic. */
-wallPositionsListener.subscribe(function(message) {
-  horizontalWalls = [];
-  verticalWalls = [];
-  for (var i = 0; i < message.horizontal_walls.length; i++) {
-    horizontalWall = Object.freeze({'row': message.horizontal_walls[i].x,
-      'col': message.horizontal_walls[i].y})
-    horizontalWalls.push(horizontalWall);
-  };
-  for (var i = 0; i < message.vertical_walls.length; i++) {
-    verticalWall = Object.freeze({'row': message.vertical_walls[i].x,
-      'col': message.vertical_walls[i].y})
-    verticalWalls.push(verticalWall);
+var walls = [];
+/* Listener that listens to the /walls topic. */
+wallsListener.subscribe(function(message) {
+  walls = [];
+  var wall;
+  var width = 51;
+  var cell_size = 0.4;
+  var offset = (width - 1)/2;
+  var row = 0;
+  var col = 0;
+  var is_end_of_vertical;
+  var is_end_of_horizontal;
+  var horizontal = true;
+  for (var i = 0; i < message.data.length; i++) {
+    is_end_of_vertical = !horizontal && col == width + 1;
+    is_end_of_horizontal = horizontal && col == width;
+    if (is_end_of_vertical) {
+      horizontal = true;
+      row++;
+      col = 0;
+    } else if (is_end_of_horizontal) {
+      horizontal = false;
+      col = 0;
+    };
+    if (message.data[i]) { // Found wall
+      from = Object.freeze({'x': row*cell_size, 'y': (col - offset)*cell_size});
+      if (horizontal) { // On horizontal row in array
+        to = Object.freeze({'x': row*cell_size, 'y': (col - offset)*cell_size + cell_size});
+      } else { // On vertical row in array
+        to = Object.freeze({'x': row*cell_size + cell_size, 'y': (col - offset)*cell_size});
+      };
+      wall = Object.freeze({'from': from, 'to': to});
+      walls.push(wall);
+    };
+    col++;
   };
 });
 
@@ -182,4 +199,30 @@ var laserScanListener = new ROSLIB.Topic({
 /* Listener that listens to the /wall_positions topic. */
 laserScanListener.subscribe(function(message) {
   laserScan = message.points;
+});
+
+/* Subscriber and publisher for button state */
+var btnState = false;
+
+var btnStateSub = new ROSLIB.Topic({ // Subscriber
+  ros : ros,
+  name : '/btn_state',
+  messageType : 'std_msgs/Bool'
+});
+
+btnStateSub.subscribe(function(message) {
+  btnState = message.data;
+  if (btnState) {
+    console.log("Checked");
+    $("#mode-slider").prop("checked", true);
+  } else {
+    console.log("Unchecked");
+    $("#mode-slider").prop("checked", false);
+  };
+});
+
+var btnStatePub = new ROSLIB.Topic({ // Publisher
+  ros : ros,
+  name : '/btn_state',
+  messageType : 'std_msgs/Bool'
 });
