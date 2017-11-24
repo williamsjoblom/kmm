@@ -52,17 +52,40 @@ function bindCanvasEvents() {
 function bindMenuEvents() {
   $("#debug-scan").click(function () {
     debug.scan = !debug.scan;
-    alert("debug scan = " + (debug.scan ? "true" : "false"));
+  });
+  $('#debug-scan').removeAttr('checked');
+  debug.scan = false;
+
+  $("#debug-aligned").click(function () {
+    debug.aligned = !debug.aligned;
+  });
+
+  $("#debug-end-points").click(function () {
+    debug.endPoints = !debug.endPoints;
+  });
+
+  $("#debug-velocity").click(function () {
+    debug.velocity = !debug.velocity;
+  });
+
+  $("#debug-acceleration").click(function () {
+    debug.acceleration = !debug.acceleration;
+  });
+  $('#debug-acceleration').removeAttr('checked');
+  debug.acceleration = false;
+
+  $("#debug-target").click(function () {
+    debug.target = !debug.target;
+  });
+
+  $("#debug-path").click(function () {
+    debug.path = !debug.path;
   });
 }
 
 function bindSidebarEvents() {
   // Bind mode slider.
   $("#mode-slider").click(toggleMode);
-  var bool = new ROSLIB.Message({
-    data : false
-  });
-  btnStatePub.publish(bool);
 }
 
 function resizeCanvas() {

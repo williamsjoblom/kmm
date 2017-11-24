@@ -38,7 +38,7 @@ html, body {
 .dropdown {
   display: none;
   position: absolute;
-  width: 200px;
+  width: 275px;
   left: 0;
   top: 50px;
   background: #222;
@@ -50,11 +50,16 @@ html, body {
 
 .dropdown-row {
   padding: 5px 20px;
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
 }
 
 .dropdown-text {
   float: left;
   cursor: pointer;
+  padding-right: 20px;
 }
 
 .dropdown-checkbox {

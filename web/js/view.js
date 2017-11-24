@@ -57,17 +57,20 @@ function render() {
   // Global frame
   drawGrid();
   drawWalls();
-  drawEndPoints();
   drawGlobalFrame();
-  drawTarget();
-  drawPath();
-  drawLaserScan();
+  if (debug.scan) {drawLaserScan();};
+  if (debug.aligned) {drawAlignedScan();};
+  if (debug.endPoints) {drawEndPoints();};
+  if (debug.target) {drawTarget();};
+  if (debug.path) {drawPath();};
+
 
   { // Robot frame
     ctx.save();
     ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
     ctx.rotate(robot.position.angle*Math.PI);
-    drawVelocity();
+    if (debug.velocity) {drawVelocity();};
+    if (debug.acceleration) {drawAcceleration();};
     drawRobot();
     ctx.restore();
   }
@@ -97,21 +100,35 @@ function drawPath() {
     ctx.moveTo(plannedPath[0].x, plannedPath[0].y);
     for (var i = 1; i < plannedPath.length; i++) {
       ctx.lineTo(plannedPath[i].x, plannedPath[i].y);
-    }
+    };
     ctx.stroke();
-  }
+  };
 }
 
 function drawLaserScan() {
   ctx.save();
-  //ctx.rotate(Math.PI);
+  ctx.translate(robot.position.x,robot.position.y);
+  ctx.rotate(-robot.position.angle*Math.PI);
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
-
   for (var i = 0; i < laserScan.length; i++) {
-    if (laserScan[i].x + laserScan[i].y > 0.1) {
-      ctx.fillRect(laserScan[i].x + (rectHeight/2), laserScan[i].y + (rectWidth/2), rectWidth, rectHeight);
+    if (laserScan[i] > 0.1) {
+      ctx.fillRect(-laserScan[i] + (rectHeight/2), (rectWidth/2), rectWidth, rectHeight);
+    };
+    ctx.rotate(Math.PI/180);
+  };
+  ctx.restore();
+}
+
+function drawAlignedScan() {
+  ctx.save();
+  ctx.fillStyle = "#9C27B0";
+  var rectHeight = 0.02;
+  var rectWidth = 0.02;
+  for (var i = 0; i < alignedScan.length; i++) {
+    if (alignedScan[i].x + alignedScan[i].y > 0.1) {
+      ctx.fillRect(alignedScan[i].x + (rectHeight/2), alignedScan[i].y + (rectWidth/2), rectWidth, rectHeight);
     };
   }
   ctx.restore();

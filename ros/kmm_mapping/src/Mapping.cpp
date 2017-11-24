@@ -28,7 +28,6 @@ namespace kmm_mapping {
 		for (int i = 0; i < walls_size_; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
 			walls_.push_back(0);
     };
-    publish_walls_ = false;
     // Set dimensions of wall array in message
     walls_msg_.layout.dim.push_back(std_msgs::MultiArrayDimension());
     walls_msg_.layout.dim[0].size = walls_.size();
@@ -38,9 +37,6 @@ namespace kmm_mapping {
     // Wall point count requirements
     pnt_cnt_req_ = 7;
     times_req_ = 5;
-
-    // End Points
-    publish_end_points_ = false;
   }
 
   Mapping::~Mapping() {
@@ -80,12 +76,8 @@ namespace kmm_mapping {
       };
     };
     // Publish
-    if (publish_walls_) {
-      publish_walls();
-    }
-    if (publish_end_points_) {
-      publish_end_points();
-    }
+    publish_walls();
+    publish_end_points();
 
     reset_wall_point_counts();
 
@@ -161,7 +153,6 @@ namespace kmm_mapping {
     } else {
       walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
     };
-    publish_walls_ = true;
   }
 
   void Mapping::update_end_points(int row, int col, bool horizontal) {
@@ -216,7 +207,6 @@ namespace kmm_mapping {
       end_point_2[1] = y_2;
       end_points_.push_back(end_point_2);
     };
-    publish_end_points_ = true;
   }
 
   void Mapping::publish_walls() {
@@ -225,7 +215,6 @@ namespace kmm_mapping {
         walls_msg_.data.push_back(is_wall);
     }
     walls_pub_.publish(walls_msg_);
-    publish_walls_ = false;
   }
 
   void Mapping::publish_end_points() {
@@ -238,7 +227,6 @@ namespace kmm_mapping {
       end_points_msg_.points.push_back(point);
     };
     end_points_pub_.publish(end_points_msg_);
-    publish_end_points_ = false;
   }
 
   void Mapping::set_pnt_cnt_req(int pnt_cnt_req) {

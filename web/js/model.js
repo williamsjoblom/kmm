@@ -17,7 +17,11 @@ var view = {
 
 var debug = {
   scan: true,
+  aligned: true,
+  endPoints: true,
   velocity: true,
+  acceleration: true,
+  target: true,
   path: true
 }
 
@@ -172,6 +176,8 @@ wallsListener.subscribe(function(message) {
   };
 });
 
+
+/* Listener that listens to the /end_points topic. */
 var endPointListener = new ROSLIB.Topic({
   ros: ros,
   name: '/end_points',
@@ -179,27 +185,37 @@ var endPointListener = new ROSLIB.Topic({
 });
 
 var endPoints = [];
-
-/* Listener that listens to the /end_points topic. */
 endPointListener.subscribe(function(message) {
   endPoints = [];
   for (var i = 0; i < message.points.length; i++) {
     endPoints.push(message.points[i]);
   };
 });
+/**/
 
-var laserScan = [];
-
+/* Listener that listens to the /scan topic. */
 var laserScanListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/scan',
+  messageType: 'sensor_msgs/LaserScan'
+});
+var laserScan = [];
+laserScanListener.subscribe(function(message) {
+  laserScan = message.ranges;
+});
+/**/
+
+/* Listener that listens to the /scan topic. */
+var alignedScanListener = new ROSLIB.Topic({
   ros: ros,
   name: '/aligned_scan',
   messageType: 'sensor_msgs/PointCloud'
 });
-
-/* Listener that listens to the /wall_positions topic. */
-laserScanListener.subscribe(function(message) {
-  laserScan = message.points;
+var alignedScan = [];
+alignedScanListener.subscribe(function(message) {
+  alignedScan = message.points;
 });
+/**/
 
 /* Subscriber and publisher for button state */
 var btnState = false;

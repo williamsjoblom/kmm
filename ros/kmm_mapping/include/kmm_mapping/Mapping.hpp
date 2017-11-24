@@ -68,10 +68,8 @@ private:
 
   // Wall vector
   std::vector<int> walls_;
-  bool publish_walls_;
 
   // End points
   std::vector<Eigen::Vector2f> end_points_;
-  bool publish_end_points_;
 };
 }
