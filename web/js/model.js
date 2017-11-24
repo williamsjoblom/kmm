@@ -105,7 +105,7 @@ var robotPositionListener = new ROSLIB.Topic({
 robotPositionListener.subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
-  robot.position.angle = message.pose.pose.orientation.z;
+  robot.position.angle = message.pose.pose.orientation.z * Math.PI;
 });
 
 var robotVelocityListener = new ROSLIB.Topic({
@@ -196,12 +196,12 @@ endPointListener.subscribe(function(message) {
 /* Listener that listens to the /scan topic. */
 var laserScanListener = new ROSLIB.Topic({
   ros: ros,
-  name: '/scan',
-  messageType: 'sensor_msgs/LaserScan'
+  name: '/scan_point_cloud',
+  messageType: 'sensor_msgs/PointCloud'
 });
 var laserScan = [];
 laserScanListener.subscribe(function(message) {
-  laserScan = message.ranges;
+  laserScan = message.points;
 });
 /**/
 

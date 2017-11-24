@@ -1,6 +1,6 @@
 
-// Render canvas 60Hz
-setInterval(render, 16);
+// Render canvas 30Hz
+setInterval(render, 33);
 
 // Update DOM 10Hz
 setInterval(updateDOM, 100);
@@ -9,7 +9,7 @@ function updateDOM() {
   //Position
   $("#pos-x").html(decimal(robot.position.x, 2));
   $("#pos-y").html(decimal(robot.position.y, 2));
-  $("#theta").html(decimal(robot.position.angle, 3) + " rad");
+  $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + "\u03C0");
   //Target
   $("#tar-pos-x").html(decimal(robot.target.x, 1));
   $("#tar-pos-y").html(decimal(robot.target.y, 1));
@@ -61,20 +61,18 @@ function render() {
   if (debug.scan) {drawLaserScan();};
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
+  if (debug.velocity) {drawVelocity();};
   if (debug.target) {drawTarget();};
   if (debug.path) {drawPath();};
-
+  if (debug.acceleration) {drawAcceleration();};
 
   { // Robot frame
     ctx.save();
     ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-    ctx.rotate(robot.position.angle*Math.PI);
-    if (debug.velocity) {drawVelocity();};
-    if (debug.acceleration) {drawAcceleration();};
+    ctx.rotate(robot.position.angle);
     drawRobot();
     ctx.restore();
   }
-
   ctx.restore();
 }
 
@@ -106,19 +104,13 @@ function drawPath() {
 }
 
 function drawLaserScan() {
-  ctx.save();
-  ctx.translate(robot.position.x,robot.position.y);
-  ctx.rotate(-robot.position.angle*Math.PI);
-  ctx.fillStyle = "#9C27B0";
-  var rectHeight = 0.02;
-  var rectWidth = 0.02;
+  var rectSize = 0.02;
+  ctx.fillStyle = "#0000ff";
   for (var i = 0; i < laserScan.length; i++) {
-    if (laserScan[i] > 0.1) {
-      ctx.fillRect(-laserScan[i] + (rectHeight/2), (rectWidth/2), rectWidth, rectHeight);
-    };
-    ctx.rotate(Math.PI/180);
-  };
-  ctx.restore();
+    if (laserScan[i].x + laserScan[i].y > 0.1) {
+      ctx.fillRect(laserScan[i].x + (rectSize/2), laserScan[i].y + (rectSize/2), rectSize, rectSize);
+    }
+  }
 }
 
 function drawAlignedScan() {
@@ -243,10 +235,11 @@ function drawAcceleration() {
 function drawVelocity() {
   ctx.strokeStyle = "#000000";
   ctx.lineWidth = 0.02;
-  var from = { x: 0, y: 0 };
+  var above_90 = Math.abs(robot.position.angle) > Math.PI/2 ? 1 : 1;
+  var from = { x: -robot.position.x, y: -robot.position.y };
   var to = {
-    x: robot.velocity.x * 2,
-    y: robot.velocity.y * 2
+    x: above_90*(-robot.velocity.x * 2) -robot.position.x,
+    y: above_90*(-robot.velocity.y * 2) -robot.position.y
   };
   ctx.save();
   ctx.rotate(Math.PI);
