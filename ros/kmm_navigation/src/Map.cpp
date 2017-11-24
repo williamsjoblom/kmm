@@ -1,5 +1,4 @@
 #include "kmm_navigation/Map.hpp"
-#include "ros/ros.h"
 
 namespace kmm_navigation {
 
@@ -35,8 +34,11 @@ namespace kmm_navigation {
     return cs_;
   }
 
+  void Map::set_walls(std::vector<int> walls) {
+    walls_ = walls;
+  }
+
   Eigen::Vector2f Map::get_cell(Eigen::Vector2f grid_pos) {
-    ROS_INFO_STREAM("cs_ " << cs_);
     float x = grid_pos.x();
     float y = grid_pos.y();
     float cell_x = ((x - (cs_/2)) - remainder(x - (cs_/2), cs_)) / cs_;
@@ -52,7 +54,6 @@ namespace kmm_navigation {
     int y = round(cell.y());
     int index = (x + 1)*(w_ + 1) + (x + 1)*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_above_cell() called with invalid cell!\n";
       return true;
     }
     return Map::walls_[index];
@@ -63,7 +64,6 @@ namespace kmm_navigation {
     int y = round(cell.y());
     int index = x*(w_ + 1) + x*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_below_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];
@@ -74,7 +74,6 @@ namespace kmm_navigation {
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_right_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];
@@ -85,7 +84,6 @@ namespace kmm_navigation {
     int y = round(cell.y());
     int index = x*(w_ + 1) + (x + 1)*w_ + offset_ + y + 1;
     if (index >= walls_size_) {
-      std::cout << "Function is_wall_left_cell() called with invalid cell!\n";
       return true;
     }
     return walls_[index];

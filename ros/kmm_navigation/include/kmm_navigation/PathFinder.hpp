@@ -1,13 +1,7 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/PoseArray.h>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/Point.h>
 #include <Eigen/Dense>
-#include <iostream>
 #include <vector>
 #include <set>
 #include <queue>
@@ -15,11 +9,6 @@
 #include <algorithm>
 #include <limits>
 #include "kmm_navigation/Map.hpp"
-#include "std_msgs/MultiArrayLayout.h"
-#include "std_msgs/MultiArrayDimension.h"
-#include "std_msgs/Int8MultiArray.h"
-#include <actionlib/server/simple_action_server.h>
-#include <kmm_navigation/MoveToAction.h>
 
 namespace kmm_navigation {
 

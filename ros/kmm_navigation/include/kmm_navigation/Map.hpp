@@ -29,6 +29,10 @@ namespace kmm_navigation {
     bool is_west_reachable_from_cell(Eigen::Vector2f cell);
     bool is_east_reachable_from_cell(Eigen::Vector2f cell);
 
+    void set_walls(std::vector<int> walls);
+
+  private:
+
     // Map variables
     int h_; // Map height in cells
     int w_; // Map width in cells

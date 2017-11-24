@@ -5,7 +5,8 @@ namespace kmm_navigation {
 
   Navigation::Navigation(ros::NodeHandle nh)
   : nh_(nh),
-    action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false) {
+    action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false)
+  {
 
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
@@ -14,6 +15,10 @@ namespace kmm_navigation {
     walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
 
+    // Timers
+    publish_path_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Navigation::publish_path, this);
+
+    // ROS parameters
     int map_rows;
     if (!nh_.getParam("/map_rows", map_rows)) {
         ROS_ERROR("Couldn't set map_rows!");
@@ -32,12 +37,12 @@ namespace kmm_navigation {
         assert(false);
     }
 
-    ROS_INFO("%d, %d, %f", map_rows, map_cols, cell_size);
-
+    // Helper classes
     map_ = new Map(map_rows, map_cols, cell_size);
-
     path_finder_ = new PathFinder(map_);
 
+    // Start the action server when all other
+    // instance variables are initiated.
     action_server_.start();
   }
 
@@ -46,55 +51,70 @@ namespace kmm_navigation {
     delete map_;
   }
 
+  /*
+    Action server callback. Gets a target position, calculates a path to follow
+    and actively controls the robot velocity to keep it on track.
+  */
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
-    ROS_INFO("Got new navigation request to x: %.2f, y: %.2f, angle: %.2f", goal->x, goal->y, goal->angle);
+    ros::Rate rate(20);
 
-    ros::Rate rate(3); // 3 Hz
-
-    ROS_INFO("Calculate path!");
-
+    // Find a path from robot position to target for the robot to follow.
     Eigen::Vector2f target(goal->x, goal->y);
-    std::vector<Eigen::Vector2f> path = path_finder_->find_path(pos_, target);
-    publish_path(path);
+    path_ = path_finder_->find_path(robot_position_, target);
 
-    while (true) {
-      ROS_INFO("Drive along path!");
+    bool has_reached_target = false;
+    while (!has_reached_target) {
 
+      // The navigation request can be preemted by the client.
+      // In that case we want to clear the path and stop the robot.
       if (action_server_.isPreemptRequested() || !ros::ok()) {
-        ROS_INFO("Preemted!");
         action_server_.setPreempted();
+        path_.clear();
         return;
       }
+
+      // TODO: Do the velocity control of the robot.
 
       rate.sleep();
     }
 
-    ROS_INFO("Roboten åkte hela vägen fram till target!");
+    // The robot has reached the target destination.
     action_server_.setSucceeded(result_);
   }
 
+  /*
+    Listen to the wall array and update
+    the underlying map data.
+  */
   void Navigation::walls_callback(std_msgs::Int8MultiArray msg) {
-    for (int i = 0; i < map_->walls_size_; i++) {
-      map_->walls_[i] = msg.data[i];
-    };
-    return;
+    std::vector<int> walls;
+    walls.resize(msg.data.size());
+    for (int i = 0; i < msg.data.size(); i++) {
+      walls[i] = msg.data[i];
+    }
+    map_->set_walls(walls);
   }
 
+  /*
+    Listen to and save robot position.
+  */
   void Navigation::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
-    pos_[0] = msg.pose.pose.position.x;
-    pos_[1] = msg.pose.pose.position.y;
+    robot_position_[0] = msg.pose.pose.position.x;
+    robot_position_[1] = msg.pose.pose.position.y;
   }
 
-  void Navigation::publish_path(std::vector<Eigen::Vector2f> path) {
-    ROS_INFO("Path size() = %d", path.size());
-    geometry_msgs::PoseArray path_msg;
-    for (Eigen::Vector2f& p : path) {
+  /*
+    Publish the current planned path
+    at a fixed time interval.
+  */
+  void Navigation::publish_path(const ros::TimerEvent&) {
+    geometry_msgs::PoseArray msg;
+    for (Eigen::Vector2f& p : path_) {
       geometry_msgs::Pose pose;
       pose.position.x = p.x();
       pose.position.y = p.y();
-      path_msg.poses.push_back(pose);
-      ROS_INFO("x: %f, y: %f", p.x(), p.y());
+      msg.poses.push_back(pose);
     }
-    path_pub_.publish(path_msg);
+    path_pub_.publish(msg);
   }
 }

@@ -37,26 +37,14 @@ namespace kmm_navigation {
    */
   std::vector<Eigen::Vector2f> PathFinder::find_path(Eigen::Vector2f from, Eigen::Vector2f to) {
 
-    ROS_INFO("Find path!");
-
-    ROS_INFO_STREAM("from " << from);
-    ROS_INFO_STREAM("to " << to);
-
     // Get pointers to start and end cells from current position to target.
     Eigen::Vector2f start_cell = map_->get_cell(from);
     Eigen::Vector2f end_cell = map_->get_cell(to);
 
-    ROS_INFO("start.x: %f, start.y: %f", start_cell[0], start_cell[1]);
-    ROS_INFO("end.x: %f, end.y: %f", end_cell[0], end_cell[1]);
-
     Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->get_offset()];
     Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + map_->get_offset()];
 
-    ROS_INFO("1");
-
     reset_cells();
-
-    ROS_INFO("2");
 
     std::priority_queue<Cell> cell_queue;
     start->cost = 0;
@@ -66,7 +54,7 @@ namespace kmm_navigation {
     double alt_cost;
     while (!cell_queue.empty()) {
       Cell next_cell = cell_queue.top();
-      curr_cell = cells_[next_cell.row][next_cell.col + map_->offset_];
+      curr_cell = cells_[next_cell.row][next_cell.col + map_->get_offset()];
       cell_queue.pop();
       if (curr_cell == end) {
         break;
@@ -89,25 +77,8 @@ namespace kmm_navigation {
       };
     }
 
-    ROS_INFO("3");
-
-    ROS_INFO("end row col %d, %d", end->row, end->col);
-
     std::vector<Eigen::Vector2f> path = get_path(start, end);
-
-    for (Eigen::Vector2f p : path) {
-      ROS_INFO("p x: %f, py: %f", p.x(), p.y());
-    }
-
-    ROS_INFO("4");
-
     std::vector<Eigen::Vector2f> smooth = make_smooth(path);
-
-    for (Eigen::Vector2f s : smooth) {
-      ROS_INFO("s x: %f, sy: %f", s.x(), s.y());
-    }
-
-    ROS_INFO("5");
 
     return smooth;
   }
@@ -119,7 +90,7 @@ namespace kmm_navigation {
     std::priority_queue<Cell> new_queue;
     for (int i = 0; i < old_queue.size(); i++) {
       Cell cell = old_queue.top();
-      new_queue.push(*cells_[cell.row][cell.col + map_->offset_]);
+      new_queue.push(*cells_[cell.row][cell.col + map_->get_offset()]);
       old_queue.pop();
     };
     return new_queue;
@@ -148,25 +119,25 @@ namespace kmm_navigation {
 
     // North
     if (map_->is_north_reachable_from_cell(current_cell)) {
-      Cell* north_neighbor = cells_[cell->row + 1][cell->col + map_->offset_];
+      Cell* north_neighbor = cells_[cell->row + 1][cell->col + map_->get_offset()];
       neighbors.insert(north_neighbor);
     };
 
     // South
     if (map_->is_south_reachable_from_cell(current_cell)) {
-      Cell* south_neighbor = cells_[cell->row - 1][cell->col + map_->offset_];
+      Cell* south_neighbor = cells_[cell->row - 1][cell->col + map_->get_offset()];
       neighbors.insert(south_neighbor);
     };
 
     // West
     if (map_->is_west_reachable_from_cell(current_cell)) {
-      Cell* west_neighbor = cells_[cell->row][cell->col + 1 + map_->offset_];
+      Cell* west_neighbor = cells_[cell->row][cell->col + 1 + map_->get_offset()];
       neighbors.insert(west_neighbor);
     };
 
     // East
     if (map_->is_east_reachable_from_cell(current_cell)) {
-      Cell* east_neighbor = cells_[cell->row][cell->col - 1 + map_->offset_];
+      Cell* east_neighbor = cells_[cell->row][cell->col - 1 + map_->get_offset()];
       neighbors.insert(east_neighbor);
     };
 
@@ -184,16 +155,13 @@ namespace kmm_navigation {
     if (foundEnd) {
       Cell* backtracker = end;
       while (backtracker != start) {
-        ROS_INFO("b->r: %d, b->c: %d", backtracker->row, backtracker->col);
         cell_center_x = map_->get_cell_size()/2 + map_->get_cell_size() * backtracker->row;
         cell_center_y = map_->get_cell_size()/2 + map_->get_cell_size() * backtracker->col;
-        ROS_INFO("center %f, %f", cell_center_x, cell_center_y);
         path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
         backtracker = backtracker->previous;
       };
       cell_center_x = map_->get_cell_size()/2 + map_->get_cell_size() * start->row;
       cell_center_y = map_->get_cell_size()/2 + map_->get_cell_size() * start->col;
-      ROS_INFO("center %f, %f", cell_center_x, cell_center_y);
       path.push_back(Eigen::Vector2f(cell_center_x, cell_center_y));
       reverse(path.begin(), path.end());
     }
