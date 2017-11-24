@@ -4,8 +4,6 @@
 #include <util/twi.h>
 #include <avr/interrupt.h>
 
-#define F_CPU 16000000UL
-#include <util/delay.h>
 
 #include "I2C.h"
 
@@ -38,7 +36,40 @@ uint8_t twst;
  * NMAK := NO MASTER ACKNOWLEDGE
  * SP := STOP CONDITION
  */
-uint8_t i2c_enable_reading(uint8_t address, uint16_t enable){
+
+
+int i2c_write(uint8_t addr, uint8_t reg, uint8_t data){
+  twst = twi_transmit(TWI_START);
+  switch(twst){
+    case TW_START:
+      TWDR = addr;
+      twst = twi_transmit(TWI_DATA);
+      switch(twst){
+        case TW_MT_SLA_ACK:
+          TWDR = reg;
+          twst = twi_transmit(TWI_DATA);
+          switch(twst){
+            case TW_MT_DATA_ACK:
+              TWDR = data;
+              twst = twi_transmit(TWI_DATA);
+              switch(twst){
+                case TW_MT_DATA_ACK:
+                  return twi_transmit(TWI_STOP);
+                default:
+                  return -1;
+              }
+              default:
+                return -1;
+          }
+          default:
+            return -1;
+      }
+      default:
+        return -1;
+  }
+}
+
+int i2c_enable_reading(uint8_t address, uint8_t enable){
   twst = twi_transmit(TWI_START);
   switch(twst){
     case TW_START:
@@ -65,9 +96,9 @@ uint8_t i2c_enable_reading(uint8_t address, uint16_t enable){
             return 1;
       }
       default:
-        return 1;    
+        return 1;
   }
-
+  return 1;
 }
 
 void i2c_init(){
@@ -77,11 +108,14 @@ void i2c_init(){
   TWBR = 0x48;
   //PRR0 &= ~(_BV(PRTWI));
   TWCR &= ~(_BV(TWIE));
-  i2c_enable_reading(ACC_ADDR, 0x57);
-  i2c_enable_reading(GYRO_ADDR, 0x0F);
-
-
+  //i2c_enable_reading(ACC_ADDR, 0x57);
+  //i2c_enable_reading(GYRO_ADDR, 0x23, GYRO_RANGE_250DPS);
+  //i2c_enable_reading(GYRO_ADDR, 0x0F);
+  i2c_write(ACC_ADDR,0x20, 0x57);
+  i2c_write(GYRO_ADDR,0x20, 0x0F);
+  i2c_write(GYRO_ADDR,0x23, GYRO_RANGE_250DPS);
 }
+
 
 int twi_assess_error(unsigned char type){
   switch(type){
@@ -264,9 +298,10 @@ int twi_read_bytes(const uint8_t sad, uint8_t addr, uint8_t *buf, int iter) {
   PORTD = PORTD | 0x04; //PD2
   while(n++ <= MAX_ITER){
     return_value = twi_send_start(sad, addr, buf, iter);
-    if (return_value <= 0)
+    if (return_value <= 0){
       PORTD = PORTD&0xFB;
       return return_value;
+    }
   }
   PORTD = PORTD&0xFB;
   return -10;
