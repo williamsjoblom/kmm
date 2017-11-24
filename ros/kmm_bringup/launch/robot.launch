@@ -1,3 +1,4 @@
 <launch>
-  <node name="kmm_steering" pkg="kmm_drivers" type="kmm_steering_node.py"></node>
+  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+  <!--<node name="kmm_steering" pkg="kmm_drivers" type="kmm_steering_node.py"></node>-->
 </launch>

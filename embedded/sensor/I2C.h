@@ -28,6 +28,7 @@
     #define TWI_STOP 2
     #define TWI_ERROR 3
     #define TWI_RESTART 4
+    #define TWI_REP_STOP 5
 
 
 
