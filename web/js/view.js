@@ -61,13 +61,13 @@ function render() {
 
   // Global frame
   drawGrid();
+  if (debug.axes) {drawGlobalFrame();};
   drawWalls();
-  drawGlobalFrame();
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
+  if (debug.path) {drawPath();};
   if (debug.target) {drawTarget();};
   if (debug.goToTarget && goToPos) {drawGoToTarget();};
-  if (debug.path) {drawPath();};
 
   { // Robot frame
     matrix.save();
@@ -89,10 +89,15 @@ function clearCanvas() {
 }
 
 function drawTarget() {
+  matrix.save();
   ctx.beginPath();
-  ctx.strokeStyle = "#00ff00"; // Green
-  ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
-  ctx.fill();
+  matrix.translate(robot.target.x + 0.1, robot.target.y);
+  matrix.rotate(Math.PI/2);
+  var scale = 0.001;
+  var pixels = 256; // Image size
+  var picSize = pixels * scale;
+  ctx.drawImage(targetImage, picSize / -2, picSize / -2, picSize, picSize);
+  matrix.restore();
 }
 
 function drawGoToTarget() {
@@ -122,7 +127,7 @@ Draws real time laser scan.
 */
 function drawLaserScan() {
   var rectSize = 0.02;
-  ctx.fillStyle = "#0000ff";
+  ctx.fillStyle = "#0080FF"; // Azure
   matrix.save();
   matrix.rotate(laserScan.angle_min + Math.PI);
   for (var i = 0; i < laserScan.ranges.length; i++){
@@ -173,7 +178,7 @@ function drawGrid() {
 
 function drawWalls() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#884422";
+  ctx.strokeStyle = "#000000";
   for (var i = 0; i < walls.length; i++) {
     ctx.beginPath();
     ctx.moveTo(walls[i].from.x, walls[i].from.y);
@@ -183,8 +188,8 @@ function drawWalls() {
 }
 
 function drawEndPoints() {
-  var radius = 0.05;
-  ctx.fillStyle = "#ffff00";
+  var radius = 0.06;
+  ctx.fillStyle = "#ff0000";
   for (var i = 0; i < endPoints.length; i++) {
     ctx.beginPath();
     ctx.arc(endPoints[i].x, endPoints[i].y, radius, 0, 2*Math.PI);

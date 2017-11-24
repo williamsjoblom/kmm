@@ -77,11 +77,15 @@ function bindCanvasEvents() {
 }
 
 function bindMenuEvents() {
+  $("#debug-axes").click(function () {
+    debug.axes = !debug.axes;
+  });
+  $('#debug-axes').removeAttr('checked');
+  debug.axes = false;
+
   $("#debug-scan").click(function () {
     debug.scan = !debug.scan;
   });
-  $('#debug-scan').removeAttr('checked');
-  debug.scan = false;
 
   $("#debug-aligned").click(function () {
     debug.aligned = !debug.aligned;

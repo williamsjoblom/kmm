@@ -20,14 +20,15 @@ var view = {
 };
 
 var debug = {
+  axes : true,
   scan: true,
   aligned: true,
   endPoints: true,
+  path: true,
   velocity: true,
   acceleration: true,
   target: true,
-  goToTarget: true,
-  path: true
+  goToTarget: true
 }
 
 var isUsingGoTo = false;
@@ -67,6 +68,8 @@ var robot = {
 };
 
 robot.image.src = "img/robot.png";
+var targetImage = new Image();
+targetImage.src = "img/target.png";
 
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
@@ -217,7 +220,6 @@ var laserScanListener = new ROSLIB.Topic({
   messageType: 'sensor_msgs/LaserScan'
 });
 laserScanListener.subscribe(function(message) {
-  console.log(message);
   laserScan.angle_min = message.angle_min;
   laserScan.angle_increment = message.angle_increment;
   laserScan.ranges = message.ranges;
@@ -250,6 +252,7 @@ btnStateSub.subscribe(function(message) {
     $("#mode-slider").prop("checked", false);
   } else {
     $("#mode-slider").prop("checked", true);
+    goToPos = null;
   };
 });
 
@@ -258,6 +261,7 @@ var btnStatePub = new ROSLIB.Topic({ // Publisher
   name : '/btn_state',
   messageType : 'std_msgs/Bool'
 });
+/**/
 
 /* Action client for target position */
 var navigationClient = new ROSLIB.ActionClient({
