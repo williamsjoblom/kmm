@@ -21,11 +21,14 @@ public:
   void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
   void cmd_vel_callback(geometry_msgs::Twist msg);
   void publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned);
-  void broadcast_position(const ros::TimerEvent&);
+  void broadcast_robot_pose(const ros::TimerEvent&);
+  void publish_robot_pose(const ros::TimerEvent&);
+  void publish_scan_cloud(sensor_msgs::PointCloud& cloud);
 
 private:
   ros::NodeHandle nh_;
-  ros::Timer broadcast_timer_;
+  ros::Timer broadcast_robot_pose_timer_;
+  ros::Timer publish_robot_pose_timer_;
   laser_geometry::LaserProjection projector_;
 
   // Subscribers
@@ -37,6 +40,7 @@ private:
   // Publishers
   ros::Publisher aligned_scan_pub_;
   ros::Publisher position_pub_;
+  ros::Publisher scan_point_cloud_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
 
   // State estimation

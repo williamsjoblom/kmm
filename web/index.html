@@ -2,16 +2,52 @@
 <html>
   <head>
     <meta charset="utf-8"/>
-    <script src="jquery.min.js"></script>
-    <script src="roslib.js"></script>
-    <link href="web.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
   </head>
   <body>
 
     <div class="menu">
       <div class="menu-option">
         Debug options
+        <div class="dropdown">
+          <div class="dropdown-row">
+            <label for="debug-scan" class="dropdown-text">Show laser scan</label>
+            <input id="debug-scan" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-aligned" class="dropdown-text">Show aligned laser scan</label>
+            <input id="debug-aligned" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-end-points" class="dropdown-text">Show end points</label>
+            <input id="debug-end-points" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-velocity" class="dropdown-text">Show robot velocity</label>
+            <input id="debug-velocity" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-acceleration" class="dropdown-text">Show robot acceleration</label>
+            <input id="debug-acceleration" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-target" class="dropdown-text">Show target</label>
+            <input id="debug-target" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+          <div class="dropdown-row">
+            <label for="debug-path" class="dropdown-text">Show planned path</label>
+            <input id="debug-path" checked type="checkbox" class="dropdown-checkbox"/>
+            <div class="clear"></div>
+          </div>
+        </div>
       </div>
+
       <div class="menu-option">
         Go to
       </div>
@@ -32,7 +68,7 @@
             <div class="map-button zoom-button" id="zoom-out-button">-</div>
           </td>
           <td>
-            <div class="map-button" id="view-state-button"></div>
+            <div class="map-button" id="view-state-button">Global</div>
           </td>
           <td>
             <div class="map-button" id="center-view-button"></div>
@@ -58,6 +94,20 @@
           <td id="pos-y"></td>
           <td>&theta;:</td>
           <td id="theta"></td>
+        </tr>
+
+        <tr>
+          <td colspan="6">
+            <center>Target Position</center>
+          </td>
+        </tr>
+        <tr>
+          <td>X<sub>tar</sub>:</td>
+          <td id="tar-pos-x"></td>
+          <td>Y<sub>tar</sub>:</td>
+          <td id="tar-pos-y"></td>
+          <td>&theta;<sub>tar</sub>:</td>
+          <td id="tar-theta"></td>
         </tr>
 
         <tr>
@@ -91,20 +141,6 @@
 
         <tr>
           <td colspan="6">
-            <center>Target Position</center>
-          </td>
-        </tr>
-        <tr>
-          <td>X<sub>tar</sub>:</td>
-          <td id="tar-pos-x"></td>
-          <td>Y<sub>tar</sub>:</td>
-          <td id="tar-pos-y"></td>
-          <td>&theta;<sub>tar</sub>:</td>
-          <td id="tar-theta"></td>
-        </tr>
-
-        <tr>
-          <td colspan="6">
             <center>Wheel Velocity</center>
           </td>
         </tr>
@@ -116,10 +152,28 @@
           <td>W<sub>3</sub>:</td>
           <td id="w-vel-3"></td>
         </tr>
+        <tr>
+          <td colspan="6">
+            <center>Mode</center>
+          </td>
+        </tr>
+        <tr>
+          <td id="manual-mode" colspan="2">Manual</td>
+          <td colspan="2">
+            <!-- Mode slider -->
+            <label class="switch">
+              <input id="mode-slider" type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </td>
+          <td id="auto-mode" colspan="2">Autonomous</td>
       </table>
     </div>
-
-    <script src="web.js"></script>
-    <script src="gamepad.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/roslib.js"></script>
+    <script src="js/model.js"></script>
+    <script src="js/controller.js"></script>
+    <script src="js/view.js"></script>
+    <script src="js/gamepad.js"></script>
   </body>
 </html>

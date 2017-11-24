@@ -25,10 +25,12 @@ struct WallPointCount {
 
 class Mapping {
 public:
-
   Mapping(ros::NodeHandle nh);
   ~Mapping();
+  void set_pnt_cnt_req(int pnt_cnt_req);
+  void set_times_req(int times_req);
 
+private:
   void mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col, int cnt);
   void reset_wall_point_counts();
@@ -36,33 +38,36 @@ public:
     bool horizontal, int row, int col);
   void add_wall(int row, int col, bool horizontal);
   void update_end_points(int row, int col, bool horizontal);
-  void publish_wall_positions();
-  void publish_wall_array();
+  void publish_walls();
   void publish_end_points();
 
-private:
   ros::NodeHandle nh_;
   // Subscribers
-  ros::Subscriber mapping_sub_;
+  ros::Subscriber sub_;
   // Publishers
-  ros::Publisher mapping_wall_pos_pub_;
-  ros::Publisher mapping_wall_arr_pub_;
-  ros::Publisher mapping_end_points_pub_;
+  ros::Publisher walls_pub_;
+  ros::Publisher end_points_pub_;
+
+  // Map variables
+  int h_; // Map rows = height
+  int w_; // Map cols = width
+  float cell_size_; // Size of a cell in meters
+  int offset_; // Offset used to index walls_
+  int walls_size_; // Size of walls_
 
   // Message variables
-  kmm_mapping::wall_positions wall_positions_msg_;
-  std_msgs::Int8MultiArray wall_arr_msg_;
+  std_msgs::Int8MultiArray walls_msg_;
   sensor_msgs::PointCloud end_points_msg_;
   int msg_cnt_;
 
   // Wall point counts
   std::vector<WallPointCount> hor_wall_point_counts_;
   std::vector<WallPointCount> ver_wall_point_counts_;
-  int pnt_cnt_req_ = 7;
-  int times_req_ = 5;
+  int pnt_cnt_req_; // Number of points on wall required to increment times count
+  int times_req_; // Number of times times has to be incremented for wall to be added
 
-  // Wall array
-  std::vector<int> wall_vec_;
+  // Wall vector
+  std::vector<int> walls_;
 
   // End points
   std::vector<Eigen::Vector2f> end_points_;

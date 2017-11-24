@@ -6,21 +6,37 @@ namespace kmm_mapping {
   : nh_(nh)
   {
     // Publishers
-    mapping_wall_pos_pub_ = nh_.advertise<kmm_mapping::wall_positions>("wall_positions", 1);
-    mapping_wall_arr_pub_ = nh_.advertise<std_msgs::Int8MultiArray>("wall_array", 1);
-    mapping_end_points_pub_ = nh_.advertise<sensor_msgs::PointCloud>("end_points", 1);
+    walls_pub_ = nh_.advertise<std_msgs::Int8MultiArray>("walls", 1);
+    end_points_pub_ = nh_.advertise<sensor_msgs::PointCloud>("end_points", 1);
     // Subscribers
-    mapping_sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
+    sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
+
+    // Get map variables
+    if (!nh_.getParam("/map_rows", h_)) {
+        ROS_ERROR("Couldn't set map_rows!");
+    }
+    if (!nh_.getParam("/map_cols", w_)) {
+        ROS_ERROR("Couldn't set map_cols!");
+    }
+    if (!nh_.getParam("/cell_size", cell_size_)) {
+        ROS_ERROR("Couldn't set cell_size!");
+    }
+    offset_ = (w_ - 1) / 2;
+    walls_size_ = (w_ + (w_ + 1)) * h_ + w_;
 
     // Initialize wall vector with 0's
-		for (int i = 0; i < 1500; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
-			wall_vec_.push_back(0);
+		for (int i = 0; i < walls_size_; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
+			walls_.push_back(0);
     };
     // Set dimensions of wall array in message
-    wall_arr_msg_.layout.dim.push_back(std_msgs::MultiArrayDimension());
-    wall_arr_msg_.layout.dim[0].size = wall_vec_.size();
-    wall_arr_msg_.layout.dim[0].stride = 1;
-    wall_arr_msg_.layout.dim[0].label = "x";
+    walls_msg_.layout.dim.push_back(std_msgs::MultiArrayDimension());
+    walls_msg_.layout.dim[0].size = walls_.size();
+    walls_msg_.layout.dim[0].stride = 1;
+    walls_msg_.layout.dim[0].label = "x";
+
+    // Wall point count requirements
+    pnt_cnt_req_ = 7;
+    times_req_ = 5;
   }
 
   Mapping::~Mapping() {
@@ -31,37 +47,36 @@ namespace kmm_mapping {
    */
   void Mapping::mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg) {
     std::vector<Eigen::Vector2f> wall_points;
-    for (const auto p : msg->points) {
+    for (const auto &p : msg->points) {
       Eigen::Vector2f point;
       point[0] = p.x;
       point[1] = p.y;
       wall_points.push_back(point);
     };
     // Iterate through wall points.
-    for (int i = 0; i < wall_points.size(); i++) {
-      float x = wall_points[i].x();
-      float y = wall_points[i].y();
+    for (Eigen::Vector2f& wall_point: wall_points) {
+      float x = wall_point.x();
+      float y = wall_point.y();
       float eps = 0.000001;
-      float rem_x = std::remainder(std::fabs(x), 0.4);
+      float rem_x = std::remainder(std::fabs(x), cell_size_);
       bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
-      float rem_y = std::remainder(std::fabs(y), 0.4);
+      float rem_y = std::remainder(std::fabs(y), cell_size_);
       bool on_vertical_wall = (rem_y > -eps) && (rem_y < eps);
       if (on_horizontal_wall) {
-        int row = std::round(x / 0.4);
-        int col = std::ceil(std::fabs(y) / 0.4) * (y < 0 ? -1 : 1); // col can never be 0
+        int row = std::round(x / cell_size_);
+        int col = std::ceil(std::fabs(y) / cell_size_) * (y < 0 ? -1 : 1); // col can never be 0
         increment_wall_point_count(hor_wall_point_counts_, true, row, col);
       } else if (on_vertical_wall) {
-        int row = std::ceil(std::fabs(x) / 0.4) * (x < 0 ? -1 : 1); // row can never be 0
-        int col = std::round(y / 0.4);
+        int row = std::ceil(std::fabs(x) / cell_size_) * (x < 0 ? -1 : 1); // row can never be 0
+        int col = std::round(y / cell_size_);
         increment_wall_point_count(ver_wall_point_counts_, false, row, col);
       } else {
         ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
-          x, y, std::remainder(std::fabs(x), 0.4),std::remainder(std::fabs(y), 0.4));
+          x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
       };
     };
     // Publish
-    publish_wall_positions();
-    publish_wall_array();
+    publish_walls();
     publish_end_points();
 
     reset_wall_point_counts();
@@ -83,33 +98,36 @@ namespace kmm_mapping {
   /* Sets all wall point count to 0. Called each time we analyze points. */
   void Mapping::reset_wall_point_counts() {
     // Reset horizontal wall point counts
-    for (std::vector<WallPointCount>::iterator it = hor_wall_point_counts_.begin();
-        it != hor_wall_point_counts_.end(); it++) {
-      (*it).pnt_cnt = 0;
+    for (WallPointCount& wall_point_count : hor_wall_point_counts_) {
+      wall_point_count.pnt_cnt = 0;
     };
     // Reset vertical wall point counts
-    for (std::vector<WallPointCount>::iterator it = ver_wall_point_counts_.begin();
-        it != ver_wall_point_counts_.end(); it++) {
-      (*it).pnt_cnt = 0;
+    for (WallPointCount& wall_point_count : ver_wall_point_counts_) {
+      wall_point_count.pnt_cnt = 0;
     };
   }
 
-  /* Increment the wall point count of a wall. Creates a new one with count 1 if missing. */
+  /*
+   * Increment the wall point count (pnt_cnt) of a wall.
+   * Creates a new one with pnt_cnt 1 if WallPointCount is missing.
+   * If pnt_cnt gets high enough, increment times.
+   * If times gets high enough, add wall and update end points.
+   */
   void Mapping::increment_wall_point_count(
       std::vector<WallPointCount>& wall_point_counts,
       bool horizontal, int row, int col) {
     int existing_wall_row;
     int existing_wall_col;
-    for (std::vector<WallPointCount>::iterator it = wall_point_counts.begin();
-        it != wall_point_counts.end(); it++) {
-      existing_wall_row = (*it).position[0];
-      existing_wall_col = (*it).position[1];
+    for (WallPointCount& wall_point_count : wall_point_counts) {
+      existing_wall_row = wall_point_count.position[0];
+      existing_wall_col = wall_point_count.position[1];
       if ((existing_wall_row == row) && (existing_wall_col == col)) {
-        (*it).pnt_cnt++;
-        if ((*it).pnt_cnt == pnt_cnt_req_ && !(*it).published) {
-          (*it).times++;
-          if ((*it).times == times_req_) {
-            (*it).published = true;
+        wall_point_count.pnt_cnt++;
+        if (wall_point_count.pnt_cnt == pnt_cnt_req_ &&
+            !wall_point_count.published) {
+          wall_point_count.times++;
+          if (wall_point_count.times == times_req_) {
+            wall_point_count.published = true;
             add_wall(row, col, horizontal);
             update_end_points(row, col, horizontal);
           };
@@ -121,20 +139,19 @@ namespace kmm_mapping {
     return;
   }
 
+  /*
+   * Add wall to wall_positions_msg_ and walls_.
+   */
   void Mapping::add_wall(int row, int col, bool horizontal) {
-    int w = 53; // Grid width
-    int offset = (w - 1) / 2;
     geometry_msgs::Point wall;
     wall.x = row;
     wall.y = col;
     wall.z = 0;
     if (horizontal) {
-      wall_positions_msg_.horizontal_walls.push_back(wall);
       int t = (col >= 1 ? 1 : 0);
-      wall_vec_[row*w + row*(w + 1) + offset + col - t] = 1;
+      walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 1;
     } else {
-      wall_positions_msg_.vertical_walls.push_back(wall);
-      wall_vec_[row*w + (w + 1)*(row - 1) + offset + col] = 1;
+      walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
     };
   }
 
@@ -145,14 +162,14 @@ namespace kmm_mapping {
     float x_2;
     float y_2;
     if (horizontal) {
-      x_1 = row * 0.4;
-      y_1 = (col - 1*(col >= 1 ? 1 : 0)) * 0.4;
+      x_1 = row * cell_size_;
+      y_1 = (col - 1*(col >= 1 ? 1 : 0)) * cell_size_;
       x_2 = x_1;
-      y_2 = y_1 + 0.4;
+      y_2 = y_1 + cell_size_;
     } else {
-      x_1 = (row - 1) * 0.4;
-      y_1 = col * 0.4;
-      x_2 = x_1 + 0.4;
+      x_1 = (row - 1) * cell_size_;
+      y_1 = col * cell_size_;
+      x_2 = x_1 + cell_size_;
       y_2 = y_1;
     };
     // Determine if end points in list equal any of the two new end points.
@@ -192,29 +209,31 @@ namespace kmm_mapping {
     };
   }
 
-  void Mapping::publish_wall_positions() {
-    wall_positions_msg_.cnt = msg_cnt_;
-    mapping_wall_pos_pub_.publish(wall_positions_msg_);
-    ++msg_cnt_;
-  }
-
-  void Mapping::publish_wall_array() {
-    wall_arr_msg_.data.clear();
-    for (std::vector<int>::const_iterator it = wall_vec_.begin(); it != wall_vec_.end(); ++it) {
-        wall_arr_msg_.data.push_back(*it);
+  void Mapping::publish_walls() {
+    walls_msg_.data.clear();
+    for (int& is_wall : walls_) {
+        walls_msg_.data.push_back(is_wall);
     }
-    mapping_wall_arr_pub_.publish(wall_arr_msg_);
+    walls_pub_.publish(walls_msg_);
   }
 
   void Mapping::publish_end_points() {
     end_points_msg_.points.clear();
-    for (int i = 0; i < end_points_.size(); i++) {
+    for (Eigen::Vector2f end_point : end_points_) {
       geometry_msgs::Point32 point;
-      point.x = end_points_[i].x();
-      point.y = end_points_[i].y();
+      point.x = end_point.x();
+      point.y = end_point.y();
       point.z = 0;
       end_points_msg_.points.push_back(point);
     };
-    mapping_end_points_pub_.publish(end_points_msg_);
+    end_points_pub_.publish(end_points_msg_);
+  }
+
+  void Mapping::set_pnt_cnt_req(int pnt_cnt_req) {
+    pnt_cnt_req_ = pnt_cnt_req;
+  }
+
+  void Mapping::set_times_req(int times_req) {
+    times_req_ = times_req;
   }
 }

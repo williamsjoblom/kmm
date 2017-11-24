@@ -19,6 +19,8 @@ html, body {
   height: 50px;
   background: #222;
   color: #fff;
+  overflow: visible;
+  z-index: 9999;
 }
 
 .menu-option {
@@ -26,10 +28,46 @@ html, body {
   color: #f2f2f2;
   padding: 17px;
   cursor: pointer;
+  position: abolute;
 }
 
 .menu-option:hover {
   background-color: rgba(156, 39, 176, 0.8);
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  width: 275px;
+  left: 0;
+  top: 50px;
+  background: #222;
+}
+
+.menu-option:hover .dropdown {
+  display: block;
+}
+
+.dropdown-row {
+  padding: 5px 20px;
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+}
+
+.dropdown-text {
+  float: left;
+  cursor: pointer;
+  padding-right: 20px;
+}
+
+.dropdown-checkbox {
+  float: right;
+}
+
+.clear {
+  clear: both;
 }
 
 .sidebar {
@@ -44,6 +82,7 @@ html, body {
 
 .sidebar .table-info {
   width: 100%;
+  text-align: center;
 }
 
 .sidebar .table-info tr {
@@ -123,6 +162,54 @@ html, body {
   height: 36px;
   cursor: pointer;
   background: rgba(0,0,0,0);
-  background: url("centerViewButton.png") center no-repeat;
+  background: url("img/centerViewButton.png") center no-repeat;
   background-size: cover;
+}
+
+/* Mode slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  /*left: 150px;*/
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 34px;
+  background-color: #2196F3; /* Blue */
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  border-radius: 50%;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #00ff00; /* Green */
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
 }
