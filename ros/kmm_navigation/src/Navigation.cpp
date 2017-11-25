@@ -10,7 +10,7 @@ namespace kmm_navigation {
 
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
-
+    cmd_vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
     // Subscribers
     walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
@@ -74,6 +74,16 @@ namespace kmm_navigation {
       }
 
       // TODO: Do the velocity control of the robot.
+      Eigen::Vector2f vel = path_follower_.get_velocity(path_, robot_position_);
+      Eigen::Vector3f vel3(vel[0], vel[1], 0);
+      Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
+      vel3 = t * vel3; // Rotate into robot frame.
+
+      geometry_msgs::Twist cmd_vel_msg;
+      cmd_vel_msg.linear.x =  vel3[0];
+      cmd_vel_msg.linear.y = vel3[1];
+      cmd_vel_msg.angular.z = 0;
+      cmd_vel_pub_.publish(cmd_vel_msg);
 
       rate.sleep();
     }
@@ -101,6 +111,9 @@ namespace kmm_navigation {
   void Navigation::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
     robot_position_[0] = msg.pose.pose.position.x;
     robot_position_[1] = msg.pose.pose.position.y;
+    geometry_msgs::Quaternion q = msg.pose.pose.orientation;
+    // Convert Quaternion to Euler angle.
+    robot_angle_ = std::atan2(2*(q.x*q.y+q.z*q.w), 1-2*(std::pow(q.y, 2)+std::pow(q.z, 2)));
   }
 
   /*
