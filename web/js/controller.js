@@ -18,10 +18,6 @@ function bindEvents() {
   bindSidebarEvents();
 }
 
-function getMousePos(e) {
-
-}
-
 function bindCanvasEvents() {
   // Bind map buttons.
   $("#zoom-in-button").click(zoomIn);
@@ -158,6 +154,8 @@ function toggleViewState() {
 function centerView() {
   view.pan.x = 0;
   view.pan.y = 0;
+  view.zoom = 1;
+  view.rotation = 0;
 }
 
 function zoomIn() {

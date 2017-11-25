@@ -8,6 +8,7 @@ var globalFrame = new Matrix();
 // Information about the viewport.
 var view = {
   zoom: 1,
+  rotation: 0,
   pan: {
     x: 0,
     y: 0
@@ -15,8 +16,7 @@ var view = {
   isDragging: false,
   prevDragPos: { x: 0, y: 0 },
   state: "global",
-  rotation: 0,
-  PX_PER_METER: 120
+  PX_PER_METER: 150
 };
 
 var debug = {
