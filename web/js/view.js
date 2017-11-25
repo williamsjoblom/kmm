@@ -9,7 +9,7 @@ function updateDOM() {
   //Position
   $("#pos-x").html(decimal(robot.position.x, 2));
   $("#pos-y").html(decimal(robot.position.y, 2));
-  $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + "\u03C0");
+  $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + " rad");
   //Target
   $("#tar-pos-x").html(decimal(robot.target.x, 1));
   $("#tar-pos-y").html(decimal(robot.target.y, 1));
@@ -23,9 +23,9 @@ function updateDOM() {
   $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 2) + " rad/s");
   $("#w-vel-3").html(decimal(robot.wheelVelocities[2], 2) + " rad/s");
   //Acceleration
-  $("#acc-x").html(decimal(robot.acceleration.x, 1) + " m/s");
-  $("#acc-y").html(decimal(robot.acceleration.y, 1) + " m/s");
-  $("#acc-w").html(decimal(robot.acceleration.angle, 1) + " rad/s");
+  $("#acc-x").html(decimal(robot.acceleration.x, 1) + " m/s²");
+  $("#acc-y").html(decimal(robot.acceleration.y, 1) + " m/s²");
+  $("#acc-w").html(decimal(robot.acceleration.angle, 1) + " rad/s²");
 }
 
 //Rounds to given decimal
