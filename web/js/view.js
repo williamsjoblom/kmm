@@ -7,8 +7,8 @@ setInterval(updateDOM, 100);
 
 function updateDOM() {
   //Position
-  $("#pos-x").html(decimal(robot.position.x, 2));
-  $("#pos-y").html(decimal(robot.position.y, 2));
+  $("#pos-x").html(decimal(robot.position.x, 2) + " m");
+  $("#pos-y").html(decimal(robot.position.y, 2) + " m");
   $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + " rad");
   //Target
   $("#tar-pos-x").html(decimal(robot.target.x, 1));

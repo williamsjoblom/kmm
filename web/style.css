@@ -97,7 +97,7 @@ html, body {
   top: 50px;
   right: 0;
   bottom: 0;
-  width: 450px;
+  width: 490px;
   background: #fff;
   padding: 20px;
   box-shadow: -5px 0 5px rgba(0,0,0,0.2);
@@ -121,13 +121,15 @@ html, body {
 }
 
 .table-info-data {
-  width: 90px;
+  width: 110px;
 }
 
 .table-info-label div, .table-info-data div {
-  padding: 10px;
   margin: 0;
   border: 1px solid #ddd;
+  font-size: 12px;
+  padding: 10px;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .table-info-label div {
@@ -145,7 +147,7 @@ html, body {
   border-radius: 0 5px 5px 0;
 }
 
-.table-info td:last-child .table-info-data div {
+.table-info-data:last-child div {
   margin-right: 0;
 }
 
