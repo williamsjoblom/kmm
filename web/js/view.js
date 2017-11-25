@@ -7,30 +7,30 @@ setInterval(updateDOM, 100);
 
 function updateDOM() {
   //Position
-  $("#pos-x").html(decimal(robot.position.x, 2) + " m");
-  $("#pos-y").html(decimal(robot.position.y, 2) + " m");
-  $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + " rad");
+  $("#pos-x").html(precision(robot.position.x, 2) + " m");
+  $("#pos-y").html(precision(robot.position.y, 2) + " m");
+  $("#theta").html(precision(robot.position.angle/Math.PI, 2) + " rad");
   //Target
-  $("#tar-pos-x").html(decimal(robot.target.x, 1));
-  $("#tar-pos-y").html(decimal(robot.target.y, 1));
-  $("#tar-theta").html(decimal(robot.target.angle, 2) + " rad");
+  $("#tar-pos-x").html(precision(robot.target.x, 1));
+  $("#tar-pos-y").html(precision(robot.target.y, 1));
+  $("#tar-theta").html(precision(robot.target.angle, 2) + " rad");
   //Velocity
-  $("#vel-x").html(decimal(robot.velocity.x, 2) + " m/s");
-  $("#vel-y").html(decimal(robot.velocity.y, 2) + " m/s");
-  $("#vel-w").html(decimal(robot.velocity.w, 2) + " rad/s");
+  $("#vel-x").html(precision(robot.velocity.x, 2) + " m/s");
+  $("#vel-y").html(precision(robot.velocity.y, 2) + " m/s");
+  $("#vel-w").html(precision(robot.velocity.w, 2) + " rad/s");
   //Wheel velocity
-  $("#w-vel-1").html(decimal(robot.wheelVelocities[0], 2) + " rad/s");
-  $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 2) + " rad/s");
-  $("#w-vel-3").html(decimal(robot.wheelVelocities[2], 2) + " rad/s");
+  $("#w-vel-1").html(precision(robot.wheelVelocities[0], 2) + " rad/s");
+  $("#w-vel-2").html(precision(robot.wheelVelocities[1], 2) + " rad/s");
+  $("#w-vel-3").html(precision(robot.wheelVelocities[2], 2) + " rad/s");
   //Acceleration
-  $("#acc-x").html(decimal(robot.acceleration.x, 1) + " m/s²");
-  $("#acc-y").html(decimal(robot.acceleration.y, 1) + " m/s²");
-  $("#acc-w").html(decimal(robot.acceleration.angle, 1) + " rad/s²");
+  $("#acc-x").html(precision(robot.acceleration.x, 2) + " m/s²");
+  $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
+  $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 }
 
-//Rounds to given decimal
-function decimal(val, dec){
-  return Math.round(val*Math.pow(10, dec))/Math.pow(10, dec);
+// Rounds to given precision
+function precision(val, n){
+  return (parseFloat(val*Math.pow(10, n)) / Math.pow(10, n)).toFixed(n);
 }
 
 function render() {
@@ -188,7 +188,7 @@ function drawWalls() {
 }
 
 function drawEndPoints() {
-  var radius = 0.06;
+  var radius = 0.04;
   ctx.fillStyle = "#ff0000";
   for (var i = 0; i < endPoints.length; i++) {
     ctx.beginPath();
