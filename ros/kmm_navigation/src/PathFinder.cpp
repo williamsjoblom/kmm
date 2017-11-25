@@ -11,6 +11,8 @@ namespace kmm_navigation {
         cells_[row][col] = make_cell(row, col - map_->get_offset());
       };
     };
+
+    diagonal_cost_ = sqrt(3.5);
   }
 
   PathFinder::~PathFinder() {
@@ -126,7 +128,7 @@ namespace kmm_navigation {
 
     if (map_->is_north_east_reachable_from_cell(current_cell)) {
       Cell* north_east_neighbor = cells_[cell->row + 1][cell->col - 1 + map_->get_offset()];
-      north_east_neighbor->path_cost = sqrt(4);
+      north_east_neighbor->path_cost = diagonal_cost_;
       neighbors.insert(north_east_neighbor);
     };
 
@@ -138,7 +140,7 @@ namespace kmm_navigation {
 
     if (map_->is_south_east_reachable_from_cell(current_cell)) {
       Cell* south_east_neighbor = cells_[cell->row - 1][cell->col - 1 + map_->get_offset()];
-      south_east_neighbor->path_cost = sqrt(4);
+      south_east_neighbor->path_cost = diagonal_cost_;
       neighbors.insert(south_east_neighbor);
     };
 
@@ -150,7 +152,7 @@ namespace kmm_navigation {
 
     if (map_->is_south_west_reachable_from_cell(current_cell)) {
       Cell* south_west_neighbor = cells_[cell->row - 1][cell->col + 1 + map_->get_offset()];
-      south_west_neighbor->path_cost = sqrt(4);
+      south_west_neighbor->path_cost = diagonal_cost_;
       neighbors.insert(south_west_neighbor);
     };
 
@@ -162,7 +164,7 @@ namespace kmm_navigation {
 
     if (map_->is_north_west_reachable_from_cell(current_cell)) {
       Cell* north_west_neighbor = cells_[cell->row + 1][cell->col + 1 + map_->get_offset()];
-      north_west_neighbor->path_cost = sqrt(4);
+      north_west_neighbor->path_cost = diagonal_cost_;
       neighbors.insert(north_west_neighbor);
     };
 
