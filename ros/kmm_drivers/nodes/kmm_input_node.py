@@ -24,10 +24,10 @@ if __name__ == '__main__':
         pressed = False
 
         while not rospy.is_shutdown():
-            if GPIO.input(BTN_PIN) and !pressed:
-                btn_state = !btn_state
+            if GPIO.input(BTN_PIN) and not pressed:
+                btn_state = not btn_state
                 pressed = True;
-            elif !GPIO.input(BTN_PIN):
+            elif not GPIO.input(BTN_PIN):
                 pressed = False;
             pub.publish(btn_state)
             rate.sleep()

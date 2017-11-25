@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import socket
 import fcntl
 import struct
@@ -71,8 +73,10 @@ if __name__ == '__main__':
                 
         while True:
             refresh(lcd)
-            time.sleep(5)
-            print('Reset: ' + str(GPIO.input(11)))                
+            time.sleep(0.5)
+            print('Reset: ' + str(GPIO.input(11)))
+	    print('SSID: ' + wlan_ssid())
+	    print('IP: ' + str(wlan_ip()))                
             
     except Exception as e:
         print("Exception occurred: " + str(e))
