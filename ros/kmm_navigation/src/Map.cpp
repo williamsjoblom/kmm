@@ -93,15 +93,47 @@ namespace kmm_navigation {
     return !is_wall_north_of_cell(cell) && cell.x() < (h_ - 1);
   }
 
+  bool Map::is_north_east_reachable_from_cell(Eigen::Vector2f cell) {
+    Eigen::Vector2f north_cell(cell.x() + 1, cell.y());
+    bool is_path_north = is_north_reachable_from_cell(cell) && is_east_reachable_from_cell(north_cell);
+    Eigen::Vector2f east_cell(cell.x(), cell.y() - 1);
+    bool is_path_east = is_east_reachable_from_cell(cell) && is_north_reachable_from_cell(east_cell);
+    return is_path_north && is_path_east;
+  }
+
+  bool Map::is_east_reachable_from_cell(Eigen::Vector2f cell) {
+    return !is_wall_east_of_cell(cell) && cell.y() > -offset_;
+  }
+
+  bool Map::is_south_east_reachable_from_cell(Eigen::Vector2f cell) {
+    Eigen::Vector2f south_cell(cell.x() - 1, cell.y());
+    bool is_path_south = is_south_reachable_from_cell(cell) && is_east_reachable_from_cell(south_cell);
+    Eigen::Vector2f east_cell(cell.x(), cell.y() - 1);
+    bool is_path_east = is_east_reachable_from_cell(cell) && is_south_reachable_from_cell(east_cell);
+    return is_path_south && is_path_east;
+  }
+
   bool Map::is_south_reachable_from_cell(Eigen::Vector2f cell) {
     return !is_wall_south_of_cell(cell) && cell.x() > 0;
+  }
+
+  bool Map::is_south_west_reachable_from_cell(Eigen::Vector2f cell) {
+    Eigen::Vector2f south_cell(cell.x() - 1, cell.y());
+    bool is_path_south = is_south_reachable_from_cell(cell) && is_west_reachable_from_cell(south_cell);
+    Eigen::Vector2f west_cell(cell.x(), cell.y() + 1);
+    bool is_path_west = is_west_reachable_from_cell(cell) && is_south_reachable_from_cell(west_cell);
+    return is_path_south && is_path_west;
   }
 
   bool Map::is_west_reachable_from_cell(Eigen::Vector2f cell) {
     return !is_wall_west_of_cell(cell) && cell.y() < offset_;
   }
 
-  bool Map::is_east_reachable_from_cell(Eigen::Vector2f cell) {
-    return !is_wall_east_of_cell(cell) && cell.y() > -offset_;
+  bool Map::is_north_west_reachable_from_cell(Eigen::Vector2f cell) {
+    Eigen::Vector2f north_cell(cell.x() + 1, cell.y());
+    bool is_path_north = is_north_reachable_from_cell(cell) && is_west_reachable_from_cell(north_cell);
+    Eigen::Vector2f west_cell(cell.x(), cell.y() + 1);
+    bool is_path_west = is_west_reachable_from_cell(cell) && is_north_reachable_from_cell(west_cell);
+    return is_path_north && is_path_west;
   }
 }

@@ -1,10 +1,14 @@
 
 // The canvas 2d context used to draw stuff.
+//var ctx = $("#map")[0].getContext("2d");
 var ctx = $("#map")[0].getContext("2d");
+var matrix = new Matrix(ctx);
+var globalFrame = new Matrix();
 
 // Information about the viewport.
 var view = {
   zoom: 1,
+  rotation: 0,
   pan: {
     x: 0,
     y: 0
@@ -12,19 +16,24 @@ var view = {
   isDragging: false,
   prevDragPos: { x: 0, y: 0 },
   state: "global",
-  rotation: 0,
-  PX_PER_METER: 120
+  PX_PER_METER: 150
 };
 
 var debug = {
+  axes : true,
   scan: true,
   aligned: true,
   endPoints: true,
+  path: true,
   velocity: true,
   acceleration: true,
   target: true,
-  path: true
+  goToTarget: true
 }
+
+var isUsingGoTo = false;
+
+var goToPos = null;
 
 var laserScan = {
   angle_min: 0,
@@ -35,13 +44,13 @@ var laserScan = {
 // Information about the robot
 var robot = {
   position: {
-    x: 0.2,
-    y: 0.2,
+    x: 0,
+    y: 0,
     angle: 0
   },
   target: {
-    x: 0.2,
-    y: 0.2,
+    x: 0,
+    y: 0,
     angle: 0
   },
   velocity: {
@@ -59,6 +68,8 @@ var robot = {
 };
 
 robot.image.src = "img/robot.png";
+var targetImage = new Image();
+targetImage.src = "img/target.png";
 
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
@@ -209,7 +220,6 @@ var laserScanListener = new ROSLIB.Topic({
   messageType: 'sensor_msgs/LaserScan'
 });
 laserScanListener.subscribe(function(message) {
-  console.log(message);
   laserScan.angle_min = message.angle_min;
   laserScan.angle_increment = message.angle_increment;
   laserScan.ranges = message.ranges;
@@ -229,8 +239,7 @@ alignedScanListener.subscribe(function(message) {
 /**/
 
 /* Subscriber and publisher for button state */
-var btnState = false;
-
+var isInManualMode = true;
 var btnStateSub = new ROSLIB.Topic({ // Subscriber
   ros : ros,
   name : '/btn_state',
@@ -238,13 +247,12 @@ var btnStateSub = new ROSLIB.Topic({ // Subscriber
 });
 
 btnStateSub.subscribe(function(message) {
-  btnState = message.data;
-  if (btnState) {
-    console.log("Checked");
-    $("#mode-slider").prop("checked", true);
-  } else {
-    console.log("Unchecked");
+  isInManualMode = message.data;
+  if (isInManualMode) {
     $("#mode-slider").prop("checked", false);
+  } else {
+    $("#mode-slider").prop("checked", true);
+    goToPos = null;
   };
 });
 
@@ -253,3 +261,12 @@ var btnStatePub = new ROSLIB.Topic({ // Publisher
   name : '/btn_state',
   messageType : 'std_msgs/Bool'
 });
+/**/
+
+/* Action client for target position */
+var navigationClient = new ROSLIB.ActionClient({
+  ros : ros,
+  serverName : '/navigation',
+  actionName : 'kmm_navigation/MoveToAction'
+});
+/**/

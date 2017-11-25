@@ -31,7 +31,12 @@
     #define TWI_RESTART 4
     #define TWI_REP_STOP 5
 
-uint8_t i2c_enable_reading(uint8_t address, uint16_t enable);
+    #define GYRO_RANGE_250DPS 0x00
+    #define GYRO_RANGE_500DPS 0x10
+    #define GYRO_RANGE_20000DPS 0x20
+
+int i2c_enable_reading(uint8_t address, uint8_t enable);
+int i2c_write(uint8_t addr, uint8_t reg, uint8_t data);
 void i2c_init(void);
 int twi_assess_error(unsigned char type);
 unsigned char twi_transmit(unsigned char type);

@@ -27,6 +27,29 @@ function bindCanvasEvents() {
 
   // Bind map scoll zoom and mouse pan.
   $("#map")
+  .click(function(e) {
+    if (isInManualMode && isUsingGoTo) {
+      $("#map").css('cursor', 'default');
+      isUsingGoTo = false;
+
+      var offset = $("#map-container").offset();
+
+      goToPos = globalMatrix.applyToPoint(
+        e.pageX - offset.left,
+        e.pageY - offset.top
+      );
+
+      var targetPositionGoal = new ROSLIB.Goal({
+        actionClient : navigationClient,
+        goalMessage : {
+          x : goToPos.x,
+          y : goToPos.y,
+          angle : 0,
+        }
+      });
+      targetPositionGoal.send();
+    };
+  })
   .mousedown(function(e) {
     view.isDragging = true;
     view.prevDragPos.x = e.screenX;
@@ -50,11 +73,15 @@ function bindCanvasEvents() {
 }
 
 function bindMenuEvents() {
+  $("#debug-axes").click(function () {
+    debug.axes = !debug.axes;
+  });
+  $('#debug-axes').removeAttr('checked');
+  debug.axes = false;
+
   $("#debug-scan").click(function () {
     debug.scan = !debug.scan;
   });
-  $('#debug-scan').removeAttr('checked');
-  debug.scan = false;
 
   $("#debug-aligned").click(function () {
     debug.aligned = !debug.aligned;
@@ -82,8 +109,21 @@ function bindMenuEvents() {
     debug.target = !debug.target;
   });
 
+  $("#debug-go-to-target").click(function () {
+    debug.goToTarget = !debug.goToTarget;
+  });
+
   $("#debug-path").click(function () {
     debug.path = !debug.path;
+  });
+
+  $("#go-to").click(function () {
+    isUsingGoTo = !isUsingGoTo;
+    if (isInManualMode && isUsingGoTo) {
+      $("#map").css('cursor', 'crosshair');
+    } else {
+      $("#map").css('cursor', 'default');
+    };
   });
 }
 
@@ -114,6 +154,8 @@ function toggleViewState() {
 function centerView() {
   view.pan.x = 0;
   view.pan.y = 0;
+  view.zoom = 1;
+  view.rotation = 0;
 }
 
 function zoomIn() {
@@ -125,9 +167,9 @@ function zoomOut() {
 }
 
 function toggleMode() {
-  btnState = !btnState;
+  isInManualMode = !isInManualMode;
   var bool = new ROSLIB.Message({
-    data : btnState
+    data : isInManualMode
   });
   btnStatePub.publish(bool);
 }

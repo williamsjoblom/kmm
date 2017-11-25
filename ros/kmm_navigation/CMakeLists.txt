@@ -70,6 +70,7 @@ add_executable(kmm_navigation_node
   src/Navigation.cpp
   src/Map.cpp
   src/PathFinder.cpp
+  src/PathFollower.cpp
 )
 
 ## Add cmake target dependencies of the executable

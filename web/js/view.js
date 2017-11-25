@@ -7,77 +7,80 @@ setInterval(updateDOM, 100);
 
 function updateDOM() {
   //Position
-  $("#pos-x").html(decimal(robot.position.x, 2));
-  $("#pos-y").html(decimal(robot.position.y, 2));
-  $("#theta").html(decimal(robot.position.angle/Math.PI, 3) + "\u03C0");
+  $("#pos-x").html(precision(robot.position.x, 2) + " m");
+  $("#pos-y").html(precision(robot.position.y, 2) + " m");
+  $("#theta").html(precision(robot.position.angle/Math.PI, 2) + " rad");
   //Target
-  $("#tar-pos-x").html(decimal(robot.target.x, 1));
-  $("#tar-pos-y").html(decimal(robot.target.y, 1));
-  $("#tar-theta").html(decimal(robot.target.angle, 2) + " rad");
+  $("#tar-pos-x").html(precision(robot.target.x, 1));
+  $("#tar-pos-y").html(precision(robot.target.y, 1));
+  $("#tar-theta").html(precision(robot.target.angle, 2) + " rad");
   //Velocity
-  $("#vel-x").html(decimal(robot.velocity.x, 2) + " m/s");
-  $("#vel-y").html(decimal(robot.velocity.y, 2) + " m/s");
-  $("#vel-w").html(decimal(robot.velocity.w, 2) + " rad/s");
+  $("#vel-x").html(precision(robot.velocity.x, 2) + " m/s");
+  $("#vel-y").html(precision(robot.velocity.y, 2) + " m/s");
+  $("#vel-w").html(precision(robot.velocity.w, 2) + " rad/s");
   //Wheel velocity
-  $("#w-vel-1").html(decimal(robot.wheelVelocities[0], 2) + " rad/s");
-  $("#w-vel-2").html(decimal(robot.wheelVelocities[1], 2) + " rad/s");
-  $("#w-vel-3").html(decimal(robot.wheelVelocities[2], 2) + " rad/s");
+  $("#w-vel-1").html(precision(robot.wheelVelocities[0], 2) + " rad/s");
+  $("#w-vel-2").html(precision(robot.wheelVelocities[1], 2) + " rad/s");
+  $("#w-vel-3").html(precision(robot.wheelVelocities[2], 2) + " rad/s");
   //Acceleration
-  $("#acc-x").html(decimal(robot.acceleration.x, 1) + " m/s");
-  $("#acc-y").html(decimal(robot.acceleration.y, 1) + " m/s");
-  $("#acc-w").html(decimal(robot.acceleration.angle, 1) + " rad/s");
+  $("#acc-x").html(precision(robot.acceleration.x, 2) + " m/s²");
+  $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
+  $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 }
 
-//Rounds to given decimal
-function decimal(val, dec){
-  return Math.round(val*Math.pow(10, dec))/Math.pow(10, dec);
+// Rounds to given precision
+function precision(val, n){
+  return (parseFloat(val*Math.pow(10, n)) / Math.pow(10, n)).toFixed(n);
 }
 
 function render() {
   clearCanvas();
 
   // Transform coordinate system to something that is practical to work with
-  ctx.save();
-  ctx.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
-  ctx.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
-  ctx.scale(-view.PX_PER_METER, view.PX_PER_METER);
+  matrix.save();
+  matrix.rotate(Math.PI / 2); // robotics standard, x is up, y is left.
+  matrix.translate(ctx.canvas.height / 2, -ctx.canvas.width / 2); // Move origo to center.
+  matrix.scale(-view.PX_PER_METER, view.PX_PER_METER);
 
-  var restore = false;
   // Different view states.
   if (view.state == "global") {
-    ctx.translate(-2, 0);
+    matrix.translate(-2, 0);
   } else {
-    restore = true;
     view.pan.x = -robot.position.x * view.zoom;
     view.pan.y = -robot.position.y * view.zoom;
     view.rotation = -robot.position.angle;
   }
 
   // View settings
-  ctx.rotate(view.rotation);
-  ctx.translate(view.pan.x, view.pan.y);
-  ctx.scale(view.zoom, view.zoom);
+  matrix.rotate(view.rotation);
+  matrix.translate(view.pan.x, view.pan.y);
+  matrix.scale(view.zoom, view.zoom);
+
+  // This is used to transform mouse position.
+  globalMatrix = Matrix.fromMatrix(matrix).inverse();
 
   // Global frame
   drawGrid();
+  if (debug.axes) {drawGlobalFrame();};
   drawWalls();
-  drawGlobalFrame();
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
   if (debug.path) {drawPath();};
-  if (debug.target) {drawTarget();};
+  if (debug.target && !isInManualMode) {drawTarget();};
+  if (debug.goToTarget && goToPos) {drawGoToTarget();};
 
   { // Robot frame
-    ctx.save();
-    ctx.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
-    ctx.rotate(robot.position.angle);
+    matrix.save();
+    matrix.translate(robot.position.x, robot.position.y); //Uncomment to have laser data drawn at robot pos.
+    matrix.rotate(robot.position.angle);
     if (debug.velocity) {drawVelocity();};
     if (debug.scan) {drawLaserScan();};
     if (debug.acceleration) {drawAcceleration();};
     drawRobot();
-    ctx.restore();
+    matrix.restore();
   }
-  ctx.restore();
+
+  matrix.restore();
 }
 
 function clearCanvas() {
@@ -86,15 +89,27 @@ function clearCanvas() {
 }
 
 function drawTarget() {
+  matrix.save();
   ctx.beginPath();
-  ctx.fillStyle = "#00ff00";
-  ctx.arc(robot.target.x, robot.target.y, 0.05, 0, 2*Math.PI);
-  ctx.fill();
+  matrix.translate(robot.target.x + 0.1, robot.target.y);
+  matrix.rotate(Math.PI/2);
+  var scale = 0.001;
+  var pixels = 256; // Image size
+  var picSize = pixels * scale;
+  ctx.drawImage(targetImage, picSize / -2, picSize / -2, picSize, picSize);
+  matrix.restore();
+}
+
+function drawGoToTarget() {
+  ctx.beginPath();
+  ctx.strokeStyle = "#2196F3"; // Blue
+  ctx.arc(goToPos.x, goToPos.y, 0.05, 0, 2*Math.PI);
+  ctx.stroke();
 }
 
 function drawPath() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#004400";
+  ctx.strokeStyle = "#ffa500";
 
   ctx.beginPath();
   if (plannedPath.length > 0) {
@@ -112,18 +127,18 @@ Draws real time laser scan.
 */
 function drawLaserScan() {
   var rectSize = 0.02;
-  ctx.fillStyle = "#0000ff";
-  ctx.save();
-  ctx.rotate(laserScan.angle_min + Math.PI);
+  ctx.fillStyle = "#0080FF"; // Azure
+  matrix.save();
+  matrix.rotate(laserScan.angle_min + Math.PI);
   for (var i = 0; i < laserScan.ranges.length; i++){
     ctx.fillRect(laserScan.ranges[i] + (rectSize/2), (rectSize/2), rectSize, rectSize);
     ctx.rotate(laserScan.angle_increment);
   }
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawAlignedScan() {
-  ctx.save();
+  matrix.save();
   ctx.fillStyle = "#9C27B0";
   var rectHeight = 0.02;
   var rectWidth = 0.02;
@@ -132,15 +147,15 @@ function drawAlignedScan() {
       ctx.fillRect(alignedScan[i].x + (rectHeight/2), alignedScan[i].y + (rectWidth/2), rectWidth, rectHeight);
     };
   }
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawGrid() {
   ctx.lineWidth = 0.01;
   ctx.strokeStyle = "#AAAAAA";
 
-  ctx.save();
-  ctx.translate(0,0.2);
+  matrix.save();
+  matrix.translate(0,0.2);
   var rows = 26; // (10 / 0.4) + 1
   var cols = 51; // ((10 / 0.4) * 2) + 1
 
@@ -158,12 +173,12 @@ function drawGrid() {
     ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
     ctx.stroke();
   };
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawWalls() {
   ctx.lineWidth = 0.03;
-  ctx.strokeStyle = "#884422";
+  ctx.strokeStyle = "#000000";
   for (var i = 0; i < walls.length; i++) {
     ctx.beginPath();
     ctx.moveTo(walls[i].from.x, walls[i].from.y);
@@ -173,8 +188,8 @@ function drawWalls() {
 }
 
 function drawEndPoints() {
-  var radius = 0.05;
-  ctx.fillStyle = "#ffff00";
+  var radius = 0.04;
+  ctx.fillStyle = "#ff0000";
   for (var i = 0; i < endPoints.length; i++) {
     ctx.beginPath();
     ctx.arc(endPoints[i].x, endPoints[i].y, radius, 0, 2*Math.PI);
@@ -202,13 +217,13 @@ function drawGlobalFrame() {
 }
 
 function drawRobot() {
-  ctx.save();
-  ctx.rotate(Math.PI / 2);
+  matrix.save();
+  matrix.rotate(Math.PI / 2);
   var scale = 0.001;
   var pixels = 300;
   var picSize = pixels * scale;
   ctx.drawImage(robot.image, picSize / -2, picSize / -2, picSize, picSize);
-  ctx.restore();
+  matrix.restore();
 }
 
 function drawArrow(from, to){

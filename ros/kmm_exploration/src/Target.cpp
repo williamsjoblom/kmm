@@ -15,44 +15,59 @@ namespace kmm_exploration{
 
     // Subscribers
     end_points_sub_ = nh_.subscribe("end_points", 1, &Target::end_points_callback, this);
+    btn_state_sub_ = nh_.subscribe("btn_state", 1, &Target::btn_state_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Target::position_callback, this);
+
+    // Set initial values
+    is_in_manual_mode_ = true;
   }
 
   Target::~Target(){}
 
-/*
-  Callback for end_points. Eventually updates target and publishes and sets goal based on if previous target is explored.
-*/
+  /*
+   * Callback for btn_state. Sets bool is_in_manual_mode_ depending on if
+   * robot is in manual or autonomous mode.
+   */
+  void Target::btn_state_callback(std_msgs::Bool msg){
+    is_in_manual_mode_ = msg.data;
+  }
+
+  /*
+   * Callback for end_points. If robot is not in manual mode, eventually updates
+   * target and publishes and sets goal based on if previous target is explored.
+   */
   void Target::end_points_callback(sensor_msgs::PointCloud msg){
-    geometry_msgs::Point32 closest;
-    bool not_empty = false;
-    float min_distance = FLT_MAX;
-    for (geometry_msgs::Point32 point : msg.points){
-      not_empty = true;
-      float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
-      //If point is equal to the previous, there shouldn't be a new target
-      if (point.x == target_.x && point.y == target_.y){
-        closest = point;
-        break;
+    if (!is_in_manual_mode_) {
+      geometry_msgs::Point32 closest;
+      bool not_empty = false;
+      float min_distance = FLT_MAX;
+      for (geometry_msgs::Point32 point : msg.points){
+        not_empty = true;
+        float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
+        //If point is equal to the previous, there shouldn't be a new target
+        if (point.x == target_.x && point.y == target_.y){
+          closest = point;
+          break;
+        }
+        else if (distance < min_distance){
+          closest = point;
+          min_distance = distance;
+        }
       }
-      else if (distance < min_distance){
-        closest = point;
-        min_distance = distance;
+      //If list was empty, return to start
+      if (!not_empty){
+        float new_x = 0.2;
+        float new_y = 0.2;
+        update_target(new_x, new_y);
       }
-    }
-    //If list was empty, return to start
-    if (!not_empty){
-      float new_x = 0.2;
-      float new_y = 0.2;
-      update_target(new_x, new_y);
-    }
-    else{
-      target_ = closest;
-      //float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
-      float new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
-      //float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
-      float new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
-      update_target(new_x, new_y);
+      else{
+        target_ = closest;
+        //float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
+        float new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
+        //float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
+        float new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
+        update_target(new_x, new_y);
+      }
     }
   }
 

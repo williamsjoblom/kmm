@@ -4,6 +4,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Twist.h>
 #include <Eigen/Dense>
 #include <vector>
 #include "kmm_navigation/Map.hpp"
@@ -11,6 +12,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <kmm_navigation/MoveToAction.h>
 #include "PathFinder.hpp"
+#include "PathFollower.hpp"
 
 namespace kmm_navigation {
 
@@ -27,8 +29,10 @@ private:
 
   Map* map_;
   PathFinder* path_finder_;
+  PathFollower path_follower_;
   std::vector<Eigen::Vector2f> path_;
   Eigen::Vector2f robot_position_;
+  float robot_angle_;
 
   ros::NodeHandle nh_;
 
@@ -42,6 +46,7 @@ private:
 
   // Publishers
   ros::Publisher path_pub_;
+  ros::Publisher cmd_vel_pub_;
   ros::Timer publish_path_timer_;
 };
 }

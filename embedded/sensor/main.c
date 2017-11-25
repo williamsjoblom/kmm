@@ -25,6 +25,8 @@
   buf[1] = 0x00;
   buf[2] = 0x00;
   buf[3] = 0x00;
+
+
   while (1){
     n++;
     acc_return_value = twi_read_bytes(ACC_ADDR, ACC_START, buf, 4);
