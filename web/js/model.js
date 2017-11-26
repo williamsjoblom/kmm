@@ -80,79 +80,77 @@ var endPoints = [];
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
   url : 'ws://localhost:9090'
-});
 
-ros.on('connection', function() {
+}).on('connection', function() {
   console.log('Connected to a websocket server.');
-});
 
-ros.on('error', function(error) {
+}).on('error', function(error) {
   console.log('Error connecting to websocket server: ', error);
-});
 
-ros.on('close', function() {
+}).on('close', function() {
   console.log('Connection to websocket server closed. ');
 });
 
 // Setup ROS subscribers
-var pathListener = new ROSLIB.Topic({
+
+// Planned path.
+new ROSLIB.Topic({
   ros: ros,
   name: '/path',
   messageType: 'geometry_msgs/PoseArray'
-})
 
-pathListener.subscribe(function(message) {
+}).subscribe(function(message) {
   plannedPath = message.poses.map(function (pose) {
     return { x: pose.position.x, y: pose.position.y };
   });
 });
 
-var robotPositionListener = new ROSLIB.Topic({
+// Robot position and orientation.
+new ROSLIB.Topic({
   ros: ros,
   name: '/position',
   messageType: 'geometry_msgs/PoseWithCovarianceStamped'
-})
 
-robotPositionListener.subscribe(function(message) {
+}).subscribe(function(message) {
   robot.position.x = message.pose.pose.position.x;
   robot.position.y = message.pose.pose.position.y;
   var q = message.pose.pose.orientation;
+  // Quaternion to Euler angle.
   var angle = Math.atan2(2*(q.x*q.y+q.z*q.w), 1-2*(Math.pow(q.y, 2)+Math.pow(q.z, 2)));
   robot.position.angle = angle;
 });
 
-var robotVelocityListener = new ROSLIB.Topic({
+// Robot velocity.
+new ROSLIB.Topic({
   ros: ros,
   name: '/cmd_vel',
   messageType: 'geometry_msgs/Twist'
-})
 
-robotVelocityListener.subscribe(function(message) {
+}).subscribe(function(message) {
   robot.velocity.x = message.linear.x;
   robot.velocity.y = message.linear.y;
   robot.velocity.w = message.angular.z;
 });
 
-var wheelVelocityListener = new ROSLIB.Topic({
+// Robot wheel velocities.
+new ROSLIB.Topic({
   ros: ros,
   name: '/wheel_velocities',
   messageType: 'kmm_drivers/WheelVelocities'
-});
 
-wheelVelocityListener.subscribe(function(message) {
+}).subscribe(function(message) {
   robot.wheelVelocities[0] = message.wheel_0;
   robot.wheelVelocities[1] = message.wheel_1;
   robot.wheelVelocities[2] = message.wheel_2;
 });
 
-var wallsListener = new ROSLIB.Topic({
+// Map walls.
+new ROSLIB.Topic({
   ros: ros,
   name: '/walls',
   messageType: 'std_msgs/Int8MultiArray'
-});
 
-/* Listener that listens to the /walls topic. */
-wallsListener.subscribe(function(message) {
+}).subscribe(function(message) {
   walls = [];
   var wall;
   var width = 51;
@@ -189,54 +187,48 @@ wallsListener.subscribe(function(message) {
 });
 
 
-/* Listener that listens to the /end_points topic. */
-var endPointListener = new ROSLIB.Topic({
+// Map endpoints.
+new ROSLIB.Topic({
   ros: ros,
   name: '/end_points',
   messageType: 'sensor_msgs/PointCloud'
-});
 
-endPointListener.subscribe(function(message) {
+}).subscribe(function(message) {
   endPoints = [];
   for (var i = 0; i < message.points.length; i++) {
     endPoints.push(message.points[i]);
   };
 });
-/**/
 
-/* Listener that listens to the /scan topic. */
-var laserScanListener = new ROSLIB.Topic({
+// LIDAR laser scan.
+new ROSLIB.Topic({
   ros: ros,
   name: '/scan',
   messageType: 'sensor_msgs/LaserScan'
-});
-laserScanListener.subscribe(function(message) {
+
+}).subscribe(function(message) {
   laserScan.angle_min = message.angle_min;
   laserScan.angle_increment = message.angle_increment;
   laserScan.ranges = message.ranges;
 });
-/**/
 
-/* Listener that listens to the /scan topic. */
-var alignedScanListener = new ROSLIB.Topic({
+// Aligned laser scan.
+new ROSLIB.Topic({
   ros: ros,
   name: '/aligned_scan',
   messageType: 'sensor_msgs/PointCloud'
-});
 
-alignedScanListener.subscribe(function(message) {
+}).subscribe(function(message) {
   alignedScan = message.points;
 });
-/**/
 
-/* Subscriber and publisher for button state */
-var btnStateSub = new ROSLIB.Topic({ // Subscriber
+
+new ROSLIB.Topic({
   ros : ros,
   name : '/btn_state',
   messageType : 'std_msgs/Bool'
-});
 
-btnStateSub.subscribe(function(message) {
+}).subscribe(function(message) {
   isInManualMode = message.data;
   if (isInManualMode) {
     $("#mode-slider").prop("checked", false);
@@ -248,17 +240,16 @@ btnStateSub.subscribe(function(message) {
   };
 });
 
-var btnStatePub = new ROSLIB.Topic({ // Publisher
+// Publisher for button state.
+var btnStatePub = new ROSLIB.Topic({
   ros : ros,
   name : '/btn_state',
   messageType : 'std_msgs/Bool'
 });
-/**/
 
-/* Action client for target position */
+// Action client for move to navigation goal.
 var navigationClient = new ROSLIB.ActionClient({
   ros : ros,
   serverName : '/navigation',
   actionName : 'kmm_navigation/MoveToAction'
 });
-/**/
