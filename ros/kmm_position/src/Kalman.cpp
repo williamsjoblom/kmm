@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "kmm_position/Kalman.h"
+#include <ros/ros.h>
 
 namespace kmm_position {
 
@@ -45,8 +46,12 @@ namespace kmm_position {
   void Kalman::predict(const Eigen::Vector3f& u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
       predict_ts_ = ros::Time::now();
-      state_ += dt * u;
-      state_cov_ += predict_noise_;
+      if (dt < 1./20) {
+        state_ += dt * u;
+        state_cov_ += predict_noise_;
+      } else {
+        ROS_WARN_THROTTLE(1, "Too low frequency control signal to make position prediction");
+      }
   }
 
   void Kalman::lidar_measurement(const Eigen::Vector3f y) {
