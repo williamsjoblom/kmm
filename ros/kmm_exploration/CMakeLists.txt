@@ -73,7 +73,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(kmm_exploration_node
   nodes/kmm_exploration_node.cpp
-  src/Target.cpp
+  src/Exploration.cpp
 )
 
 ## Add cmake target dependencies of the executable

@@ -1,6 +1,5 @@
 
 // The canvas 2d context used to draw stuff.
-//var ctx = $("#map")[0].getContext("2d");
 var ctx = $("#map")[0].getContext("2d");
 var matrix = new Matrix(ctx);
 var globalFrame = new Matrix();
@@ -19,6 +18,7 @@ var view = {
   PX_PER_METER: 150
 };
 
+// Debug options
 var debug = {
   axes : true,
   scan: true,
@@ -27,28 +27,25 @@ var debug = {
   path: true,
   velocity: true,
   acceleration: true,
-  target: true,
   goToTarget: true
-}
+};
 
+// Go to
 var isUsingGoTo = false;
-
 var goToPos = null;
 
+// Laser scan
 var laserScan = {
   angle_min: 0,
   angle_increment: 0,
   ranges: []
 };
 
+var alignedScan = [];
+
 // Information about the robot
 var robot = {
   position: {
-    x: 0,
-    y: 0,
-    angle: 0
-  },
-  target: {
     x: 0,
     y: 0,
     angle: 0
@@ -68,8 +65,17 @@ var robot = {
 };
 
 robot.image.src = "img/robot.png";
+
+var isInManualMode = true;
+
+// Planned path and target
+var plannedPath = [];
 var targetImage = new Image();
 targetImage.src = "img/target.png";
+
+// Mapping
+var walls = [];
+var endPoints = [];
 
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
@@ -95,23 +101,10 @@ var pathListener = new ROSLIB.Topic({
   messageType: 'geometry_msgs/PoseArray'
 })
 
-var plannedPath = [];
 pathListener.subscribe(function(message) {
   plannedPath = message.poses.map(function (pose) {
     return { x: pose.position.x, y: pose.position.y };
   });
-});
-
-var targetPositionListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/target_position',
-  messageType: 'geometry_msgs/Twist'
-})
-
-targetPositionListener.subscribe(function(message) {
-  robot.target.x = message.linear.x;
-  robot.target.y = message.linear.y;
-  robot.target.angle = message.angular.z;
 });
 
 var robotPositionListener = new ROSLIB.Topic({
@@ -158,7 +151,6 @@ var wallsListener = new ROSLIB.Topic({
   messageType: 'std_msgs/Int8MultiArray'
 });
 
-var walls = [];
 /* Listener that listens to the /walls topic. */
 wallsListener.subscribe(function(message) {
   walls = [];
@@ -204,7 +196,6 @@ var endPointListener = new ROSLIB.Topic({
   messageType: 'sensor_msgs/PointCloud'
 });
 
-var endPoints = [];
 endPointListener.subscribe(function(message) {
   endPoints = [];
   for (var i = 0; i < message.points.length; i++) {
@@ -232,14 +223,13 @@ var alignedScanListener = new ROSLIB.Topic({
   name: '/aligned_scan',
   messageType: 'sensor_msgs/PointCloud'
 });
-var alignedScan = [];
+
 alignedScanListener.subscribe(function(message) {
   alignedScan = message.points;
 });
 /**/
 
 /* Subscriber and publisher for button state */
-var isInManualMode = true;
 var btnStateSub = new ROSLIB.Topic({ // Subscriber
   ros : ros,
   name : '/btn_state',
@@ -250,8 +240,10 @@ btnStateSub.subscribe(function(message) {
   isInManualMode = message.data;
   if (isInManualMode) {
     $("#mode-slider").prop("checked", false);
+    $("#go-to").removeClass("menu-option-inactive");
   } else {
     $("#mode-slider").prop("checked", true);
+    $("#go-to").addClass("menu-option-inactive");
     goToPos = null;
   };
 });

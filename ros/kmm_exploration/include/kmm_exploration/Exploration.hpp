@@ -11,15 +11,14 @@
 
 namespace kmm_exploration {
 
-class Target {
+class Exploration {
 public:
-  Target(ros::NodeHandle nh);
-  ~Target();
+  Exploration(ros::NodeHandle nh);
+  ~Exploration();
 
   void btn_state_callback(std_msgs::Bool msg);
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
-  void publish_target();
   void send_goal();
   void update_target(float new_x, float new_y);
 
@@ -45,8 +44,6 @@ private:
   ros::Subscriber btn_state_sub_;
   ros::Subscriber end_points_sub_;
 
-  // Publishers
-  ros::Publisher target_pub_;
 };
 
 }

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "kmm_position/Kalman.h"
 #include <ros/ros.h>
+#include <math.h>
 
 namespace kmm_position {
 
@@ -45,12 +46,13 @@ namespace kmm_position {
 
   void Kalman::predict(const Eigen::Vector3f& u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
+      int hz = std::floor(1/dt);
       predict_ts_ = ros::Time::now();
-      if (dt < 1./20) {
+      if (hz > 20) {
         state_ += dt * u;
         state_cov_ += predict_noise_;
       } else {
-        ROS_WARN_THROTTLE(1, "Too low frequency control signal to make position prediction");
+        ROS_WARN("Too low frequency control signal to make position prediction: %d Hz", hz);
       }
   }
 
