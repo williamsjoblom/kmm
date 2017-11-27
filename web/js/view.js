@@ -263,8 +263,8 @@ function drawVelocity() {
   ctx.lineWidth = 0.02;
   var from = { x: 0, y: 0 };
   var to = {
-    x: robot.velocity.x * 4,
-    y: robot.velocity.y * 4
+    x: robot.velocity.x * 10,
+    y: robot.velocity.y * 10
   };
   drawArrow(from, to);
 }
