@@ -160,17 +160,17 @@ target_link_libraries(kmm_position_node
 
 ### TEST ILS ###
 
-add_executable(test_ils_node
-  nodes/test_ils_node.cpp
-  src/ils.cpp
-  src/Pose.cpp
-)
+#add_executable(test_ils_node
+#  nodes/test_ils_node.cpp
+#  src/ils.cpp
+#  src/Pose.cpp
+#)
 
-add_dependencies(test_ils_node
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
+#add_dependencies(test_ils_node
+#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+#  ${catkin_EXPORTED_TARGETS}
+#)
 
-target_link_libraries(test_ils_node
-   ${catkin_LIBRARIES}
-)
+#target_link_libraries(test_ils_node
+#   ${catkin_LIBRARIES}
+#)

@@ -105,10 +105,6 @@ function bindMenuEvents() {
   $('#debug-acceleration').removeAttr('checked');
   debug.acceleration = false;
 
-  $("#debug-target").click(function () {
-    debug.target = !debug.target;
-  });
-
   $("#debug-go-to-target").click(function () {
     debug.goToTarget = !debug.goToTarget;
   });

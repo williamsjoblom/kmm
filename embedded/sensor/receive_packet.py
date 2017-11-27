@@ -5,6 +5,7 @@ import struct
 import binascii
 import RPi.GPIO as GPIO
 
+
 if __name__ == "__main__":
     print("Starting session...")
 
@@ -30,6 +31,6 @@ if __name__ == "__main__":
         sdata = [((rawdata[i+1] << 8) | rawdata[i]) for i in range(0,6,2)]
         
         print("Acc x: {0} \n Acc y: {1} \n Gyro z: {2}".format(sdata[0], sdata[1], sdata[2]))
-        input()
+        time.sleep(0.5)
 
 
