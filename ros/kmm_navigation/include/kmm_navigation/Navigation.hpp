@@ -13,6 +13,8 @@
 #include <kmm_navigation/MoveToAction.h>
 #include "PathFinder.hpp"
 #include "PathFollower.hpp"
+#include "kmm_navigation/NavigationConfig.h"
+#include <dynamic_reconfigure/server.h>
 
 namespace kmm_navigation {
 
@@ -39,6 +41,9 @@ private:
   actionlib::SimpleActionServer<kmm_navigation::MoveToAction> action_server_;
   kmm_navigation::MoveToFeedback feedback_;
   kmm_navigation::MoveToResult result_;
+
+  // Dynamic reconfigure
+  boost::shared_ptr<dynamic_reconfigure::Server<NavigationConfig> > server_;
 
   // Subscribers
   ros::Subscriber walls_sub_;

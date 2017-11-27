@@ -7,6 +7,10 @@ namespace kmm_navigation {
   : nh_(nh),
     action_server_(nh_, "navigation", boost::bind(&Navigation::navigation_callback, this, _1), false)
   {
+    dynamic_reconfigure::Server<NavigationConfig>::CallbackType f;
+    f = boost::bind(&Navigation::reconfigure_callback, this, _1, _2);
+    server_ = boost::make_shared <dynamic_reconfigure::Server<NavigationConfig> >(nh_);
+    server_->setCallback(f);
 
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
@@ -49,6 +53,11 @@ namespace kmm_navigation {
   Navigation::~Navigation() {
     delete path_finder_;
     delete map_;
+  }
+
+  void Navigation::reconfigure_callback(NavigationConfig& config, int level){
+    path_follower_.set_p_constant(config.error_p_constant);
+    path_follower_.set_max_velocity(config.max_velocity);
   }
 
   /*

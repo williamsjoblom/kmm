@@ -3,7 +3,8 @@
 namespace kmm_navigation {
 
   PathFollower::PathFollower(){
-
+    error_vel_ = 2;
+    forward_vel_ = 0.1;
   }
 
 
@@ -38,6 +39,7 @@ void PathFollower::get_velocity(
       if (robot_vector.norm() < offset_distance) {
           offset_distance = robot_vector.norm();
           offset_vector = robot_vector * -1;
+          forward_vector = path_vector.normalized;
       }
     }
 
@@ -54,7 +56,16 @@ void PathFollower::get_velocity(
       vel[0] = 0;
       vel[1] = 0;
     } else {
-      vel = offset_vector * 3. + forward_vector * 0.15;
+      // This is compontent that takes the robot forward along the path.
+      Eigen:Vector2f forward_vel_compontent = forward_vector * max_velocity_;
+
+      // This is the component that minimizes the error.
+      Eigen::Vector2f offset_vel_compontent = offset_vector * error_p_constant_;
+      if (offset_vel_compontent.norm() > max_velocity_) {
+        offset_vel_compontent = side_vector.normalized() * max_velocity_;
+      }
+
+      vel = offset_vel_compontent + forward_vel_compontent;
     }
   }
 }

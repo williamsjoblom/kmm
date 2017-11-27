@@ -35,6 +35,12 @@ generate_messages(
  actionlib_msgs
 )
 
+#add dynamic reconfigure api
+#find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+  cfg/Navigation.cfg
+)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
