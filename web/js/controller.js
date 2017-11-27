@@ -192,7 +192,9 @@ function zoomOut() {
 function toggleMode() {
   var setAutoMode = new ROSLIB.ServiceRequest({
     data : !isInAutoMode
-  isUsingGoTo = false;
   });
+  isUsingGoTo = false;
+  goToPos = null;
+  $("#go-to").html("Go to");
   SetAutoModeClient.callService(setAutoMode, function(result) {});
 }
