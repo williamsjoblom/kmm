@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 from std_msgs.msg import Bool
 
 BTN_PIN = 11
-btn_state = True;
+btn_state = True
 
 def callback(data):
     global btn_state
