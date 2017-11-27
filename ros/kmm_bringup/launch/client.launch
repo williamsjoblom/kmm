@@ -1,5 +1,5 @@
 <launch>
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
-  <node name="kmm_gamepad" pkg="kmm_gamepad" type="kmm_gamepad_node"/>
-  <node name="kmm_gamepad_to_vel" pkg="kmm_gamepad" type="kmm_gamepad_to_vel_node"/>
+  <!--<node name="kmm_gamepad" pkg="kmm_gamepad" type="kmm_gamepad_node"/>
+  <node name="kmm_gamepad_to_vel" pkg="kmm_gamepad" type="kmm_gamepad_to_vel_node"/>-->
 </launch>
