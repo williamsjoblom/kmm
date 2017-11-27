@@ -56,7 +56,7 @@ namespace kmm_navigation {
     and actively controls the robot velocity to keep it on track.
   */
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
-    ros::Rate rate(20);
+    ros::Rate rate(30);
 
     // Find a path from robot position to target for the robot to follow.
     Eigen::Vector2f target(goal->x, goal->y);
@@ -73,8 +73,9 @@ namespace kmm_navigation {
         return;
       }
 
-      // TODO: Do the velocity control of the robot.
-      Eigen::Vector2f vel = path_follower_.get_velocity(path_, robot_position_);
+      // Calculate velocity to stay on the path.
+      Eigen::Vector2f vel;
+      path_follower_.get_velocity(path_, robot_position_, vel, has_reached_target);
       Eigen::Vector3f vel3(vel[0], vel[1], 0);
       Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
       vel3 = t * vel3; // Rotate into robot frame.
@@ -89,6 +90,7 @@ namespace kmm_navigation {
     }
 
     // The robot has reached the target destination.
+    path_.clear();
     action_server_.setSucceeded(result_);
   }
 

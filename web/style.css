@@ -26,17 +26,19 @@ html, body {
   font-size: 0;
 }
 
-.menu-option {
+.menu-option-wrap {
   display: inline-block;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.menu-option {
   color: #eee;
   padding: 17px;
-  cursor: pointer;
   position: relative;
   user-select: none; /* Standard */
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+/Edge */
-  border-right: 1px solid rgba(255,255,255,0.1);
   font-size: 14px;
   background-repeat: no-repeat;
   background-position: left 10px center;
@@ -44,8 +46,13 @@ html, body {
   padding-left: 40px;
 }
 
-.menu-option:hover {
+.menu-option:not(.menu-option-inactive):hover {
   background-color: #000;
+  cursor: pointer;
+}
+
+.menu-option-inactive {
+  opacity: 0.3;
 }
 
 #go-to {

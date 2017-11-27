@@ -7,7 +7,13 @@ namespace kmm_navigation {
   }
 
 
-  Eigen::Vector2f PathFollower::get_velocity(std::vector<Eigen::Vector2f> path, Eigen::Vector2f robot_position){
+void PathFollower::get_velocity(
+    const std::vector<Eigen::Vector2f>& path,
+    const Eigen::Vector2f& robot_position,
+    Eigen::Vector2f& vel,
+    bool& has_reached_target
+  )
+  {
     double offset_distance = std::numeric_limits<double>::infinity();
     Eigen::Vector2f offset_vector(0,0);
     Eigen::Vector2f curr_offset_vector;
@@ -34,7 +40,21 @@ namespace kmm_navigation {
           offset_vector = robot_vector * -1;
       }
     }
-    Eigen::Vector2f vel = offset_vector * 3. + forward_vector * 0.15;
-    return vel;
+
+    has_reached_target = false;
+    if (path.size() > 0) {
+      Eigen::Vector2f destination = path[path.size() - 1];
+      float distance_to_destination = (destination - robot_position).norm();
+      if (distance_to_destination < 0.05) {
+        has_reached_target = true;
+      }
+    }
+
+    if (has_reached_target) {
+      vel[0] = 0;
+      vel[1] = 0;
+    } else {
+      vel = offset_vector * 3. + forward_vector * 0.15;
+    }
   }
 }

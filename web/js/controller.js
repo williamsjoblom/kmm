@@ -16,6 +16,7 @@ function bindEvents() {
   bindCanvasEvents();
   bindMenuEvents();
   bindSidebarEvents();
+  bindButtonEvents();
 }
 
 function bindCanvasEvents() {
@@ -31,6 +32,7 @@ function bindCanvasEvents() {
     if (isInManualMode && isUsingGoTo) {
       $("#map").css('cursor', 'default');
       isUsingGoTo = false;
+      $("#go-to").html("Remove goal");
 
       var offset = $("#map-container").offset();
 
@@ -105,31 +107,57 @@ function bindMenuEvents() {
   $('#debug-acceleration').removeAttr('checked');
   debug.acceleration = false;
 
-  $("#debug-target").click(function () {
-    debug.target = !debug.target;
-  });
-
-  $("#debug-go-to-target").click(function () {
-    debug.goToTarget = !debug.goToTarget;
-  });
-
   $("#debug-path").click(function () {
     debug.path = !debug.path;
   });
 
   $("#go-to").click(function () {
-    isUsingGoTo = !isUsingGoTo;
-    if (isInManualMode && isUsingGoTo) {
-      $("#map").css('cursor', 'crosshair');
-    } else {
-      $("#map").css('cursor', 'default');
-    };
+    setGoalClick();
   });
 }
 
 function bindSidebarEvents() {
   // Bind mode slider.
   $("#mode-slider").click(toggleMode);
+}
+
+function bindButtonEvents(){
+  document.addEventListener("keyup", setGoalClickKey, false);
+  document.addEventListener("keyup", toggleModeKey, false);
+}
+
+function toggleModeKey(e){
+  if (e.keyCode == 77){
+    toggleMode();
+    if (isInManualMode) {
+      $("#mode-slider").prop("checked", false);
+      $("#go-to").removeClass("menu-option-inactive");
+    } else {
+      $("#mode-slider").prop("checked", true);
+      $("#go-to").addClass("menu-option-inactive");
+    };
+  }
+}
+
+function setGoalClickKey(e){
+  if (e.keyCode == 71){
+    setGoalClick();
+  }
+}
+
+function setGoalClick(e){
+  isUsingGoTo = !isUsingGoTo;
+  if (isInManualMode && goToPos){
+    goToPos = null;
+    $("#go-to").html("Set goal");
+    isUsingGoTo = false;
+  }
+  else if (isInManualMode && isUsingGoTo) {
+    $("#map").css('cursor', 'crosshair');
+  }
+  else {
+    $("#map").css('cursor', 'default');
+  }
 }
 
 function resizeCanvas() {
@@ -168,6 +196,9 @@ function zoomOut() {
 
 function toggleMode() {
   isInManualMode = !isInManualMode;
+  goToPos = null;
+  isUsingGoTo = false;
+  $("#go-to").html("Set goal");
   var bool = new ROSLIB.Message({
     data : isInManualMode
   });

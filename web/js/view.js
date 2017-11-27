@@ -10,10 +10,6 @@ function updateDOM() {
   $("#pos-x").html(precision(robot.position.x, 2) + " m");
   $("#pos-y").html(precision(robot.position.y, 2) + " m");
   $("#theta").html(precision(robot.position.angle/Math.PI, 2) + " rad");
-  //Target
-  $("#tar-pos-x").html(precision(robot.target.x, 1));
-  $("#tar-pos-y").html(precision(robot.target.y, 1));
-  $("#tar-theta").html(precision(robot.target.angle, 2) + " rad");
   //Velocity
   $("#vel-x").html(precision(robot.velocity.x, 2) + " m/s");
   $("#vel-y").html(precision(robot.velocity.y, 2) + " m/s");
@@ -65,9 +61,7 @@ function render() {
   drawWalls();
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
-  if (debug.path) {drawPath();};
-  if (debug.target && !isInManualMode) {drawTarget();};
-  if (debug.goToTarget && goToPos) {drawGoToTarget();};
+  if (debug.path) {drawPlannedPath();};
 
   { // Robot frame
     matrix.save();
@@ -88,10 +82,10 @@ function clearCanvas() {
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 }
 
-function drawTarget() {
+function drawTarget(point) {
   matrix.save();
   ctx.beginPath();
-  matrix.translate(robot.target.x + 0.1, robot.target.y);
+  matrix.translate(point.x + 0.1, point.y);
   matrix.rotate(Math.PI/2);
   var scale = 0.001;
   var pixels = 256; // Image size
@@ -100,14 +94,7 @@ function drawTarget() {
   matrix.restore();
 }
 
-function drawGoToTarget() {
-  ctx.beginPath();
-  ctx.strokeStyle = "#2196F3"; // Blue
-  ctx.arc(goToPos.x, goToPos.y, 0.05, 0, 2*Math.PI);
-  ctx.stroke();
-}
-
-function drawPath() {
+function drawPlannedPath() {
   ctx.lineWidth = 0.03;
   ctx.strokeStyle = "#ffa500";
 
@@ -120,6 +107,11 @@ function drawPath() {
     };
     ctx.stroke();
   };
+
+  if (plannedPath.length) {
+    var lastPoint = plannedPath[plannedPath.length - 1];
+    drawTarget(lastPoint);
+  }
 }
 
 /*

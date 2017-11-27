@@ -7,59 +7,53 @@
   <body>
 
     <div class="menu">
-      <div class="menu-option" id="debug-option">
-        Debug options
-        <div class="dropdown">
-          <div class="dropdown-row">
-            <label for="debug-axes" class="dropdown-text">Show global frame</label>
-            <input id="debug-axes" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-scan" class="dropdown-text">Show laser scan</label>
-            <input id="debug-scan" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-aligned" class="dropdown-text">Show aligned laser scan</label>
-            <input id="debug-aligned" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-end-points" class="dropdown-text">Show end points</label>
-            <input id="debug-end-points" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-path" class="dropdown-text">Show planned path</label>
-            <input id="debug-path" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-velocity" class="dropdown-text">Show robot velocity</label>
-            <input id="debug-velocity" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-acceleration" class="dropdown-text">Show robot acceleration</label>
-            <input id="debug-acceleration" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-target" class="dropdown-text">Show target</label>
-            <input id="debug-target" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
-          </div>
-          <div class="dropdown-row">
-            <label for="debug-go-to-target" class="dropdown-text">Show go to target</label>
-            <input id="debug-go-to-target" checked type="checkbox" class="dropdown-checkbox"/>
-            <div class="clear"></div>
+      <div class="menu-option-wrap">
+        <div class="menu-option" id="debug-option">
+          Debug options
+          <div class="dropdown">
+            <div class="dropdown-row">
+              <label for="debug-axes" class="dropdown-text">Show global frame</label>
+              <input id="debug-axes" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-scan" class="dropdown-text">Show laser scan</label>
+              <input id="debug-scan" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-aligned" class="dropdown-text">Show aligned laser scan</label>
+              <input id="debug-aligned" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-end-points" class="dropdown-text">Show end points</label>
+              <input id="debug-end-points" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-path" class="dropdown-text">Show planned path</label>
+              <input id="debug-path" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-velocity" class="dropdown-text">Show robot velocity</label>
+              <input id="debug-velocity" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
+            <div class="dropdown-row">
+              <label for="debug-acceleration" class="dropdown-text">Show robot acceleration</label>
+              <input id="debug-acceleration" checked type="checkbox" class="dropdown-checkbox"/>
+              <div class="clear"></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="menu-option" id="go-to">
-        Go to
+      <div class="menu-option-wrap">
+        <div class="menu-option" id="go-to">
+          Set goal
+        </div>
       </div>
     </div>
 
@@ -108,20 +102,6 @@
           <td class="table-info-data"><div id="theta"></div></td>
         </tr>
       <table>
-
-      <!--
-      <div class="table-info-header">Target</div>
-      <table class="table-info">
-        <tr>
-          <td class="table-info-label"><div>x:</div></td>
-          <td class="table-info-data"><div id="tar-pos-x"></div></td>
-          <td class="table-info-label"><div>y:</div></td>
-          <td class="table-info-data"><div id="tar-pos-y"></div></td>
-          <td class="table-info-label"><div>&theta;:</div></td>
-          <td class="table-info-data"><div id="tar-theta"></div></td>
-        </tr>
-      <table>
-      -->
 
       <div class="table-info-header">Velocity</div>
       <table class="table-info">

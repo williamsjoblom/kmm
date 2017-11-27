@@ -13,7 +13,7 @@ namespace kmm_position {
     aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
     position_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("position", 1);
     broadcast_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 50), &Position::broadcast_robot_pose, this);
-    publish_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 10), &Position::publish_robot_pose, this);
+    publish_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 20), &Position::publish_robot_pose, this);
     scan_point_cloud_pub_ = nh_.advertise<sensor_msgs::PointCloud>("scan_point_cloud", 1);
 
     // Subscribers

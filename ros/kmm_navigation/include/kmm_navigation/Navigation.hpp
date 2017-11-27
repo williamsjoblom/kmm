@@ -45,6 +45,7 @@ private:
   ros::Subscriber position_sub_;
 
   // Publishers
+  ros::Publisher target_pub_;
   ros::Publisher path_pub_;
   ros::Publisher cmd_vel_pub_;
   ros::Timer publish_path_timer_;

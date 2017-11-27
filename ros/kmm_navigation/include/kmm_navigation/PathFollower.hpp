@@ -7,6 +7,10 @@ namespace kmm_navigation {
   class PathFollower {
   public:
     PathFollower();
-    Eigen::Vector2f get_velocity(std::vector<Eigen::Vector2f> path, Eigen::Vector2f robot_position);
+    void get_velocity(
+      const std::vector<Eigen::Vector2f>& path,
+      const Eigen::Vector2f& robot_position,
+      Eigen::Vector2f& vel,
+      bool& has_reached_target);
   };
 }
