@@ -38,9 +38,10 @@ uint8_t twst;
  */
 
 
-int i2c_write(uint8_t addr, uint8_t reg, uint8_t data){
+uint8_t i2c_write(uint8_t addr, uint8_t reg, uint8_t data){
   twst = twi_transmit(TWI_START);
   switch(twst){
+    case TW_REP_START:    // Should not happen but ok.
     case TW_START:
       TWDR = addr;
       twst = twi_transmit(TWI_DATA);
@@ -51,37 +52,6 @@ int i2c_write(uint8_t addr, uint8_t reg, uint8_t data){
           switch(twst){
             case TW_MT_DATA_ACK:
               TWDR = data;
-              twst = twi_transmit(TWI_DATA);
-              switch(twst){
-                case TW_MT_DATA_ACK:
-                  return twi_transmit(TWI_STOP);
-                default:
-                  return -1;
-              }
-              default:
-                return -1;
-          }
-          default:
-            return -1;
-      }
-      default:
-        return -1;
-  }
-}
-
-int i2c_enable_reading(uint8_t address, uint8_t enable){
-  twst = twi_transmit(TWI_START);
-  switch(twst){
-    case TW_START:
-      TWDR = address;
-      twst = twi_transmit(TWI_DATA);
-      switch(twst){
-        case TW_MT_SLA_ACK:
-          TWDR = 0x20;
-          twst = twi_transmit(TWI_DATA);
-          switch(twst){
-            case TW_MT_DATA_ACK:
-              TWDR = enable;
               twst = twi_transmit(TWI_DATA);
               switch(twst){
                 case TW_MT_DATA_ACK:
@@ -114,6 +84,44 @@ void i2c_init(){
   i2c_write(ACC_ADDR,0x20, 0x57);
   i2c_write(GYRO_ADDR,0x20, 0x0F);
   i2c_write(GYRO_ADDR,0x23, GYRO_RANGE_250DPS);
+}
+
+uint8_t read8(uint8_t address, uint8_t reg){
+  uint8_t value;
+  twst = twi_transmit(TWI_START);
+  switch(twst){
+    case TW_START:
+      TWDR = address;
+      twst = twi_transmit(TWI_DATA);
+      switch(twst){
+        case TW_MR_SLA_ACK:
+          TWDR = reg;
+          twst = twi_transmit(TWI_DATA);
+          switch(twst){
+            case TW_MT_DATA_ACK:
+              twst = twi_transmit(TWI_START);
+              switch(twst){
+                case TW_START:
+                  TWDR = address | TW_READ;
+                  twst = twi_transmit(TWI_DATA);
+                  switch(twst){
+                    case TW_MR_DATA_ACK:
+                      return value = TWDR;
+                    default:
+                      return 1;
+                  }
+                default:
+                  return 1;
+              }
+              default:
+                return 1;
+          }
+          default:
+            return 1;
+      }
+      default:
+        return 1;    
+  }
 }
 
 
@@ -207,7 +215,7 @@ int twi_read(uint8_t addr, uint8_t *buf, const uint8_t sad, int iter){
 /* Sends repeated start condition, #4 in event loop*/
 int twi_repeat_start(uint8_t addr, uint8_t *buf, const uint8_t sad, int iter){
   //twi_transmit(TWI_STOP);
- // _delay_ms(0.001);
+ 
   twst = twi_transmit(TWI_START);
   switch(twst) {
     case TW_REP_START:
