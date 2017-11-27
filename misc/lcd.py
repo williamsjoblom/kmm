@@ -10,11 +10,6 @@ from subprocess import check_output
 from RPLCD.gpio import CharLCD
 from RPi import GPIO
 
-"""
-Last string written to the display.
-"""
-last_string = ' '
-
 
 def wlan_ip():
     """
@@ -50,18 +45,17 @@ def refresh(lcd):
     """
     ip = wlan_ip()
     ssid = wlan_ssid()
-    if ssid == None:
+    if not ssid:
         ssid = "not connected"
 
     lcd.clear()
     lcd.cursor_pos = (0, 0)
     
-    s = center(ip) + '\n\r' + center(ssid)
+    s = center(ip) + "\n\r" + center(ssid)
     lcd.write_string(s)
         
 if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(11, GPIO.IN)
     
     try:
         lcd = CharLCD(pin_rs=8, pin_e=10, pin_rw=None,
@@ -73,8 +67,7 @@ if __name__ == '__main__':
                 
         while True:
             refresh(lcd)
-            time.sleep(0.5)
-            print('Reset: ' + str(GPIO.input(11)))
+            time.sleep(2)
 	    print('SSID: ' + wlan_ssid())
 	    print('IP: ' + str(wlan_ip()))                
             
