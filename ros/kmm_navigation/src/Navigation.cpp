@@ -14,6 +14,10 @@ namespace kmm_navigation {
     // Subscribers
     walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
+    auto_mode_sub_ = nh_.subscribe("auto_mode", 1, &Navigation::auto_mode_callback, this);
+
+    // Auto mode
+    auto_mode_ = false;
 
     // Timers
     publish_path_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Navigation::publish_path, this);
@@ -57,7 +61,6 @@ namespace kmm_navigation {
   */
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
     ros::Rate rate(30);
-
     // Find a path from robot position to target for the robot to follow.
     Eigen::Vector2f target(goal->x, goal->y);
     path_ = path_finder_->find_path(robot_position_, target);
@@ -116,6 +119,14 @@ namespace kmm_navigation {
     geometry_msgs::Quaternion q = msg.pose.pose.orientation;
     // Convert Quaternion to Euler angle.
     robot_angle_ = std::atan2(2*(q.x*q.y+q.z*q.w), 1-2*(std::pow(q.y, 2)+std::pow(q.z, 2)));
+  }
+
+  void Navigation::auto_mode_callback(std_msgs::Bool msg) {
+    auto_mode_ = msg.data;
+    if (!auto_mode_) {
+      action_server_.setPreempted();
+      path_.clear();
+    }
   }
 
   /*

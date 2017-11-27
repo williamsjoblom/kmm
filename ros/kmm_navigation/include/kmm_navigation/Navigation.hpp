@@ -9,6 +9,7 @@
 #include <vector>
 #include "kmm_navigation/Map.hpp"
 #include "std_msgs/Int8MultiArray.h"
+#include "std_msgs/Bool.h"
 #include <actionlib/server/simple_action_server.h>
 #include <kmm_navigation/MoveToAction.h>
 #include "PathFinder.hpp"
@@ -25,6 +26,7 @@ private:
   void navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal);
   void walls_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
+  void auto_mode_callback(std_msgs::Bool msg);
   void publish_path(const ros::TimerEvent&);
 
   Map* map_;
@@ -40,9 +42,13 @@ private:
   kmm_navigation::MoveToFeedback feedback_;
   kmm_navigation::MoveToResult result_;
 
+  // Auto mode
+  bool auto_mode_;
+
   // Subscribers
   ros::Subscriber walls_sub_;
   ros::Subscriber position_sub_;
+  ros::Subscriber auto_mode_sub_;
 
   // Publishers
   ros::Publisher target_pub_;

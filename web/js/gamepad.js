@@ -44,15 +44,15 @@ function gamepadHandler(event, connecting){
 
 /* Takes the input from the gamepad if it's connected and sends it in
   a ROS-Message */
-function checkMovement(){
-  if (connected) {
+function checkMovement() {
+  if (connected && !isInAutoMode) {
     //Motion in x-direction
     var x = gamepad.axes[0];
     //Motion in y-direction
     var y = -gamepad.axes[1];
     //the rotation, controlled by the right stick
     var rotation = gamepad.axes[3];
-    
+
     //Uncomment the following line to log input from the gamepad
     //console.log("X: "+x+ ", Y: "+y+", Rotation: "+ rotation);
     //Create and sends ROS-message

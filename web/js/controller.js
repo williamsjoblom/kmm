@@ -196,5 +196,5 @@ function toggleMode() {
   isUsingGoTo = false;
   goToPos = null;
   $("#go-to").html("Go to");
-  SetAutoModeClient.callService(setAutoMode, function(result) {});
+  setAutoModeClient.callService(setAutoMode, function(result) {});
 }
