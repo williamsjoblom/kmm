@@ -230,13 +230,13 @@ new ROSLIB.Topic({
 
 }).subscribe(function(message) {
   isInAutoMode = message.data;
+  goToPos = null;
   if (isInAutoMode) {
-    $("#mode-slider").prop("checked", false);
-    $("#go-to").removeClass("menu-option-inactive");
-  } else {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
-    goToPos = null;
+  } else {
+    $("#mode-slider").prop("checked", false);
+    $("#go-to").removeClass("menu-option-inactive");
   };
 });
 
