@@ -222,10 +222,10 @@ new ROSLIB.Topic({
   alignedScan = message.points;
 });
 
-
+// Subscriber for auto_mode
 new ROSLIB.Topic({
   ros : ros,
-  name : '/btn_state',
+  name : '/auto_mode',
   messageType : 'std_msgs/Bool'
 
 }).subscribe(function(message) {
@@ -240,11 +240,11 @@ new ROSLIB.Topic({
   };
 });
 
-// Publisher for button state.
-var btnStatePub = new ROSLIB.Topic({
+// Service client for auto_mode
+var setAutoModeClient = new ROSLIB.Service({
   ros : ros,
-  name : '/btn_state',
-  messageType : 'std_msgs/Bool'
+  name : '/set_auto_mode',
+  serviceType : 'std_srvs/SetBool'
 });
 
 // Action client for move to navigation goal.

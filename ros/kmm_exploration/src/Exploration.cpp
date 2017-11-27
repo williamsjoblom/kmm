@@ -12,29 +12,32 @@ namespace kmm_exploration{
   {
     // Subscribers
     end_points_sub_ = nh_.subscribe("end_points", 1, &Exploration::end_points_callback, this);
-    btn_state_sub_ = nh_.subscribe("btn_state", 1, &Exploration::btn_state_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Exploration::position_callback, this);
 
+    // Publishers
+    auto_mode_pub_ = nh_.advertise<std_msgs::Bool>("auto_mode", 1);
+
     // Set initial values
-    is_in_manual_mode_ = true;
+    auto_mode_ = false;
+
+    // Services
+    auto_mode_service_ = nh_.advertiseService("set_auto_mode", &Exploration::set_auto_mode, this);
   }
 
   Exploration::~Exploration(){}
 
-  /*
-   * Callback for btn_state. Sets bool is_in_manual_mode_ depending on if
-   * robot is in manual or autonomous mode.
-   */
-  void Exploration::btn_state_callback(std_msgs::Bool msg){
-    is_in_manual_mode_ = msg.data;
+  bool Exploration::set_auto_mode(std_srvs::SetBool::Request &req,
+         std_srvs::SetBool::Response &res) {
+    auto_mode_ = req.data;
+    return true;
   }
 
   /*
    * Callback for end_points. If robot is not in manual mode, eventually updates
    * target and publishes and sets goal based on if previous target is explored.
    */
-  void Exploration::end_points_callback(sensor_msgs::PointCloud msg){
-    if (!is_in_manual_mode_) {
+  void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
+    if (auto_mode_) {
       geometry_msgs::Point32 closest;
       bool not_empty = false;
       float min_distance = FLT_MAX;
@@ -94,5 +97,11 @@ namespace kmm_exploration{
     pos_x_ = msg.pose.pose.position.x;
     pos_y_ = msg.pose.pose.position.y;
     angle_ = msg.pose.pose.orientation.z;
+  }
+
+  void Exploration::publish_auto_mode() {
+    std_msgs::Bool auto_mode;
+    auto_mode.data = auto_mode_;
+    auto_mode_pub_.publish(auto_mode);
   }
 }

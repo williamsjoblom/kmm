@@ -26,7 +26,6 @@ int main(int argc, char **argv) {
   f = boost::bind(&reconfigure_callback, _1, _2);
   server.setCallback(f);
 
-  //ros::spin();
   ros::Rate r(10); // 10 hz
   while (ros::ok())
   {

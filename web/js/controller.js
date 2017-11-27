@@ -163,9 +163,9 @@ function zoomOut() {
 }
 
 function toggleMode() {
-  isInManualMode = !isInManualMode;
-  var bool = new ROSLIB.Message({
-    data : isInManualMode
+  var setAutoMode = new ROSLIB.ServiceRequest({
+    data : !isInManualMode
   });
-  btnStatePub.publish(bool);
+
+  SetAutoModeClient.callService(setAutoMode, function(result) {});
 }
