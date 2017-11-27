@@ -62,7 +62,6 @@ function render() {
   if (debug.aligned) {drawAlignedScan();};
   if (debug.endPoints) {drawEndPoints();};
   if (debug.path) {drawPlannedPath();};
-  if (debug.goToTarget && goToPos) {drawGoToTarget();};
 
   { // Robot frame
     matrix.save();
@@ -93,13 +92,6 @@ function drawTarget(point) {
   var picSize = pixels * scale;
   ctx.drawImage(targetImage, picSize / -2, picSize / -2, picSize, picSize);
   matrix.restore();
-}
-
-function drawGoToTarget() {
-  ctx.beginPath();
-  ctx.strokeStyle = "#2196F3"; // Blue
-  ctx.arc(goToPos.x, goToPos.y, 0.05, 0, 2*Math.PI);
-  ctx.stroke();
 }
 
 function drawPlannedPath() {

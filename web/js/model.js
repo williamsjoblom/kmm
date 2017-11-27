@@ -26,8 +26,7 @@ var debug = {
   endPoints: true,
   path: true,
   velocity: true,
-  acceleration: true,
-  goToTarget: true
+  acceleration: true
 };
 
 // Go to
@@ -230,13 +229,13 @@ new ROSLIB.Topic({
 
 }).subscribe(function(message) {
   isInManualMode = message.data;
+  goToPos = null;
   if (isInManualMode) {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
   } else {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
-    goToPos = null;
   };
 });
 
