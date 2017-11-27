@@ -17,6 +17,12 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   actionlib
   nav_msgs
+  dynamic_reconfigure
+)
+
+#add dynamic reconfigure api
+generate_dynamic_reconfigure_options(
+  cfg/Navigation.cfg
 )
 
 ################################################
@@ -33,12 +39,6 @@ add_action_files(
 generate_messages(
  DEPENDENCIES
  actionlib_msgs
-)
-
-#add dynamic reconfigure api
-#find_package(catkin REQUIRED dynamic_reconfigure)
-generate_dynamic_reconfigure_options(
-  cfg/Navigation.cfg
 )
 
 ###################################

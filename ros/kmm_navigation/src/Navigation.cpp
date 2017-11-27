@@ -55,8 +55,8 @@ namespace kmm_navigation {
     delete map_;
   }
 
-  void Navigation::reconfigure_callback(NavigationConfig& config, int level){
-    path_follower_.set_p_constant(config.error_p_constant);
+  void Navigation::reconfigure_callback(NavigationConfig& config, int level) {
+    path_follower_.set_error_p_constant(config.error_p_constant);
     path_follower_.set_max_velocity(config.max_velocity);
   }
 

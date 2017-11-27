@@ -28,6 +28,7 @@ private:
   void walls_callback(std_msgs::Int8MultiArray msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void publish_path(const ros::TimerEvent&);
+  void reconfigure_callback(NavigationConfig& config, int level);
 
   Map* map_;
   PathFinder* path_finder_;

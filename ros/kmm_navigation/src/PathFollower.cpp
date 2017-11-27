@@ -3,12 +3,19 @@
 namespace kmm_navigation {
 
   PathFollower::PathFollower(){
-    error_vel_ = 2;
-    forward_vel_ = 0.1;
+    error_p_constant_ = 0;
+    max_velocity_ = 0;
   }
 
+  void PathFollower::set_error_p_constant(float error_p_constant) {
+    error_p_constant_ = error_p_constant;
+  }
 
-void PathFollower::get_velocity(
+  void PathFollower::set_max_velocity(float max_velocity) {
+    max_velocity_ = max_velocity;
+  }
+
+  void PathFollower::get_velocity(
     const std::vector<Eigen::Vector2f>& path,
     const Eigen::Vector2f& robot_position,
     Eigen::Vector2f& vel,
@@ -39,7 +46,7 @@ void PathFollower::get_velocity(
       if (robot_vector.norm() < offset_distance) {
           offset_distance = robot_vector.norm();
           offset_vector = robot_vector * -1;
-          forward_vector = path_vector.normalized;
+          forward_vector = path_vector.normalized();
       }
     }
 
@@ -57,15 +64,15 @@ void PathFollower::get_velocity(
       vel[1] = 0;
     } else {
       // This is compontent that takes the robot forward along the path.
-      Eigen:Vector2f forward_vel_compontent = forward_vector * max_velocity_;
+      Eigen::Vector2f forward_vel_component = forward_vector * max_velocity_;
 
       // This is the component that minimizes the error.
-      Eigen::Vector2f offset_vel_compontent = offset_vector * error_p_constant_;
-      if (offset_vel_compontent.norm() > max_velocity_) {
-        offset_vel_compontent = side_vector.normalized() * max_velocity_;
+      Eigen::Vector2f offset_vel_component = offset_vector * error_p_constant_;
+      if (offset_vel_component.norm() > max_velocity_) {
+        offset_vel_component = offset_vel_component.normalized() * max_velocity_;
       }
 
-      vel = offset_vel_compontent + forward_vel_compontent;
+      vel = offset_vel_component + forward_vel_component;
     }
   }
 }
