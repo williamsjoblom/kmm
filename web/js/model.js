@@ -66,7 +66,7 @@ var robot = {
 
 robot.image.src = "img/robot.png";
 
-var isInManualMode = true;
+var isInAutoMode = false;
 
 // Planned path and target
 var plannedPath = [];
@@ -229,8 +229,8 @@ new ROSLIB.Topic({
   messageType : 'std_msgs/Bool'
 
 }).subscribe(function(message) {
-  isInManualMode = message.data;
-  if (isInManualMode) {
+  isInAutoMode = message.data;
+  if (isInAutoMode) {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
   } else {

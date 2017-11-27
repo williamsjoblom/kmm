@@ -28,7 +28,7 @@ function bindCanvasEvents() {
   // Bind map scoll zoom and mouse pan.
   $("#map")
   .click(function(e) {
-    if (isInManualMode && isUsingGoTo) {
+    if (!isInAutoMode && isUsingGoTo) {
       $("#map").css('cursor', 'default');
       isUsingGoTo = false;
 
@@ -115,7 +115,7 @@ function bindMenuEvents() {
 
   $("#go-to").click(function () {
     isUsingGoTo = !isUsingGoTo;
-    if (isInManualMode && isUsingGoTo) {
+    if (!isInAutoMode && isUsingGoTo) {
       $("#map").css('cursor', 'crosshair');
     } else {
       $("#map").css('cursor', 'default');
@@ -164,7 +164,7 @@ function zoomOut() {
 
 function toggleMode() {
   var setAutoMode = new ROSLIB.ServiceRequest({
-    data : !isInManualMode
+    data : !isInAutoMode
   });
 
   SetAutoModeClient.callService(setAutoMode, function(result) {});
