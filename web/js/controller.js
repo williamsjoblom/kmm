@@ -122,10 +122,30 @@ function bindSidebarEvents() {
 }
 
 function bindButtonEvents(){
-  document.addEventListener("keyup", setGoalClick, false);
+  document.addEventListener("keyup", setGoalClickKey, false);
+  document.addEventListener("keyup", toggleModeKey, false);
 }
 
-function setGoalClick(){
+function toggleModeKey(e){
+  if (e.keyCode == 77){
+    toggleMode();
+    if (isInManualMode) {
+      $("#mode-slider").prop("checked", false);
+      $("#go-to").removeClass("menu-option-inactive");
+    } else {
+      $("#mode-slider").prop("checked", true);
+      $("#go-to").addClass("menu-option-inactive");
+    };
+  }
+}
+
+function setGoalClickKey(e){
+  if (e.keyCode == 71){
+    setGoalClick();
+  }
+}
+
+function setGoalClick(e){
   isUsingGoTo = !isUsingGoTo;
   if (isInManualMode && goToPos){
     goToPos = null;
@@ -137,7 +157,7 @@ function setGoalClick(){
   }
   else {
     $("#map").css('cursor', 'default');
-  };
+  }
 }
 
 function resizeCanvas() {
