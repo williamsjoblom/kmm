@@ -43,8 +43,10 @@ namespace kmm_exploration{
         float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
         //If point is equal to the previous, there shouldn't be a new target
         if (point.x == target_.x && point.y == target_.y){
-          closest = point;
-          break;
+          return;
+          //Uncomment these to make target change goal around point while moving.
+          //closest = point;
+          //break;
         }
         else if (distance < min_distance){
           closest = point;
