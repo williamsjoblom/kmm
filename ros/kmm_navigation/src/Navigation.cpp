@@ -65,12 +65,15 @@ namespace kmm_navigation {
     Eigen::Vector2f target(goal->x, goal->y);
     path_ = path_finder_->find_path(robot_position_, target);
 
+    bool initial_mode = auto_mode_;
+
     bool has_reached_target = false;
     while (!has_reached_target) {
 
       // The navigation request can be preemted by the client.
       // In that case we want to clear the path and stop the robot.
-      if (action_server_.isPreemptRequested() || !ros::ok()) {
+      bool auto_mode_turned_off = initial_mode && !auto_mode_;
+      if (action_server_.isPreemptRequested() || !ros::ok() || auto_mode_turned_off) {
         action_server_.setPreempted();
         path_.clear();
         return;
@@ -123,10 +126,6 @@ namespace kmm_navigation {
 
   void Navigation::auto_mode_callback(std_msgs::Bool msg) {
     auto_mode_ = msg.data;
-    if (!auto_mode_) {
-      action_server_.setPreempted();
-      path_.clear();
-    }
   }
 
   /*
