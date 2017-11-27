@@ -6,11 +6,11 @@ from std_msgs.msg import Bool
 from std_srvs.srv import SetBool
 
 BTN_PIN = 11
-global auto_mode = False;
+auto_mode = False;
 
 def auto_mode_callback(data):
-    btn_state = data.data
-
+    global auto_mode
+    auto_mode = data.data
 
 if __name__ == '__main__':
     rospy.init_node('kmm_input', anonymous=True)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                 rospy.wait_for_service('set_auto_mode')
 
                 try:
-                    set_auto_mode(not btn_state)
+                    set_auto_mode(not auto_mode)
                 except rospy.ServiceException, e:
                     print "Service call set_auto_mode failed in kmm_input: %s"%e
 
