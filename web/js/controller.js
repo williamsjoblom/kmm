@@ -193,6 +193,6 @@ function toggleMode() {
   var setAutoMode = new ROSLIB.ServiceRequest({
     data : !isInAutoMode
   isUsingGoTo = false;
-
+  });
   SetAutoModeClient.callService(setAutoMode, function(result) {});
 }
