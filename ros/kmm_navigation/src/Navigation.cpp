@@ -9,8 +9,7 @@ namespace kmm_navigation {
   {
     dynamic_reconfigure::Server<NavigationConfig>::CallbackType f;
     f = boost::bind(&Navigation::reconfigure_callback, this, _1, _2);
-    server_ = boost::make_shared <dynamic_reconfigure::Server<NavigationConfig> >(nh_);
-    server_->setCallback(f);
+    server_.setCallback(f);
 
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
@@ -45,6 +44,11 @@ namespace kmm_navigation {
         assert(false);
     }
 
+    if (!nh_.getParam("/produce_cmd_vel", produce_cmd_vel_)) {
+        ROS_ERROR("Couldn't set produce_cmd_vel_!");
+        assert(false);
+    }
+
     // Helper classes
     map_ = new Map(map_rows, map_cols, cell_size);
     path_finder_ = new PathFinder(map_);
@@ -60,8 +64,8 @@ namespace kmm_navigation {
   }
 
   void Navigation::reconfigure_callback(NavigationConfig& config, int level) {
-    path_follower_.set_error_p_constant(config.error_p_constant);
-    path_follower_.set_max_velocity(config.max_velocity);
+    /*path_follower_.set_error_p_constant(config.error_p_constant);
+    path_follower_.set_max_velocity(config.max_velocity);*/
   }
 
   /*
@@ -97,11 +101,13 @@ namespace kmm_navigation {
       Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
       vel3 = t * vel3; // Rotate into robot frame.
 
-      geometry_msgs::Twist cmd_vel_msg;
-      cmd_vel_msg.linear.x =  vel3[0];
-      cmd_vel_msg.linear.y = vel3[1];
-      cmd_vel_msg.angular.z = 0;
-      cmd_vel_pub_.publish(cmd_vel_msg);
+      if (produce_cmd_vel_) {
+        geometry_msgs::Twist cmd_vel_msg;
+        cmd_vel_msg.linear.x =  vel3[0];
+        cmd_vel_msg.linear.y = vel3[1];
+        cmd_vel_msg.angular.z = 0;
+        cmd_vel_pub_.publish(cmd_vel_msg);
+      }
 
       rate.sleep();
     }

@@ -60,7 +60,7 @@ namespace kmm_position {
       float y = cloud.points[i].y;
       Eigen::Vector2f p(x, y);
       // Only use data points that are within a certain proximity.
-      float proximity = 1;
+      float proximity = 6;
       if ((p - pos).norm() < proximity) {
         scan.push_back(p);
       }

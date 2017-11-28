@@ -46,10 +46,13 @@ private:
   kmm_navigation::MoveToResult result_;
 
   // Dynamic reconfigure
-  boost::shared_ptr<dynamic_reconfigure::Server<NavigationConfig> > server_;
+  dynamic_reconfigure::Server<NavigationConfig> server_;
 
   // Auto mode
   bool auto_mode_;
+
+  // When playing a rosbag we dont want to produce cmd_vel messages.
+  bool produce_cmd_vel_;
 
   // Subscribers
   ros::Subscriber walls_sub_;
