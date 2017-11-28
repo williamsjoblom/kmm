@@ -57,11 +57,11 @@ function render() {
 
   // Global frame
   drawGrid();
-  if (debug.axes) {drawGlobalFrame();};
-  drawWalls();
-  if (debug.aligned) {drawAlignedScan();};
-  if (debug.endPoints) {drawEndPoints();};
-  if (debug.path) {drawPlannedPath();};
+  if (debug.axes) { drawGlobalFrame(); }
+  if (debug.walls) { drawWalls(); }
+  if (debug.aligned) { drawAlignedScan(); }
+  if (debug.endPoints) { drawEndPoints(); }
+  if (debug.path) { drawPlannedPath(); }
 
   { // Robot frame
     matrix.save();

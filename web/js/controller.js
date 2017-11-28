@@ -85,6 +85,10 @@ function bindMenuEvents() {
     debug.scan = !debug.scan;
   });
 
+  $("#debug-walls").click(function () {
+    debug.walls = !debug.walls;
+  });
+
   $("#debug-aligned").click(function () {
     debug.aligned = !debug.aligned;
   });

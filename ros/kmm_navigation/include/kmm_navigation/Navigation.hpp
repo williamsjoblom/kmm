@@ -46,7 +46,7 @@ private:
   kmm_navigation::MoveToResult result_;
 
   // Dynamic reconfigure
-  dynamic_reconfigure::Server<NavigationConfig> server_;
+  dynamic_reconfigure::Server<NavigationConfig> reconfigure_server_;
 
   // Auto mode
   bool auto_mode_;

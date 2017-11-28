@@ -26,7 +26,8 @@ var debug = {
   endPoints: true,
   path: true,
   velocity: true,
-  acceleration: true
+  acceleration: true,
+  walls: true
 };
 
 // Go to

@@ -14,8 +14,8 @@ namespace kmm_position {
     I_.setIdentity();
 
     set_state_cov(0.2, 20 * pi / 180);
-    set_predict_noise(0.02, 0.01);
-    set_lidar_noise(1, 5 * pi / 180);
+    set_predict_noise(0.05, 0.03);
+    set_lidar_noise(0.1, 0.5 * pi / 180);
 
     predict_ts_ = ros::Time::now();
     lidar_measurement_ts_ = ros::Time::now();
