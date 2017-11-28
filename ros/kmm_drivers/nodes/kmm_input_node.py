@@ -3,14 +3,14 @@
 import rospy
 import RPi.GPIO as GPIO
 from std_msgs.msg import Bool
+from std_srvs.srv import SetBool
 
 BTN_PIN = 11
-btn_state = True
+auto_mode = False;
 
-def callback(data):
-    global btn_state
-    btn_state = data.data
-
+def auto_mode_callback(data):
+    global auto_mode
+    auto_mode = data.data
 
 if __name__ == '__main__':
     rospy.init_node('kmm_input', anonymous=True)
@@ -18,19 +18,25 @@ if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(BTN_PIN, GPIO.IN)
 
+    set_auto_mode = rospy.ServiceProxy('set_auto_mode', SetBool)
+    rospy.Subscriber("auto_mode", Bool, auto_mode_callback);
+
     try:
-        pub = rospy.Publisher('btn_state', Bool, queue_size=1)
-        sub = rospy.Subscriber('btn_state', Bool, callback)
         rate = rospy.Rate(60) # 60Hz
         pressed = False
 
         while not rospy.is_shutdown():
             if GPIO.input(BTN_PIN) and not pressed:
-                btn_state = not btn_state
-                pressed = True;
+                rospy.wait_for_service('set_auto_mode')
+                pressed = True
+                try:
+                    set_auto_mode(not auto_mode)
+                except rospy.ServiceException, e:
+                    print "Service call set_auto_mode failed in kmm_input: %s"%e
+
             elif not GPIO.input(BTN_PIN):
-                pressed = False;
-            pub.publish(btn_state)
+                pressed = False
+
             rate.sleep()
     except rospy.ROSInterruptException:
         pass

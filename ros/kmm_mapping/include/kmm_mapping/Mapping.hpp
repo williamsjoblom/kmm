@@ -38,15 +38,21 @@ private:
     bool horizontal, int row, int col);
   void add_wall(int row, int col, bool horizontal);
   void update_end_points(int row, int col, bool horizontal);
-  void publish_walls();
-  void publish_end_points();
+  void publish_walls(const ros::TimerEvent&);
+  void publish_end_points(const ros::TimerEvent&);
 
   ros::NodeHandle nh_;
+
   // Subscribers
-  ros::Subscriber sub_;
+  ros::Subscriber aligned_scan_sub_;
+
   // Publishers
   ros::Publisher walls_pub_;
   ros::Publisher end_points_pub_;
+
+  // Timers
+  ros::Timer publish_walls_timer_;
+  ros::Timer publish_end_points_timer_;
 
   // Map variables
   int h_; // Map rows = height

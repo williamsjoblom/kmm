@@ -20,8 +20,6 @@ function checkGamepad(){
     //the rotation, controlled by the right stick
     var rotation = gamepad.axes[3];
 
-    console.log("x: %s, y: %s, rotation: %s", precision(x, 2), precision(y, 2), precision(rotation, 2));
-
     //Uncomment the following line to log input from the gamepad
     //console.log("X: "+x+ ", Y: "+y+", Rotation: "+ rotation);
     //Create and sends ROS-message

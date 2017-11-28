@@ -9,12 +9,10 @@ from subprocess import check_output
 
 from RPLCD.gpio import CharLCD
 from RPi import GPIO
+from wireless import Wireless
 
-"""
-Last string written to the display.
-"""
-last_string = ' '
-
+last_ip = None
+last_ssid = None
 
 def wlan_ip():
     """
@@ -35,12 +33,17 @@ def wlan_ssid():
     output = check_output(["iwlist", "wlan0", "scan"])
     for line in output.split():
         if line.startswith("ESSID"):
-            return line.split('"')[1]
+            return line.split('"')[1].strip()
 
     return None
 
+
 def center(s):
+    """
+    Return centered string.
+    """
     i = 16 % len(s)
+    print("i = {}".format(i))
     return ' '*(i/2) + s
 
 
@@ -48,33 +51,39 @@ def refresh(lcd):
     """
     Refresh LCD.
     """
+    global last_ssid
+    global last_ip
+    
     ip = wlan_ip()
     ssid = wlan_ssid()
-    if ssid == None:
+    if not ssid:
         ssid = "not connected"
-
-    lcd.clear()
-    lcd.cursor_pos = (0, 0)
-    
-    s = center(ip) + '\n\r' + center(ssid)
-    lcd.write_string(s)
         
+    if ip != last_ip or ssid != last_ssid:
+        lcd.clear()
+        
+        lcd.cursor_pos = (0, 0)
+        lcd.write_string(center(ip))
+        
+        lcd.cursor_pos = (1, 0)
+        lcd.write_string(center(ssid))
+
+        last_ip = ip
+        last_ssid = ssid
+
+    
 if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(11, GPIO.IN)
     
     try:
         lcd = CharLCD(pin_rs=8, pin_e=10, pin_rw=None,
                       pins_data=[12, 16, 18, 22], cols=16,
                       rows=2, numbering_mode=GPIO.BOARD,
                       auto_linebreaks=True)
-        lcd.clear()
-
-                
+                        
         while True:
             refresh(lcd)
-            time.sleep(0.5)
-            print('Reset: ' + str(GPIO.input(11)))
+            time.sleep(2)
 	    print('SSID: ' + wlan_ssid())
 	    print('IP: ' + str(wlan_ip()))                
             

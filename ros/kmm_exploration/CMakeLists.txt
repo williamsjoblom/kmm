@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   kmm_navigation
   actionlib
   actionlib_msgs
+  std_srvs
 )
 
 ################################################

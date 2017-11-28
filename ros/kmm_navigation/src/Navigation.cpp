@@ -18,6 +18,10 @@ namespace kmm_navigation {
     // Subscribers
     walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
+    auto_mode_sub_ = nh_.subscribe("auto_mode", 1, &Navigation::auto_mode_callback, this);
+
+    // Auto mode
+    auto_mode_ = false;
 
     // Timers
     publish_path_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Navigation::publish_path, this);
@@ -66,17 +70,21 @@ namespace kmm_navigation {
   */
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
     ros::Rate rate(30);
-
     // Find a path from robot position to target for the robot to follow.
     Eigen::Vector2f target(goal->x, goal->y);
     path_ = path_finder_->find_path(robot_position_, target);
+
+    bool initial_mode = auto_mode_;
 
     bool has_reached_target = false;
     while (!has_reached_target) {
 
       // The navigation request can be preemted by the client.
       // In that case we want to clear the path and stop the robot.
-      if (action_server_.isPreemptRequested() || !ros::ok()) {
+      bool auto_mode_turned_off = initial_mode && !auto_mode_;
+      bool auto_mode_turned_on = !initial_mode && auto_mode_;
+      bool auto_mode_changed = auto_mode_turned_on || auto_mode_turned_off;
+      if (auto_mode_changed || action_server_.isPreemptRequested() || !ros::ok()) {
         action_server_.setPreempted();
         path_.clear();
         return;
@@ -125,6 +133,10 @@ namespace kmm_navigation {
     geometry_msgs::Quaternion q = msg.pose.pose.orientation;
     // Convert Quaternion to Euler angle.
     robot_angle_ = std::atan2(2*(q.x*q.y+q.z*q.w), 1-2*(std::pow(q.y, 2)+std::pow(q.z, 2)));
+  }
+
+  void Navigation::auto_mode_callback(std_msgs::Bool msg) {
+    auto_mode_ = msg.data;
   }
 
   /*

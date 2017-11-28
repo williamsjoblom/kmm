@@ -9,7 +9,11 @@ namespace kmm_mapping {
     walls_pub_ = nh_.advertise<std_msgs::Int8MultiArray>("walls", 1);
     end_points_pub_ = nh_.advertise<sensor_msgs::PointCloud>("end_points", 1);
     // Subscribers
-    sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
+    aligned_scan_sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
+
+    // Timers
+    publish_walls_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_walls, this);
+    publish_end_points_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_end_points, this);
 
     // Get map variables
     if (!nh_.getParam("/map_rows", h_)) {
@@ -76,8 +80,8 @@ namespace kmm_mapping {
       };
     };
     // Publish
-    publish_walls();
-    publish_end_points();
+    //publish_walls();
+    //publish_end_points();
 
     reset_wall_point_counts();
 
@@ -209,7 +213,7 @@ namespace kmm_mapping {
     };
   }
 
-  void Mapping::publish_walls() {
+  void Mapping::publish_walls(const ros::TimerEvent&) {
     walls_msg_.data.clear();
     for (int& is_wall : walls_) {
         walls_msg_.data.push_back(is_wall);
@@ -217,7 +221,7 @@ namespace kmm_mapping {
     walls_pub_.publish(walls_msg_);
   }
 
-  void Mapping::publish_end_points() {
+  void Mapping::publish_end_points(const ros::TimerEvent&) {
     end_points_msg_.points.clear();
     for (Eigen::Vector2f end_point : end_points_) {
       geometry_msgs::Point32 point;

@@ -16,8 +16,10 @@ function bindEvents() {
   bindCanvasEvents();
   bindMenuEvents();
   bindSidebarEvents();
+  bindButtonEvents();
 }
 
+var targetPositionGoal;
 function bindCanvasEvents() {
   // Bind map buttons.
   $("#zoom-in-button").click(zoomIn);
@@ -28,9 +30,10 @@ function bindCanvasEvents() {
   // Bind map scoll zoom and mouse pan.
   $("#map")
   .click(function(e) {
-    if (isInManualMode && isUsingGoTo) {
-      $("#map").css('cursor', 'default');
+    if (!isInAutoMode && isUsingGoTo) {
       isUsingGoTo = false;
+      $("#map").css('cursor', 'default');
+      $("#go-to").html("Remove goal");
 
       var offset = $("#map-container").offset();
 
@@ -39,7 +42,7 @@ function bindCanvasEvents() {
         e.pageY - offset.top
       );
 
-      var targetPositionGoal = new ROSLIB.Goal({
+      targetPositionGoal = new ROSLIB.Goal({
         actionClient : navigationClient,
         goalMessage : {
           x : goToPos.x,
@@ -105,27 +108,61 @@ function bindMenuEvents() {
   $('#debug-acceleration').removeAttr('checked');
   debug.acceleration = false;
 
-  $("#debug-go-to-target").click(function () {
-    debug.goToTarget = !debug.goToTarget;
-  });
-
   $("#debug-path").click(function () {
     debug.path = !debug.path;
   });
 
   $("#go-to").click(function () {
-    isUsingGoTo = !isUsingGoTo;
-    if (isInManualMode && isUsingGoTo) {
-      $("#map").css('cursor', 'crosshair');
-    } else {
-      $("#map").css('cursor', 'default');
-    };
+    setGoalClick();
   });
 }
 
 function bindSidebarEvents() {
   // Bind mode slider.
   $("#mode-slider").click(toggleMode);
+}
+
+function bindButtonEvents(){
+  document.addEventListener("keyup", setGoalClickKey, false);
+  document.addEventListener("keyup", toggleModeKey, false);
+}
+
+function toggleModeKey(e){
+  if (e.keyCode == 77) { // m
+    toggleMode();
+  }
+}
+
+function setGoalClickKey(e){
+  if (e.keyCode == 71) { // g
+    setGoalClick();
+  }
+}
+
+function setGoalClick(e){
+  isUsingGoTo = !isUsingGoTo;
+  if (!isInAutoMode && goToPos) { // Cancel current
+
+    isUsingGoTo = false;
+    goToPos = null;
+
+    $("#go-to").html("Go to");
+    $("#map").css('cursor', 'default');
+
+    targetPositionGoal.cancel();
+
+  } else if (!isInAutoMode && isUsingGoTo) { // Set new
+
+    $("#go-to").html("Set goal");
+    $("#map").css('cursor', 'crosshair');
+
+  }
+  else { // Cancelled without set goal
+
+    $("#go-to").html("Go to");
+    $("#map").css('cursor', 'default');
+
+  }
 }
 
 function resizeCanvas() {
@@ -163,9 +200,8 @@ function zoomOut() {
 }
 
 function toggleMode() {
-  isInManualMode = !isInManualMode;
-  var bool = new ROSLIB.Message({
-    data : isInManualMode
+  var setAutoMode = new ROSLIB.ServiceRequest({
+    data : !isInAutoMode
   });
-  btnStatePub.publish(bool);
+  setAutoModeClient.callService(setAutoMode, function(result) {});
 }

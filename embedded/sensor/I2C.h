@@ -9,6 +9,7 @@
      * ACC_X_H   0b0101001
      * ACC_Y_L   0b0101010
      * ACC_Y_H   0b0101011
+     *
      * GYRO_Z_L  0b0101100
      * GYRO_Z_H  0b0101101
      */
@@ -35,8 +36,8 @@
     #define GYRO_RANGE_500DPS 0x10
     #define GYRO_RANGE_20000DPS 0x20
 
-int i2c_enable_reading(uint8_t address, uint8_t enable);
-int i2c_write(uint8_t addr, uint8_t reg, uint8_t data);
+uint8_t i2c_write(uint8_t addr, uint8_t reg, uint8_t data);
+uint8_t read8(uint8_t address, uint8_t reg);
 void i2c_init(void);
 int twi_assess_error(unsigned char type);
 unsigned char twi_transmit(unsigned char type);

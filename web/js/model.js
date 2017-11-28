@@ -26,8 +26,7 @@ var debug = {
   endPoints: true,
   path: true,
   velocity: true,
-  acceleration: true,
-  goToTarget: true
+  acceleration: true
 };
 
 // Go to
@@ -66,7 +65,7 @@ var robot = {
 
 robot.image.src = "img/robot.png";
 
-var isInManualMode = true;
+var isInAutoMode = false;
 
 // Planned path and target
 var plannedPath = [];
@@ -222,29 +221,37 @@ new ROSLIB.Topic({
   alignedScan = message.points;
 });
 
-
+// Subscriber for auto_mode
 new ROSLIB.Topic({
   ros : ros,
-  name : '/btn_state',
+  name : '/auto_mode',
   messageType : 'std_msgs/Bool'
 
 }).subscribe(function(message) {
-  isInManualMode = message.data;
-  if (isInManualMode) {
-    $("#mode-slider").prop("checked", false);
-    $("#go-to").removeClass("menu-option-inactive");
-  } else {
+  var wasInAutoMode = isInAutoMode;
+  isInAutoMode = message.data;
+  if (isInAutoMode && !wasInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
+    $("#go-to").html("Go to");
+    targetPositionGoal.cancel();
+    isUsingGoTo = false;
+    goToPos = null;
+  } else if (!isInAutoMode && wasInAutoMode) {
+    $("#mode-slider").prop("checked", false);
+    $("#go-to").removeClass("menu-option-inactive");
+    isUsingGoTo = false;
     goToPos = null;
   };
 });
 
-// Publisher for button state.
-var btnStatePub = new ROSLIB.Topic({
+
+
+// Service client for auto_mode
+var setAutoModeClient = new ROSLIB.Service({
   ros : ros,
-  name : '/btn_state',
-  messageType : 'std_msgs/Bool'
+  name : '/set_auto_mode',
+  serviceType : 'std_srvs/SetBool'
 });
 
 // Action client for move to navigation goal.

@@ -84,6 +84,26 @@ http-server
 
 Open broswer at http://localhost:8080
 
+# Köra på roboten
+ssh pi@kmm-raspberry
+kör ifconfig för att kolla ip-addressen. Borde vara något med 192.168.43.???
+öppna ~/.rosenv
+ROS_IP=192.168.43.???
+ROS_MASTER_URI=http://192.168.43.???:11311
+spara
+kör roscore
+öppna ny tab och logga in på raspberryn
+kör roslaunch kmm_bringup robot.launch
+
+Öppna terminal på laptopen, kolla din ip med ifconfig, och redigera din ~/.rosenv
+ROS_IP=laptopens ip
+ROS_MASTER_URI=samma som på raspberryn
+
+Glöm inte att man måste source:a ~/.rosenv för att variablerna ska ändras.
+kör roslaunch kmm_bringup client.launch
+och såklart http-server för att visa hemsidan
+
+
 
 ## Rosbag
 

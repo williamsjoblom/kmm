@@ -8,6 +8,7 @@
 #include <kmm_navigation/MoveToAction.h>
 #include <kmm_navigation/MoveToGoal.h>
 #include <actionlib/client/simple_action_client.h>
+#include <std_srvs/SetBool.h>
 
 namespace kmm_exploration {
 
@@ -16,23 +17,25 @@ public:
   Exploration(ros::NodeHandle nh);
   ~Exploration();
 
-  void btn_state_callback(std_msgs::Bool msg);
-  void end_points_callback(sensor_msgs::PointCloud msg);
-  void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void send_goal();
   void update_target(float new_x, float new_y);
+  void publish_auto_mode();
 
 private:
   ros::NodeHandle nh_;
+
   // Bool for manual or autonomous mode
-  bool is_in_manual_mode_;
+  bool auto_mode_;
+
   //Stores the returned target position
   float x_;
   float y_;
+
   //Stores robot coords
   float pos_x_;
   float pos_y_;
   float angle_;
+
   //Stores last point chosen
   geometry_msgs::Point32 target_;
 
@@ -41,8 +44,18 @@ private:
 
   // Subscribers
   ros::Subscriber position_sub_;
-  ros::Subscriber btn_state_sub_;
   ros::Subscriber end_points_sub_;
+
+  // Publishers
+  ros::Publisher auto_mode_pub_;
+
+  // Services
+  ros::ServiceServer auto_mode_service_;
+
+  bool set_auto_mode(std_srvs::SetBool::Request &req,
+         std_srvs::SetBool::Response &res);
+  void end_points_callback(sensor_msgs::PointCloud msg);
+  void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
 
 };
 
