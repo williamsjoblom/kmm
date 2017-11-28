@@ -16,7 +16,7 @@ function checkGamepad(){
     //Motion in x-direction
     var x = gamepad.axes[0];
     //Motion in y-direction
-    var y = -gamepad.axes[1];
+    var y = gamepad.axes[1];
     //the rotation, controlled by the right stick
     var rotation = gamepad.axes[3];
 

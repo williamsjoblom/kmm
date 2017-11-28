@@ -71,6 +71,7 @@ var isInAutoMode = false;
 var plannedPath = [];
 var targetImage = new Image();
 targetImage.src = "img/target.png";
+var targetPositionGoal = null;
 
 // Mapping
 var walls = [];
@@ -234,7 +235,9 @@ new ROSLIB.Topic({
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
-    targetPositionGoal.cancel();
+    if (targetPositionGoal) {
+      targetPositionGoal.cancel();
+    }
     isUsingGoTo = false;
     goToPos = null;
   } else if (!isInAutoMode && wasInAutoMode) {
