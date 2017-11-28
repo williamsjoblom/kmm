@@ -228,17 +228,24 @@ new ROSLIB.Topic({
   messageType : 'std_msgs/Bool'
 
 }).subscribe(function(message) {
+  var wasInAutoMode = isInAutoMode;
   isInAutoMode = message.data;
-  goToPos = null;
-  if (isInAutoMode) {
+  if (isInAutoMode && !wasInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
+    $("#go-to").html("Go to");
+    targetPositionGoal.cancel();
     isUsingGoTo = false;
-  } else {
+    goToPos = null;
+  } else if (!isInAutoMode && wasInAutoMode) {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
+    isUsingGoTo = false;
+    goToPos = null;
   };
 });
+
+
 
 // Service client for auto_mode
 var setAutoModeClient = new ROSLIB.Service({

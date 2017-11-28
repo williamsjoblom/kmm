@@ -19,6 +19,7 @@ function bindEvents() {
   bindButtonEvents();
 }
 
+var targetPositionGoal;
 function bindCanvasEvents() {
   // Bind map buttons.
   $("#zoom-in-button").click(zoomIn);
@@ -41,7 +42,7 @@ function bindCanvasEvents() {
         e.pageY - offset.top
       );
 
-      var targetPositionGoal = new ROSLIB.Goal({
+      targetPositionGoal = new ROSLIB.Goal({
         actionClient : navigationClient,
         goalMessage : {
           x : goToPos.x,
@@ -133,26 +134,34 @@ function toggleModeKey(e){
 }
 
 function setGoalClickKey(e){
-  if (e.keyCode == 71 && !isInAutoMode) { // g
+  if (e.keyCode == 71) { // g
     setGoalClick();
   }
 }
 
 function setGoalClick(e){
   isUsingGoTo = !isUsingGoTo;
-  if (!isInAutoMode && goToPos) {
-    $("#go-to").html("Go to");
+  if (!isInAutoMode && isUsingGoTo && goToPos != null) { // Cancel current
+
     isUsingGoTo = false;
     goToPos = null;
+
+    $("#go-to").html("Go to");
     $("#map").css('cursor', 'default');
+
     targetPositionGoal.cancel();
-  } else if (!isInAutoMode && isUsingGoTo) {
-    goToPos = null;
+
+  } else if (!isInAutoMode && isUsingGoTo) { // Set new
+
     $("#go-to").html("Set goal");
     $("#map").css('cursor', 'crosshair');
+
   }
-  else {
+  else { // Cancelled without set goal
+
+    $("#go-to").html("Go to");
     $("#map").css('cursor', 'default');
+
   }
 }
 
@@ -194,8 +203,5 @@ function toggleMode() {
   var setAutoMode = new ROSLIB.ServiceRequest({
     data : !isInAutoMode
   });
-  isUsingGoTo = false;
-  goToPos = null;
-  $("#go-to").html("Go to");
   setAutoModeClient.callService(setAutoMode, function(result) {});
 }

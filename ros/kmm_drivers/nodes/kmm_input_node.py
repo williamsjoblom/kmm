@@ -28,14 +28,14 @@ if __name__ == '__main__':
         while not rospy.is_shutdown():
             if GPIO.input(BTN_PIN) and not pressed:
                 rospy.wait_for_service('set_auto_mode')
-
+                pressed = True
                 try:
                     set_auto_mode(not auto_mode)
                 except rospy.ServiceException, e:
                     print "Service call set_auto_mode failed in kmm_input: %s"%e
 
             elif not GPIO.input(BTN_PIN):
-                pressed = False;
+                pressed = False
 
             rate.sleep()
     except rospy.ROSInterruptException:
