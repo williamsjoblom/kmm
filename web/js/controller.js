@@ -144,6 +144,7 @@ function setGoalClick(e){
     $("#go-to").html("Go to");
     isUsingGoTo = false;
     goToPos = null;
+    $("#map").css('cursor', 'default');
     targetPositionGoal.cancel();
   } else if (!isInAutoMode && isUsingGoTo) {
     goToPos = null;

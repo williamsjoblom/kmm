@@ -73,7 +73,10 @@ namespace kmm_navigation {
       // The navigation request can be preemted by the client.
       // In that case we want to clear the path and stop the robot.
       bool auto_mode_turned_off = initial_mode && !auto_mode_;
-      if (action_server_.isPreemptRequested() || !ros::ok() || auto_mode_turned_off) {
+      bool auto_mode_turned_on = !initial_mode && auto_mode_;
+      bool auto_mode_changed = auto_mode_turned_on || auto_mode_turned_off;
+      if (auto_mode_changed || action_server_.isPreemptRequested() || !ros::ok()) {
+        ROS_INFO("Cleared path!");
         action_server_.setPreempted();
         path_.clear();
         return;
