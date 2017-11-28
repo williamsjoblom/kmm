@@ -141,7 +141,7 @@ function setGoalClickKey(e){
 
 function setGoalClick(e){
   isUsingGoTo = !isUsingGoTo;
-  if (!isInAutoMode && isUsingGoTo && goToPos != null) { // Cancel current
+  if (!isInAutoMode && goToPos) { // Cancel current
 
     isUsingGoTo = false;
     goToPos = null;
