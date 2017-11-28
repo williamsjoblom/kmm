@@ -12,7 +12,7 @@ setInterval(checkGamepad, 33);
   a ROS-Message */
 function checkGamepad(){
   var gamepad = navigator.getGamepads()[0];
-  if (gamepad && isInManualMode && plannedPath.length == 0) {
+  if (gamepad && !isInAutoMode && plannedPath.length == 0) {
     //Motion in x-direction
     var x = gamepad.axes[0];
     //Motion in y-direction
