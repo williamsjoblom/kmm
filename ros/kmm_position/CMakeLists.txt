@@ -141,36 +141,3 @@ add_dependencies(kmm_position_node
 target_link_libraries(kmm_position_node
    ${catkin_LIBRARIES}
 )
-
-### TEST KALMAN ###
-
-#add_executable(test_kalman_node
-#  nodes/test_kalman_node.cpp
-#  src/Kalman.cpp
-#)
-
-#add_dependencies(test_kalman_node
-#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-#  ${catkin_EXPORTED_TARGETS}
-#)
-
-#target_link_libraries(test_kalman_node
-#   ${catkin_LIBRARIES}
-#)
-
-### TEST ILS ###
-
-#add_executable(test_ils_node
-#  nodes/test_ils_node.cpp
-#  src/ils.cpp
-#  src/Pose.cpp
-#)
-
-#add_dependencies(test_ils_node
-#  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-#  ${catkin_EXPORTED_TARGETS}
-#)
-
-#target_link_libraries(test_ils_node
-#   ${catkin_LIBRARIES}
-#)

@@ -61,7 +61,8 @@ function render() {
   drawGrid();
   if (debug.axes) { drawGlobalFrame(); }
   if (debug.walls) { drawWalls(); }
-  if (debug.aligned) { drawAlignedScan(); }
+  if (debug.mappingScan) { drawPointCloud(mappingScan, "#ff0000", -0.02); }
+  if (debug.positionScan) { drawPointCloud(positionScan, "#00cc00", 0.02); }
   if (debug.endPoints) { drawEndPoints(); }
   if (debug.path) { drawPlannedPath(); }
 
@@ -131,17 +132,18 @@ function drawLaserScan() {
   matrix.restore();
 }
 
-function drawAlignedScan() {
-  matrix.save();
-  ctx.fillStyle = "#9C27B0";
+function drawPointCloud(pointCloud, color, offset) {
+  ctx.fillStyle = color;
   var rectHeight = 0.02;
   var rectWidth = 0.02;
-  for (var i = 0; i < alignedScan.length; i++) {
-    if (alignedScan[i].x + alignedScan[i].y > 0.1) {
-      ctx.fillRect(alignedScan[i].x + (rectHeight/2), alignedScan[i].y + (rectWidth/2), rectWidth, rectHeight);
-    };
+  for (var i = 0; i < pointCloud.length; i++) {
+    ctx.fillRect(
+      pointCloud[i].x - (rectHeight/2) + offset,
+      pointCloud[i].y - (rectWidth/2) + offset,
+      rectWidth,
+      rectHeight
+    );
   }
-  matrix.restore();
 }
 
 function drawGrid() {
@@ -257,8 +259,8 @@ function drawVelocity() {
   ctx.lineWidth = 0.02;
   var from = { x: 0, y: 0 };
   var to = {
-    x: robot.velocity.x * 10,
-    y: robot.velocity.y * 10
+    x: robot.velocity.x * 3,
+    y: robot.velocity.y * 3
   };
   drawArrow(from, to);
 }

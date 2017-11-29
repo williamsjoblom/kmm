@@ -9,7 +9,7 @@ namespace kmm_mapping {
     walls_pub_ = nh_.advertise<std_msgs::Int8MultiArray>("walls", 1);
     end_points_pub_ = nh_.advertise<sensor_msgs::PointCloud>("end_points", 1);
     // Subscribers
-    aligned_scan_sub_ = nh_.subscribe("aligned_scan", 1, &Mapping::mapping_callback, this);
+    mapping_scan_sub_ = nh_.subscribe("mapping_scan", 1, &Mapping::mapping_scan_callback, this);
 
     // Timers
     publish_walls_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_walls, this);
@@ -49,7 +49,7 @@ namespace kmm_mapping {
   /* Analyzes points by counting number of collisions on the same wall.
    * Finally publishes the walls that have enough collisions.
    */
-  void Mapping::mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg) {
+  void Mapping::mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg) {
     std::vector<Eigen::Vector2f> wall_points;
     for (const auto &p : msg->points) {
       Eigen::Vector2f point;

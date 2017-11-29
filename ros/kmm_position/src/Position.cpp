@@ -15,7 +15,8 @@ namespace kmm_position {
     reconfigure_server_.setCallback(f);
 
     // Publishers
-    aligned_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("aligned_scan", 1);
+    mapping_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("mapping_scan", 1);
+    position_scan_pub_ = nh_.advertise<sensor_msgs::PointCloud>("position_scan", 1);
     position_pub_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("position", 1);
     broadcast_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 50), &Position::broadcast_robot_pose, this);
     publish_robot_pose_timer_ = nh_.createTimer(ros::Duration(1. / 20), &Position::publish_robot_pose, this);
@@ -34,7 +35,9 @@ namespace kmm_position {
   }
 
   void Position::reconfigure_callback(PositionConfig& config, int level) {
-
+    config_ = config;
+    kalman_.set_predict_noise(config_.predict_noise_linear, config_.predict_noise_angular);
+    kalman_.set_lidar_noise(config_.lidar_noise_linear, config_.lidar_noise_angular);
   }
 
   void Position::cmd_vel_callback(geometry_msgs::Twist msg) {
@@ -57,44 +60,56 @@ namespace kmm_position {
        return;
      }
 
-    Eigen::Vector3f state = kalman_.get_state();
-    Eigen::Vector2f pos(state[0], state[1]);
-
     // Create list of Eigen vectors.
     std::vector<Eigen::Vector2f> scan;
     for (int i = 0; i < cloud.points.size(); i++) {
       float x = cloud.points[i].x;
       float y = cloud.points[i].y;
-      Eigen::Vector2f p(x, y);
-      /*// Only use data points that are within a certain proximity.
-      float proximity = 6;
-      if ((p - pos).norm() < proximity) {
-        scan.push_back(p);
-      }*/
-      scan.push_back(p);
+      scan.push_back(Eigen::Vector2f(x, y));
     }
 
-    std::vector<Eigen::Vector2f> aligned;
-    Pose result = get_transform_pose(scan, aligned, 5);
-    state[0] = result.pos[0];
-    state[1] = result.pos[1];
-    state[2] = result.angle;
-    kalman_.lidar_measurement(state);
-    publish_aligned_scan(aligned);
+    std::vector<Eigen::Vector2f> position_scan;
+    std::vector<Eigen::Vector2f> mapping_scan;
+
+    Eigen::Vector3f state = kalman_.get_state();
+    Eigen::Vector2f robot_position(state[0], state[1]);
+
+    Pose result = calculate_robot_movement(
+      robot_position,
+      scan,
+      position_scan,
+      mapping_scan,
+      config_.iterations,
+      config_.position_proximity,
+      config_.mapping_proximity,
+      config_.position_ignore,
+      config_.mapping_ignore
+    );
+
+    Eigen::Vector3f messurement(
+      result.pos[0],
+      result.pos[1],
+      result.angle
+    );
+
+    kalman_.lidar_measurement(messurement);
+
+    publish_scan(mapping_scan_pub_, mapping_scan);
+    publish_scan(position_scan_pub_, position_scan);
   }
 
-  void Position::publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned) {
+  void Position::publish_scan(ros::Publisher& pub, std::vector<Eigen::Vector2f>& scan) {
     sensor_msgs::PointCloud cloud;
     cloud.header.frame_id = "map";
 
-    for (Eigen::Vector2f point : aligned) {
+    for (Eigen::Vector2f point : scan) {
       geometry_msgs::Point32 p;
       p.x = point[0];
       p.y = point[1];
       cloud.points.push_back(p);
     }
 
-    aligned_scan_pub_.publish(cloud);
+    pub.publish(cloud);
   }
 
   void Position::broadcast_robot_pose(const ros::TimerEvent&) {

@@ -89,11 +89,13 @@ function bindMenuEvents() {
     debug.walls = !debug.walls;
   });
 
-  $("#debug-aligned").click(function () {
-    debug.aligned = !debug.aligned;
+  $("#debug-position-scan").click(function () {
+    debug.positionScan = !debug.positionScan;
   });
-  $('#debug-aligned').removeAttr('checked');
-  debug.aligned = false;
+
+  $("#debug-mapping-scan").click(function () {
+    debug.mappingScan = !debug.mappingScan;
+  });
 
   $("#debug-end-points").click(function () {
     debug.endPoints = !debug.endPoints;

@@ -22,10 +22,9 @@ public:
 
   void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
   void cmd_vel_callback(geometry_msgs::Twist msg);
-  void publish_aligned_scan(std::vector<Eigen::Vector2f>& aligned);
+  void publish_scan(ros::Publisher& pub, std::vector<Eigen::Vector2f>& scan);
   void broadcast_robot_pose(const ros::TimerEvent&);
   void publish_robot_pose(const ros::TimerEvent&);
-  void publish_scan_cloud(sensor_msgs::PointCloud& cloud);
   void reconfigure_callback(PositionConfig& config, int level);
 
 private:
@@ -36,6 +35,7 @@ private:
 
   // Dynamic reconfigure
   dynamic_reconfigure::Server<PositionConfig> reconfigure_server_;
+  PositionConfig config_;
 
   // Subscribers
   tf::TransformListener tf_listener_;
@@ -44,7 +44,8 @@ private:
   ros::Subscriber cmd_vel_sub_;
 
   // Publishers
-  ros::Publisher aligned_scan_pub_;
+  ros::Publisher position_scan_pub_;
+  ros::Publisher mapping_scan_pub_;
   ros::Publisher position_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
 

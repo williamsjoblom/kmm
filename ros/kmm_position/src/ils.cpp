@@ -4,12 +4,19 @@
 #include <ros/ros.h>
 
 /**
-  Creates a Pose that aligns points in laser scan to grid. Also modifies scan with Pose.
+  Creates a Pose that aligns points in laser scan to grid.
 */
-Pose get_transform_pose(
+Pose calculate_robot_movement(
+  Eigen::Vector2f robot_position,
   std::vector<Eigen::Vector2f> &scan,
-  std::vector<Eigen::Vector2f> &aligned,
-  int iterations)
+  std::vector<Eigen::Vector2f> &position_scan,
+  std::vector<Eigen::Vector2f> &mapping_scan,
+  int iterations,
+  float position_proximity,
+  float mapping_proximity,
+  float position_ignore,
+  float mapping_ignore
+)
 {
   Pose total;
 
@@ -18,22 +25,49 @@ Pose get_transform_pose(
     return total;
   }
 
-  for (int i = 0; i < iterations; i++) {
+  for (Eigen::Vector2f p : scan) {
+    float squaredDistance = (p - robot_position).squaredNorm();
 
-    std::vector<Eigen::Vector2f> scanCopy = scan;
+    // Only use scan data within a certain proximity to position the robot.
+    if (squaredDistance < std::pow(position_proximity, 2)) {
+      position_scan.push_back(p);
+    }
+
+    // Only use scan data within a certain proximity to map the room.
+    if (squaredDistance < std::pow(mapping_proximity, 2)) {
+      mapping_scan.push_back(p);
+    }
+  }
+
+  std::vector<Eigen::Vector2f> scanCopy;
+
+  for (int i = 0; i < iterations; i++) {
+    scanCopy = position_scan;
     total.transform(&scanCopy);
 
     std::vector<Eigen::Vector2f> scanPair;
     std::vector<Eigen::Vector2f> gridPair;
-    build_pairs(scanCopy, scanPair, gridPair);
+    build_pairs(scanCopy, scanPair, gridPair, position_ignore);
 
     Pose diff = least_squares(scanPair, gridPair);
     total.accumulate(diff);
-
-    if (i == iterations - 1) {
-      aligned = gridPair;
-    }
   }
+
+  total.transform(&position_scan);
+  total.transform(&mapping_scan);
+
+  // Used to vizualise what part of the scan was
+  // used to position to position the robot.
+  std::vector<Eigen::Vector2f> scanPair;
+  std::vector<Eigen::Vector2f> gridPair;
+  build_pairs(position_scan, scanPair, gridPair, position_ignore);
+  position_scan = gridPair;
+
+  // Used to do mapping of walls.
+  scanPair.clear();
+  gridPair.clear();
+  build_pairs(mapping_scan, scanPair, gridPair, mapping_ignore);
+  mapping_scan = gridPair;
 
   return total;
 }
@@ -46,18 +80,22 @@ vector b.
 void build_pairs(
   const std::vector<Eigen::Vector2f> &scan,
   std::vector<Eigen::Vector2f> &a,
-  std::vector<Eigen::Vector2f> &b)
+  std::vector<Eigen::Vector2f> &b,
+  float ignore
+)
 {
   for (Eigen::Vector2f point : scan) {
     float x_round = std::round(point[0] / 0.4) * 0.4;
     float y_round = std::round(point[1] / 0.4) * 0.4;
     float x_diff = std::abs(x_round - point[0]);
     float y_diff = std::abs(y_round - point[1]);
-    const float magic = 0.08;
-    //TODO: esting to add extra check, that diff_x and diff_Y has to differ with more than somethin..
+
     const float max_diff = 0.1;
-    if ( !(x_diff < magic && y_diff < magic) &&
-      (x_diff < max_diff || y_diff < max_diff) && y_diff != x_diff) {
+
+    bool not_near_corner = !(x_diff < ignore && y_diff < ignore);
+    bool is_close_to_grid = (x_diff < max_diff) || (y_diff < max_diff);
+
+    if (not_near_corner && is_close_to_grid) {
         a.push_back(point);
         if (x_diff < y_diff) {
           b.push_back(Eigen::Vector2f(x_round, point[1]));

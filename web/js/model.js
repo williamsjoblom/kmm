@@ -22,7 +22,8 @@ var view = {
 var debug = {
   axes : true,
   scan: true,
-  aligned: true,
+  positionScan: true,
+  mappingScan: true,
   endPoints: true,
   path: true,
   velocity: true,
@@ -41,7 +42,8 @@ var laserScan = {
   ranges: []
 };
 
-var alignedScan = [];
+var positionScan = [];
+var mappingScan = [];
 
 // Information about the robot
 var robot = {
@@ -213,14 +215,24 @@ new ROSLIB.Topic({
   laserScan.ranges = message.ranges;
 });
 
-// Aligned laser scan.
+// Position laser scan.
 new ROSLIB.Topic({
   ros: ros,
-  name: '/aligned_scan',
+  name: '/position_scan',
   messageType: 'sensor_msgs/PointCloud'
 
 }).subscribe(function(message) {
-  alignedScan = message.points;
+  positionScan = message.points;
+});
+
+// Mapping laser scan.
+new ROSLIB.Topic({
+  ros: ros,
+  name: '/mapping_scan',
+  messageType: 'sensor_msgs/PointCloud'
+
+}).subscribe(function(message) {
+  mappingScan = message.points;
 });
 
 // Subscriber for auto_mode
