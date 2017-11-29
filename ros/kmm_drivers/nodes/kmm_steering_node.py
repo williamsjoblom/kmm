@@ -78,7 +78,7 @@ class SteeringDriver:
 
         # meters
         R = 0.03
-        L = 0.095
+        L = 0.105
 
         # rad/s
         w0 = (1./R) * (-sin(pi/3.)*x + cos(pi/3.)*y + L*z)
