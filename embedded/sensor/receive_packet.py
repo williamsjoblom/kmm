@@ -25,14 +25,13 @@ if __name__ == "__main__":
     SENSORS_GRAVITY_STANDARD = 9.80665;
 
     # Values from adafruit c++ gyro code to modfy raw data.
-    GYRO_RANGE_250DPS = 250;
+    GYRO_RANGE_250DPS = 0.00875;
     SENSORS_DPS_TO_RADS = 0.017453293;
 
     rawdata = []
     sdata = [0,0,0]
 
     while True:
-        raw_xyz;
         idx = 0
         rawdata = spi.readbytes(6)
         for i in range(0,6,2):
