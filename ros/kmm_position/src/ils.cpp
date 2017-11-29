@@ -54,14 +54,16 @@ void build_pairs(
     float x_diff = std::abs(x_round - point[0]);
     float y_diff = std::abs(y_round - point[1]);
     const float magic = 0.08;
-
-    if ( !(x_diff < magic && y_diff < magic) ) {
-      a.push_back(point);
-      if (x_diff < y_diff) {
-        b.push_back(Eigen::Vector2f(x_round, point[1]));
-      } else {
-        b.push_back(Eigen::Vector2f(point[0], y_round));
-      }
+    //TODO: esting to add extra check, that diff_x and diff_Y has to differ with more than somethin..
+    const float max_diff = 0.1;
+    if ( !(x_diff < magic && y_diff < magic) &&
+      (x_diff < max_diff || y_diff < max_diff) && y_diff != x_diff) {
+        a.push_back(point);
+        if (x_diff < y_diff) {
+          b.push_back(Eigen::Vector2f(x_round, point[1]));
+        } else {
+          b.push_back(Eigen::Vector2f(point[0], y_round));
+        }
     }
   }
 }
