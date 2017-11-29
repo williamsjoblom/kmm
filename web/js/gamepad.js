@@ -6,7 +6,7 @@ var gamepadVel = new ROSLIB.Topic({
   messageType : 'geometry_msgs/Twist'
 });
 
-setInterval(checkGamepad, 33);
+setInterval(checkGamepad, 1000/30);
 
 /* Takes the input from the gamepad if it's connected and sends it in
   a ROS-Message */
