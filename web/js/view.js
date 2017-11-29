@@ -1,9 +1,9 @@
 
-// Render canvas 30Hz
-setInterval(render, 33);
+// Render canvas 60Hz
+requestAnimationFrame(render);
 
-// Update DOM 10Hz
-setInterval(updateDOM, 100);
+// Update DOM 5Hz
+setInterval(updateDOM, 1000/5);
 
 function updateDOM() {
   //Position
@@ -30,6 +30,8 @@ function precision(val, n){
 }
 
 function render() {
+  requestAnimationFrame(render);
+
   clearCanvas();
 
   // Transform coordinate system to something that is practical to work with
