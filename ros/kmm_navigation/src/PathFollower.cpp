@@ -15,6 +15,10 @@ namespace kmm_navigation {
     max_velocity_ = max_velocity;
   }
 
+  void PathFollower::set_filter_constant(float filter_constant) {
+    filter_constant_ = filter_constant;
+  }
+
   void PathFollower::get_velocity(
     const std::vector<Eigen::Vector2f>& path,
     const Eigen::Vector2f& robot_position,
@@ -72,7 +76,17 @@ namespace kmm_navigation {
         offset_vel_component = offset_vel_component.normalized() * max_velocity_;
       }
 
-      vel = offset_vel_component + forward_vel_component;
+      float dt = (ros::Time::now() - vel_ts_).toSec();
+      int hz = std::floor(1 / dt);
+      vel_ts_ = ros::Time::now();
+      if (hz > 1) {
+        Eigen::Vector2f total_vel = offset_vel_component + forward_vel_component;
+        lowpass_vel_ += (total_vel - lowpass_vel_) * (dt / (dt + filter_constant_));
+      } else {
+        ROS_WARN("Too low frequency control signal to lowpass velocity: %d Hz", hz);
+      }
+
+      vel = lowpass_vel_;
     }
   }
 }

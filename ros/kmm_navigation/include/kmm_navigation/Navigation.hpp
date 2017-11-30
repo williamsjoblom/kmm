@@ -31,6 +31,7 @@ private:
   void auto_mode_callback(std_msgs::Bool msg);
   void publish_path(const ros::TimerEvent&);
   void reconfigure_callback(NavigationConfig& config, int level);
+  void publish_vel(float x, float y, float angular);
 
   Map* map_;
   PathFinder* path_finder_;

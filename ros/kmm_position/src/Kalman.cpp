@@ -46,9 +46,9 @@ namespace kmm_position {
 
   void Kalman::predict(const Eigen::Vector3f& u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
-      int hz = std::floor(1/dt);
+      int hz = std::floor(1 / dt);
       predict_ts_ = ros::Time::now();
-      if (true || hz > 20) {
+      if (hz > 1) {
         state_ += dt * u;
         state_cov_ += predict_noise_;
       } else {
