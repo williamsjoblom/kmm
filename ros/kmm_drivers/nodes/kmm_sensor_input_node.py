@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import sys
 import serial
@@ -13,31 +15,31 @@ from sensor_msgs.msg import Imu
 from geometry_msgs.msg import Vector3
 
 # Values from adafruit c++ acc code to modify raw data.
-ACC_MG_LSB  = 0.001;
-SENSORS_GRAVITY_STANDARD = 9.80665;
+ACC_MG_LSB  = 0.001
+SENSORS_GRAVITY_STANDARD = 9.80665
 
 # Values from adafruit c++ gyro code to modfy raw data.
-GYRO_RANGE_250DPS = 0.00875;
-SENSORS_DPS_TO_RADS = 0.017453293;
+GYRO_RANGE_250DPS = 0.00875
+SENSORS_DPS_TO_RADS = 0.017453293
 
 def reset():
   """
   Reset the sensor.
   """
-  
+
   # Configure reset pins
   GPIO.setmode(GPIO.BOARD)
   GPIO.setup([29, 31], GPIO.OUT)
 
   # Reset
   GPIO.output([29, 31], 0)
-  time.sleep(0.1)
+  sleep(0.1)
   GPIO.output([29, 31], 1)
 
 
 if __name__ == "__main__":
   print("Starting session...")
-  
+
   try:
     rospy.init_node("kmm_sensor")
     
@@ -58,7 +60,7 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
       idx = 0
-      rawdata = sensor_node.spi.readbytes(6)
+      rawdata = spi.readbytes(6)
       for i in range(0,6,2):
         sensor_data[idx] = B(uint=((rawdata[i+1] << 8) | rawdata[i]), length=16).int
         idx = idx + 1

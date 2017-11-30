@@ -48,7 +48,7 @@ namespace kmm_position {
       float dt = (ros::Time::now() - predict_ts_).toSec();
       int hz = std::floor(1/dt);
       predict_ts_ = ros::Time::now();
-      if (hz > 20) {
+      if (true || hz > 20) {
         state_ += dt * u;
         state_cov_ += predict_noise_;
       } else {
