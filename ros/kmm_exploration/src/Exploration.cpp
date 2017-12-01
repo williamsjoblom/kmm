@@ -39,10 +39,10 @@ namespace kmm_exploration{
   void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
     if (auto_mode_) {
       geometry_msgs::Point32 closest;
-      bool not_empty = false;
+      bool are_no_end_points = true;
       float min_distance = FLT_MAX;
       for (geometry_msgs::Point32 point : msg.points){
-        not_empty = true;
+        are_no_end_points = false;
         float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
         //If point is equal to the previous, there shouldn't be a new target
         if (point.x == target_.x && point.y == target_.y){
@@ -56,20 +56,21 @@ namespace kmm_exploration{
           min_distance = distance;
         }
       }
-      //If list was empty, return to start
-      if (!not_empty){
-        float new_x = 0.2;
-        float new_y = 0.2;
-        update_target(new_x, new_y);
-      }
-      else{
+      //If end points list was empty, return to start position
+      float new_x;
+      float new_y;
+      if (are_no_end_points){
+        new_x = 0.2;
+        new_y = 0.2;
+      } else {
         target_ = closest;
-        //float new_x = ((closest.x - pos_x_) / min_distance) * 0.4;
-        float new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
-        //float new_y = ((closest.y - pos_y_) / min_distance) * 0.4;
-        float new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
-        update_target(new_x, new_y);
+        new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
+        new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
       }
+      update_target(new_x, new_y);
+    } else { // Force target update when entering auto-mode
+      x_ = -1;
+      y_ = -1;
     }
   }
 
