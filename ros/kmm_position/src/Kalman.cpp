@@ -14,8 +14,8 @@ namespace kmm_position {
     I_.setIdentity();
 
     set_state_cov(0.2, 20 * pi / 180);
-    set_predict_noise(0.02, 0.01);
-    set_lidar_noise(1, 5 * pi / 180);
+    set_predict_noise(0.05, 0.03);
+    set_lidar_noise(0.1, 0.5 * pi / 180);
 
     predict_ts_ = ros::Time::now();
     lidar_measurement_ts_ = ros::Time::now();
@@ -46,9 +46,9 @@ namespace kmm_position {
 
   void Kalman::predict(const Eigen::Vector3f& u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
-      int hz = std::floor(1/dt);
+      int hz = std::floor(1 / dt);
       predict_ts_ = ros::Time::now();
-      if (hz > 20) {
+      if (hz > 1) {
         state_ += dt * u;
         state_cov_ += predict_noise_;
       } else {

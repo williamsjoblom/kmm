@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include <dynamic_reconfigure/server.h>
 #include "kmm_navigation/Navigation.hpp"
 
 int main(int argc, char **argv) {

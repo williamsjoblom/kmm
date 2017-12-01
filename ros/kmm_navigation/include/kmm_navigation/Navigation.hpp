@@ -14,6 +14,8 @@
 #include <kmm_navigation/MoveToAction.h>
 #include "PathFinder.hpp"
 #include "PathFollower.hpp"
+#include "kmm_navigation/NavigationConfig.h"
+#include <dynamic_reconfigure/server.h>
 
 namespace kmm_navigation {
 
@@ -28,7 +30,8 @@ private:
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void auto_mode_callback(std_msgs::Bool msg);
   void publish_path(const ros::TimerEvent&);
-  void publish_cmd_vel(Eigen::Vector3f vel3);
+  void reconfigure_callback(NavigationConfig& config, int level);
+  void publish_vel(float x, float y, float angular);
 
   Map* map_;
   PathFinder* path_finder_;
@@ -43,8 +46,14 @@ private:
   kmm_navigation::MoveToFeedback feedback_;
   kmm_navigation::MoveToResult result_;
 
+  // Dynamic reconfigure
+  dynamic_reconfigure::Server<NavigationConfig> reconfigure_server_;
+
   // Auto mode
   bool auto_mode_;
+
+  // When playing a rosbag we dont want to produce cmd_vel messages.
+  bool produce_cmd_vel_;
 
   // Subscribers
   ros::Subscriber walls_sub_;

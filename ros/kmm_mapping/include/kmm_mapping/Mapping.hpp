@@ -31,7 +31,7 @@ public:
   void set_times_req(int times_req);
 
 private:
-  void mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
+  void mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col, int cnt);
   void reset_wall_point_counts();
   void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
@@ -44,7 +44,7 @@ private:
   ros::NodeHandle nh_;
 
   // Subscribers
-  ros::Subscriber aligned_scan_sub_;
+  ros::Subscriber mapping_scan_sub_;
 
   // Publishers
   ros::Publisher walls_pub_;

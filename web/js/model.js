@@ -22,11 +22,13 @@ var view = {
 var debug = {
   axes : true,
   scan: true,
-  aligned: true,
+  positionScan: true,
+  mappingScan: true,
   endPoints: true,
   path: true,
   velocity: true,
-  acceleration: true
+  acceleration: true,
+  walls: true
 };
 
 // Go to
@@ -40,7 +42,8 @@ var laserScan = {
   ranges: []
 };
 
-var alignedScan = [];
+var positionScan = [];
+var mappingScan = [];
 
 // Information about the robot
 var robot = {
@@ -71,6 +74,7 @@ var isInAutoMode = false;
 var plannedPath = [];
 var targetImage = new Image();
 targetImage.src = "img/target.png";
+var targetPositionGoal = null;
 
 // Mapping
 var walls = [];
@@ -211,14 +215,24 @@ new ROSLIB.Topic({
   laserScan.ranges = message.ranges;
 });
 
-// Aligned laser scan.
+// Position laser scan.
 new ROSLIB.Topic({
   ros: ros,
-  name: '/aligned_scan',
+  name: '/position_scan',
   messageType: 'sensor_msgs/PointCloud'
 
 }).subscribe(function(message) {
-  alignedScan = message.points;
+  positionScan = message.points;
+});
+
+// Mapping laser scan.
+new ROSLIB.Topic({
+  ros: ros,
+  name: '/mapping_scan',
+  messageType: 'sensor_msgs/PointCloud'
+
+}).subscribe(function(message) {
+  mappingScan = message.points;
 });
 
 // Subscriber for auto_mode
@@ -228,24 +242,8 @@ new ROSLIB.Topic({
   messageType : 'std_msgs/Bool'
 
 }).subscribe(function(message) {
-  var wasInAutoMode = isInAutoMode;
   isInAutoMode = message.data;
-  if (isInAutoMode && !wasInAutoMode) {
-    $("#mode-slider").prop("checked", true);
-    $("#go-to").addClass("menu-option-inactive");
-    $("#go-to").html("Go to");
-    targetPositionGoal.cancel();
-    isUsingGoTo = false;
-    goToPos = null;
-  } else if (!isInAutoMode && wasInAutoMode) {
-    $("#mode-slider").prop("checked", false);
-    $("#go-to").removeClass("menu-option-inactive");
-    isUsingGoTo = false;
-    goToPos = null;
-  };
 });
-
-
 
 // Service client for auto_mode
 var setAutoModeClient = new ROSLIB.Service({

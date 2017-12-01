@@ -13,7 +13,6 @@ void i2c_init() {
   TWCR &= ~(_BV(TWIE));    // Reset control register
   TWBR = 0x48;             // TWBR @ 100kHz is 0x48 (72)
 
-
   i2c_write8(ACC_WRITE, CTRL_REG1_A, 0x57);   // Power on accelerometer
   i2c_write8(GYRO_WRITE, CTRL_REG1_A, 0x0F);  // Power on gyroscope
 }

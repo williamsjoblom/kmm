@@ -19,7 +19,6 @@ function bindEvents() {
   bindButtonEvents();
 }
 
-var targetPositionGoal;
 function bindCanvasEvents() {
   // Bind map buttons.
   $("#zoom-in-button").click(zoomIn);
@@ -86,11 +85,17 @@ function bindMenuEvents() {
     debug.scan = !debug.scan;
   });
 
-  $("#debug-aligned").click(function () {
-    debug.aligned = !debug.aligned;
+  $("#debug-walls").click(function () {
+    debug.walls = !debug.walls;
   });
-  $('#debug-aligned').removeAttr('checked');
-  debug.aligned = false;
+
+  $("#debug-position-scan").click(function () {
+    debug.positionScan = !debug.positionScan;
+  });
+
+  $("#debug-mapping-scan").click(function () {
+    debug.mappingScan = !debug.mappingScan;
+  });
 
   $("#debug-end-points").click(function () {
     debug.endPoints = !debug.endPoints;
@@ -149,7 +154,9 @@ function setGoalClick(e){
     $("#go-to").html("Go to");
     $("#map").css('cursor', 'default');
 
-    targetPositionGoal.cancel();
+    if (targetPositionGoal) {
+      targetPositionGoal.cancel();
+    }
 
   } else if (!isInAutoMode && isUsingGoTo) { // Set new
 

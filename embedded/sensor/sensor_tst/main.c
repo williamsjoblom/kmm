@@ -13,10 +13,10 @@ uint8_t validate_data(uint8_t buf[]) {
   
   for(int i = 0; i < BUFFER_SIZE; i++) {
     if((buf + i) == NULL) {
-      return 1;
+      return 0;
     }
   }
-  return 0;
+  return 1;
 }
 
 void get_acc_data(uint8_t buf[], Packet *acc_packet) {
@@ -91,7 +91,10 @@ int main() {
     // Gyroscope data fetch
     get_gyro_data(buf, &gyro_packet);
 
-    // Publish to Raspberry Pi 3
-    spi_slave_write(buf, 6);
+    // Validate the raw data NEW SECTION NOT TESTED.
+    if(validate_data(buf)){
+      // Publish to Raspberry Pi 3
+      spi_slave_write(buf, 6);
+    }
   }
 }
