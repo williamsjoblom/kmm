@@ -37,7 +37,6 @@ function verify_running_container {
 
 # Verify no container is running
 function verify_no_running_container {
-    verify_associated_container
     if [ $(docker inspect -f {{.State.Running}} $CONTAINER_ID) == "true" ]
     then
        echo "Associated container already running!"
