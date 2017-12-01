@@ -51,15 +51,14 @@ namespace kmm_exploration{
           //closest = point;
           //break;
         }
-        else if (distance < min_distance){
+        else if (distance < min_distance) {
           closest = point;
           min_distance = distance;
         }
       }
-      //If end points list was empty, return to start position
       float new_x;
       float new_y;
-      if (are_no_end_points){
+      if (are_no_end_points) { // Return to start position if not end points remain
         new_x = 0.2;
         new_y = 0.2;
       } else {
@@ -77,7 +76,7 @@ namespace kmm_exploration{
 /*
   Checks if value is new and in that case publishes and sends new goal.
 */
-  void Exploration::update_target(float new_x, float new_y){
+  void Exploration::update_target(float new_x, float new_y) {
     if (!(new_x == x_ && new_y == y_)){
       x_ = new_x;
       y_ = new_y;
@@ -96,7 +95,7 @@ namespace kmm_exploration{
     navigation_client_.sendGoal(goal);
   }
 
-  void Exploration::position_callback(geometry_msgs::PoseWithCovarianceStamped msg){
+  void Exploration::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
     pos_x_ = msg.pose.pose.position.x;
     pos_y_ = msg.pose.pose.position.y;
     angle_ = msg.pose.pose.orientation.z;
