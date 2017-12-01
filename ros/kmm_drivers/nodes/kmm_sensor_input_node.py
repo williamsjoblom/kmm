@@ -123,12 +123,12 @@ if __name__ == "__main__":
     imu_msg.angular_velocity_covariance = [
       0, 0, 0,
       0, 0, 0,
-      0, 0, get_variance(z, cal_values)
+      0, 0, get_variance('z', cal_values)
     ]
     
     imu_msg.linear_acceleration_covariance = [
-      get_variance(x, cal_values), get_covariance(x, cal_values), 0,
-      get_covariance(y, cal_values), get_variance(y, cal_values), 0,
+      get_variance('x', cal_values), get_covariance('x', cal_values), 0,
+      get_covariance('y', cal_values), get_variance('y', cal_values), 0,
       0, 0, 0
     ]
 
