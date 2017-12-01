@@ -53,7 +53,7 @@ function echo_help {
     echo "    xc stop  -- Stop compilation container"
 }
 
-verify_sudo
+#verify_sudo
 
 if [ $# -eq 0 ]
 then

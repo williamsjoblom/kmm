@@ -7,3 +7,4 @@ stepper
 ros/kmm_drivers/src/.#MotorDriver.cpp
 .idea/*
 .id
+.xc_id
