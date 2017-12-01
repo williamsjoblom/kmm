@@ -22,9 +22,9 @@ SENSORS_GRAVITY_STANDARD = 9.80665
 GYRO_RANGE_250DPS = 0.00875
 SENSORS_DPS_TO_RADS = 0.017453293
 
-global x_mean
-global y_mean
-global z_mean
+x_mean = 0
+y_mean = 0 
+z_mean = 0
 
 def reset():
   """
@@ -50,7 +50,9 @@ def calibrate():
   The format for dict is:
   calibration_values = {'coordinate': [mean, variance, covariance1..n], ...}
   """
-
+  global x_mean
+  global y_mean
+  global z_mean
   n = 0
   raw_values = {'x': [], 'y': [], 'z': []}
   byte_data = []
