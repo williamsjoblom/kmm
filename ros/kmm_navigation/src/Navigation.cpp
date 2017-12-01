@@ -78,6 +78,8 @@ namespace kmm_navigation {
       if (auto_mode_changed || action_server_.isPreemptRequested() || !ros::ok()) {
         action_server_.setPreempted();
         path_.clear();
+        Eigen::Vector3f stop(0,0,0);
+        publish_cmd_vel(stop);
         return;
       }
 
@@ -88,11 +90,7 @@ namespace kmm_navigation {
       Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
       vel3 = t * vel3; // Rotate into robot frame.
 
-      geometry_msgs::Twist cmd_vel_msg;
-      cmd_vel_msg.linear.x =  vel3[0];
-      cmd_vel_msg.linear.y = vel3[1];
-      cmd_vel_msg.angular.z = 0;
-      cmd_vel_pub_.publish(cmd_vel_msg);
+      publish_cmd_vel(vel3);
 
       rate.sleep();
     }
@@ -144,4 +142,13 @@ namespace kmm_navigation {
     }
     path_pub_.publish(msg);
   }
+
+  void Navigation::publish_cmd_vel(Eigen::Vector3f vel3) {
+    geometry_msgs::Twist cmd_vel_msg;
+    cmd_vel_msg.linear.x =  vel3[0];
+    cmd_vel_msg.linear.y = vel3[1];
+    cmd_vel_msg.angular.z = 0;
+    cmd_vel_pub_.publish(cmd_vel_msg);
+  }
+
 }

@@ -28,6 +28,7 @@ private:
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void auto_mode_callback(std_msgs::Bool msg);
   void publish_path(const ros::TimerEvent&);
+  void publish_cmd_vel(Eigen::Vector3f vel3);
 
   Map* map_;
   PathFinder* path_finder_;

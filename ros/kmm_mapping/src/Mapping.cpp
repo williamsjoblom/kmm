@@ -79,9 +79,6 @@ namespace kmm_mapping {
           x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
       };
     };
-    // Publish
-    //publish_walls();
-    //publish_end_points();
 
     reset_wall_point_counts();
 
