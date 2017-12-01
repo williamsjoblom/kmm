@@ -13,22 +13,26 @@ namespace kmm_position {
   {
     I_.setIdentity();
 
-    set_state_cov(0.2, 20 * pi / 180);
-    set_predict_noise(0.05, 0.03);
-    set_lidar_noise(0.1, 0.5 * pi / 180);
+    float initial_linear_error_m = 0.2;
+    float initial_angular_error_deg = 20;
+    set_state_cov(initial_linear_error_m, initial_angular_error_deg);
 
     predict_ts_ = ros::Time::now();
     lidar_measurement_ts_ = ros::Time::now();
     accel_gyro_measurement_ts_ = ros::Time::now();
   }
 
-  void Kalman::set_cov(Eigen::Matrix3f& cov, float linear, float angular) {
-    float l = linear * linear;
-    float a = angular * angular;
+  void Kalman::set_cov(
+    Eigen::Matrix3f& cov,
+    float linear_standard_deviation_m,
+    float angular_standard_deviation_deg
+  ) {
+    float linear_variance = std::pow(linear_standard_deviation_m, 2);
+    float angular_variance = std::pow(angular_standard_deviation_deg * pi / 180, 2);
     cov <<
-      l, 0, 0,
-      0, l, 0,
-      0, 0, a;
+      linear_variance, 0              , 0,
+      0              , linear_variance, 0,
+      0              , 0              , angular_variance;
   }
 
   void Kalman::set_state_cov(float linear, float angular) {
@@ -50,7 +54,11 @@ namespace kmm_position {
       predict_ts_ = ros::Time::now();
       if (hz > 1) {
         state_ += dt * u;
-        state_cov_ += predict_noise_;
+        Eigen::Matrix3f cov_increment = predict_noise_ * dt;
+        cov_increment(0, 0) *= u[0];
+        cov_increment(1, 1) *= u[1];
+        cov_increment(2, 2) *= u[2];
+        state_cov_ += cov_increment;
       } else {
         ROS_WARN("Too low frequency control signal to make position prediction: %d Hz", hz);
       }
