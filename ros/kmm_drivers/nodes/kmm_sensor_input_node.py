@@ -40,62 +40,62 @@ def reset():
   sleep(0.1)
   GPIO.output([29, 31], 1)
 
-  def calibrate():
-    """
-    Main calibration function. Gathers 1000 points of data and calculates mean
-    values, variances as well as covariances for each of the accelerometer axis
-    x and y. The same is done for the z axis of the gyroscope. Returns a dict 
-    with these values. 
+def calibrate():
+  """
+  Main calibration function. Gathers 1000 points of data and calculates mean
+  values, variances as well as covariances for each of the accelerometer axis
+  x and y. The same is done for the z axis of the gyroscope. Returns a dict 
+  with these values. 
 
-    The format for dict is:
-    calibration_values = {'coordinate': [mean, variance, covariance1..n], ...}
-    """
+  The format for dict is:
+  calibration_values = {'coordinate': [mean, variance, covariance1..n], ...}
+  """
 
-    n = 0
-    raw_values = {'x': [], 'y': [], 'z': []}
-    byte_data = []
+  n = 0
+  raw_values = {'x': [], 'y': [], 'z': []}
+  byte_data = []
 
-    calibration_values = {'x': [], 'y': [], 'z': []}
+  calibration_values = {'x': [], 'y': [], 'z': []}
 
-    while(n < 1000):
+  while(n < 1000):
 
-      byte_data = spi.readbytes(6)
-      raw_values['x'].append(float(B(uint=((byte_data[1] << 8) | byte_data[0]), length=16).int))
-      raw_values['y'].append(float(B(uint=((byte_data[3] << 8) | byte_data[2]), length=16).int))
-      raw_values['z'].append(float(B(uint=((byte_data[5] << 8) | byte_data[4]), length=16).int))
+    byte_data = spi.readbytes(6)
+    raw_values['x'].append(float(B(uint=((byte_data[1] << 8) | byte_data[0]), length=16).int))
+    raw_values['y'].append(float(B(uint=((byte_data[3] << 8) | byte_data[2]), length=16).int))
+    raw_values['z'].append(float(B(uint=((byte_data[5] << 8) | byte_data[4]), length=16).int))
 
-      n = n + 1
+    n = n + 1
 
-    # Create a 2-d array with covariances and variances for x and y
-    covariance_array = np.cov(raw_values['x'], raw_values['y'])
+  # Create a 2-d array with covariances and variances for x and y
+  covariance_array = np.cov(raw_values['x'], raw_values['y'])
 
-    x_mean = np.mean(raw_values['x'])
-    y_mean = np.mean(raw_values['y'])
-    z_mean = np.mean(raw_values['z'])
+  x_mean = np.mean(raw_values['x'])
+  y_mean = np.mean(raw_values['y'])
+  z_mean = np.mean(raw_values['z'])
 
-    calibration_values['x'].append(x_mean)
-    calibration_values['x'].append(covariance_array[0][0])
-    calibration_values['x'].append(covariance_array[0][1])
+  calibration_values['x'].append(x_mean)
+  calibration_values['x'].append(covariance_array[0][0])
+  calibration_values['x'].append(covariance_array[0][1])
 
-    calibration_values['y'].append(y_mean)
-    calibration_values['y'].append(covariance_array[1][1])
-    calibration_values['y'].append(covariance_array[1][0])
-    
-    # Only one axis used for gyro. No need for covariance, just call
-    # for the variance with np.var
-    calibration_values['z'].append(z_mean)
-    calibration_values['z'].append(np.var(raw_values['z']))
+  calibration_values['y'].append(y_mean)
+  calibration_values['y'].append(covariance_array[1][1])
+  calibration_values['y'].append(covariance_array[1][0])
+  
+  # Only one axis used for gyro. No need for covariance, just call
+  # for the variance with np.var
+  calibration_values['z'].append(z_mean)
+  calibration_values['z'].append(np.var(raw_values['z']))
 
-    return calibration_values
+  return calibration_values
 
-  def get_mean(coordinate, calibration_values):
-    return calibration_values[coordinate][0]
+def get_mean(coordinate, calibration_values):
+  return calibration_values[coordinate][0]
 
-  def get_variance(coordinate, calibration_values):
-    return calibration_values[coordinate][1]
+def get_variance(coordinate, calibration_values):
+  return calibration_values[coordinate][1]
 
-  def get_covariance(coordinate, calibration_values):
-    return calibration_values[coordinate][2]   
+def get_covariance(coordinate, calibration_values):
+  return calibration_values[coordinate][2]   
 
 
 
