@@ -22,6 +22,20 @@ function updateDOM() {
   $("#acc-x").html(precision(robot.acceleration.x, 2) + " m/s²");
   $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
   $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
+
+  if (isInAutoMode) {
+    $("#mode-slider").prop("checked", true);
+    $("#go-to").addClass("menu-option-inactive");
+    $("#go-to").html("Go to");
+    isUsingGoTo = false;
+    if (targetPositionGoal) {
+      targetPositionGoal.cancel();
+      targetPositionGoal = null;
+    }
+  } else {
+    $("#mode-slider").prop("checked", false);
+    $("#go-to").removeClass("menu-option-inactive");
+  }
 }
 
 // Rounds to given precision

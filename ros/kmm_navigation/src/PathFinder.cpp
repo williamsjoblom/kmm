@@ -199,7 +199,7 @@ namespace kmm_navigation {
     if (path.size() < 3) {
       return path;
     }
-    int resolution = 3;
+    int resolution = 10;
     std::vector<Eigen::Vector2f> smooth;
     smooth.push_back(path[0]);
     for (int i = 0; i < path.size() - 2; i++) {

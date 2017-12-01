@@ -67,6 +67,7 @@ namespace kmm_navigation {
   void Navigation::reconfigure_callback(NavigationConfig& config, int level) {
     path_follower_.set_error_p_constant(config.error_p_constant);
     path_follower_.set_max_velocity(config.max_velocity);
+    path_follower_.set_filter_constant(config.filter_constant);
   }
 
   /*
@@ -90,8 +91,9 @@ namespace kmm_navigation {
       bool auto_mode_turned_on = !initial_mode && auto_mode_;
       bool auto_mode_changed = auto_mode_turned_on || auto_mode_turned_off;
       if (auto_mode_changed || action_server_.isPreemptRequested() || !ros::ok()) {
-        action_server_.setPreempted();
+        publish_vel(0, 0, 0);
         path_.clear();
+        action_server_.setPreempted();
         return;
       }
 
@@ -102,20 +104,25 @@ namespace kmm_navigation {
       Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
       vel3 = t * vel3; // Rotate into robot frame.
 
-      if (produce_cmd_vel_) {
-        geometry_msgs::Twist cmd_vel_msg;
-        cmd_vel_msg.linear.x =  vel3[0];
-        cmd_vel_msg.linear.y = vel3[1];
-        cmd_vel_msg.angular.z = 0;
-        cmd_vel_pub_.publish(cmd_vel_msg);
-      }
+      publish_vel(vel3[0], vel3[1], 0);
 
       rate.sleep();
     }
 
     // The robot has reached the target destination.
+    publish_vel(0, 0, 0);
     path_.clear();
     action_server_.setSucceeded(result_);
+  }
+
+  void Navigation::publish_vel(float x, float y, float angular) {
+    if (produce_cmd_vel_) {
+      geometry_msgs::Twist cmd_vel_msg;
+      cmd_vel_msg.linear.x =  x;
+      cmd_vel_msg.linear.y = y;
+      cmd_vel_msg.angular.z = angular;
+      cmd_vel_pub_.publish(cmd_vel_msg);
+    }
   }
 
   /*
