@@ -1,9 +1,9 @@
-var rand = function(rMi, rMa){return ~~((Math.random()*(rMa-rMi+1))+rMi);}
 var Fireworks = function(){
 	/*=============================================================================*/
 	/* Utility
 	/*=============================================================================*/
 	var self = this;
+	var rand = function(rMi, rMa){return ~~((Math.random()*(rMa-rMi+1))+rMi);}
 	var hitTest = function(x1, y1, w1, h1, x2, y2, w2, h2){return !(x1 + w1 < x2 || x2 + w2 < x1 || y1 + h1 < y2 || y2 + h2 < y1);};
 	window.requestAnimFrame=function(){return window.requestAnimationFrame||window.webkitRequestAnimationFrame||window.mozRequestAnimationFrame||window.oRequestAnimationFrame||window.msRequestAnimationFrame||function(a){window.setTimeout(a,1E3/60)}}();
 
@@ -15,12 +15,6 @@ var Fireworks = function(){
 		self.oldTime = Date.now();
 		self.canvas = $('#fireworks')[0];
 		self.canvasContainer = $('#fireworks-container');
-
-		/*var canvasContainerDisabled = document.getElementById('fireworks-container');
-    */
-    self.canvas.onselectstart = function() {
-			return false;
-		};
 
 		self.canvas.width = self.cw = $(document).width();
 		self.canvas.height = self.ch = $(document).height() - 50;
@@ -48,11 +42,10 @@ var Fireworks = function(){
 
 		self.canvasContainer.append(self.canvas);
 		self.ctx = $('#fireworks')[0].getContext('2d');
-	  //self.ctx.translate(self.cw / 2, -self.ch / 2); // Move origo to center.
 		self.ctx.lineCap = 'round';
 		self.ctx.lineJoin = 'round';
 		self.lineWidth = 1;
-		//self.bindEvents();
+
 		self.canvasLoop();
 	};
 
@@ -280,15 +273,6 @@ var Fireworks = function(){
 	};
 
 	/*=============================================================================*/
-	/* Create Fireworks
-	/*=============================================================================*/
-	/*self.createFireworks = function(startX, startY, targetX, targetY){
-    var randSetting = fireworkSettingsList[rand(0,5)];
-		self.fireworks.push(new Firework(fireworkSettings[randSetting],
-			startX, startY, targetX, targetY));
-	};*/
-
-	/*=============================================================================*/
 	/* Update Fireworks
 	/*=============================================================================*/
 	self.updateFireworks = function(){
@@ -313,8 +297,7 @@ var Fireworks = function(){
 	/*=============================================================================*/
 	/* Firework Settings
 	/*=============================================================================*/
-	var fireworkSettingsList = ["Default","Anti Gravity","Battle Field","Mega Blast",
-	        "Nimble","Slow Launch","Perma Trail"];
+	var fireworkSettingsList = ["Default","Battle Field","Nimble"];
 	var fireworkSettings = {
 	  "Default": {
 	  	"fworkSpeed": 2,
@@ -334,24 +317,6 @@ var Fireworks = function(){
 	  	"lineWidth": 1,
 	  	"clearAlpha": 25
 	  },
-		"Anti Gravity": {
-			"fworkSpeed": 4,
-			"fworkAccel": 10,
-			"showShockwave": true,
-			"showTarget": false,
-			"partCount": 150,
-			"partSpeed": 5,
-			"partSpeedVariance": 10,
-			"partWind": 10,
-			"partFriction": 10,
-			"partGravity": -10,
-			"flickerDensity": 30,
-			"hueMin": 0,
-			"hueMax": 360,
-			"hueVariance": 30,
-			"lineWidth": 1,
-			"clearAlpha": 50
-		},
 		"Battle Field": {
 			"fworkSpeed": 10,
 			"fworkAccel": 20,
@@ -370,24 +335,6 @@ var Fireworks = function(){
 			"lineWidth": 1,
 			"clearAlpha": 40
 		},
-		"Mega Blast": {
-			"fworkSpeed": 3,
-			"fworkAccel": 3,
-			"showShockwave": true,
-			"showTarget": true,
-			"partCount": 500,
-			"partSpeed": 50,
-			"partSpeedVariance": 5,
-			"partWind": 0,
-			"partFriction": 0,
-			"partGravity": 0,
-			"flickerDensity": 0,
-			"hueMin": 0,
-			"hueMax": 360,
-			"hueVariance": 30,
-			"lineWidth": 20,
-			"clearAlpha": 20
-		},
 		"Nimble": {
 			"fworkSpeed": 10,
 			"fworkAccel": 50,
@@ -405,42 +352,6 @@ var Fireworks = function(){
 			"hueVariance": 30,
 			"lineWidth": 1,
 			"clearAlpha": 80
-		},
-		"Slow Launch": {
-			"fworkSpeed": 2,
-			"fworkAccel": 2,
-			"showShockwave": false,
-			"showTarget": false,
-			"partCount": 200,
-			"partSpeed": 10,
-			"partSpeedVariance": 0,
-			"partWind": 100,
-			"partFriction": 0,
-			"partGravity": 2,
-			"flickerDensity": 50,
-			"hueMin": 0,
-			"hueMax": 360,
-			"hueVariance": 20,
-			"lineWidth": 4,
-			"clearAlpha": 10
-		},
-		"Perma Trail": {
-			"fworkSpeed": 4,
-			"fworkAccel": 10,
-			"showShockwave": false,
-			"showTarget": false,
-			"partCount": 150,
-			"partSpeed": 10,
-			"partSpeedVariance": 10,
-			"partWind": 100,
-			"partFriction": 3,
-			"partGravity": 0,
-			"flickerDensity": 0,
-			"hueMin": 0,
-			"hueMax": 360,
-			"hueVariance": 20,
-			"lineWidth": 1,
-			"clearAlpha": 0
 		}
 	};
 
@@ -453,7 +364,7 @@ var Fireworks = function(){
 		self.ctx.clearRect(0, 0, self.cw, self.ch);
 	};
 
-  /*=============================================================================*/
+  /*===================================================fireworkSettings[==========================*/
 	/* Delta
 	/*=============================================================================*/
   self.updateDelta = function(){
@@ -463,30 +374,32 @@ var Fireworks = function(){
 		self.oldTime = newTime;
 	}
 
-	function setFireworkSettings(fireworkSetting) {
-	  self.fworkSpeed = fireworkSetting["fworkSpeed"];
-	  self.fworkAccel = fireworkSetting["fworkAccel"];
-	  self.showShockwave = fireworkSetting["showShockwave"];
-	  self.showTarget = fireworkSetting["showTarget"];
-	  self.partCount = fireworkSetting["partCount"];
-	  self.partSpeed = fireworkSetting["partSpeed"];
-	  self.partSpeedVariance = fireworkSetting["partSpeedVariance"];
-	  self.partWind = fireworkSetting["partWind"];
-	  self.partFriction = fireworkSetting["partFriction"];
-	  self.partGravity = fireworkSetting["partGravity"];
-	  self.flickerDensity = fireworkSetting["flickerDensity"];
-	  self.hueMin = fireworkSetting["hueMin"];
-	  self.hueMax = fireworkSetting["hueMax"];
+	self.setFireworkSettings = function(fireworkSetting) {
+	  self.fworkSpeed = fireworkSettings[fireworkSetting]["fworkSpeed"];
+	  self.fworkAccel = fireworkSettings[fireworkSetting]["fworkAccel"];
+	  self.showShockwave = fireworkSettings[fireworkSetting]["showShockwave"];
+	  self.showTarget = fireworkSettings[fireworkSetting]["showTarget"];
+	  self.partCount = fireworkSettings[fireworkSetting]["partCount"];
+	  self.partSpeed = fireworkSettings[fireworkSetting]["partSpeed"];
+	  self.partSpeedVariance = fireworkSettings[fireworkSetting]["partSpeedVariance"];
+	  self.partWind = fireworkSettings[fireworkSetting]["partWind"];
+	  self.partFriction = fireworkSettings[fireworkSetting]["partFriction"];
+	  self.partGravity = fireworkSettings[fireworkSetting]["partGravity"];
+	  self.flickerDensity = fireworkSettings[fireworkSetting]["flickerDensity"];
+	  self.hueMin = fireworkSettings[fireworkSetting]["hueMin"];
+	  self.hueMax = fireworkSettings[fireworkSetting]["hueMax"];
 	  self.currentHue = rand(self.hueMin, self.hueMax);
-	  self.hueVariance = fireworkSetting["hueVariance"];
-	  self.lineWidth = fireworkSetting["lineWidth"];
-	  self.clearAlpha = fireworkSetting["clearAlpha"];
+	  self.hueVariance = fireworkSettings[fireworkSetting]["hueVariance"];
+	  self.lineWidth = fireworkSettings[fireworkSetting]["lineWidth"];
+	  self.clearAlpha = fireworkSettings[fireworkSetting]["clearAlpha"];
 	}
 
 	/*=============================================================================*/
 	/* Main Loop
 	/*=============================================================================*/
 	self.canvasLoop = function(){
+		var randSetting = fireworkSettingsList[rand(0,fireworkSettingsList.length - 1)];
+		self.setFireworkSettings(randSetting);
 		requestAnimFrame(self.canvasLoop, self.canvas);
     self.updateDelta();
 		self.ctx.globalCompositeOperation = 'destination-out';
@@ -501,17 +414,11 @@ var Fireworks = function(){
 
 	self.init();
 
-	var fireworks = true;
-	var launchCount = 30;
-	while(fireworks && launchCount--) {
-		var randSetting = fireworkSettingsList[rand(0,5)];
-		setFireworkSettings(fireworkSettings[randSetting]);
+	var launchCount = 40;
+	while(launchCount--) {
 		setTimeout(function() {
 			self.fireworks.push(new Firework(self.cw/2, self.ch, rand(50,
 				self.cw-50), rand(50, self.ch/2)-50));
 		}, launchCount*200);
-		//self.canvasLoop();
 	}
 }
-
-var fworks = new Fireworks();

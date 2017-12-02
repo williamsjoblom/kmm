@@ -20,7 +20,7 @@ var view = {
 
 // Debug options
 var debug = {
-  axes : true,
+  globalFrame : true,
   scan: true,
   positionScan: true,
   mappingScan: true,
@@ -189,7 +189,6 @@ new ROSLIB.Topic({
   };
 });
 
-
 // Map endpoints.
 new ROSLIB.Topic({
   ros: ros,
@@ -257,4 +256,19 @@ var navigationClient = new ROSLIB.ActionClient({
   ros : ros,
   serverName : '/navigation',
   actionName : 'kmm_navigation/MoveToAction'
+});
+
+// Subscriber for finished_mapping
+var finishedMapping;
+new ROSLIB.Topic({
+  ros : ros,
+  name : '/finished_mapping',
+  messageType : 'std_msgs/Bool'
+
+}).subscribe(function(message) {
+  wasFinished = finishedMapping;
+  finishedMapping = message.data;
+  if (!wasFinished && finishedMapping) {
+    var fireworks = new Fireworks();
+  }
 });

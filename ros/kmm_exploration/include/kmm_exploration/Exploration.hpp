@@ -17,15 +17,17 @@ public:
   Exploration(ros::NodeHandle nh);
   ~Exploration();
 
-  void send_goal();
-  void update_target(float new_x, float new_y);
-  void publish_auto_mode();
-
 private:
   ros::NodeHandle nh_;
 
   // Bool for manual or autonomous mode
   bool auto_mode_;
+
+  // Bool for saying if we are done mapping and are returning to start
+  bool returning_;
+
+  // Bool for saying if mapping is finished and we have returned to start
+  bool finished_mapping_;
 
   //Stores the returned target position
   float x_;
@@ -48,6 +50,11 @@ private:
 
   // Publishers
   ros::Publisher auto_mode_pub_;
+  ros::Publisher finished_mapping_pub_;
+
+  // Timers
+  ros::Timer publish_auto_mode_timer_;
+  ros::Timer publish_finished_mapping_timer_;
 
   // Services
   ros::ServiceServer auto_mode_service_;
@@ -56,7 +63,10 @@ private:
          std_srvs::SetBool::Response &res);
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
-
+  void send_goal();
+  void update_target(float new_x, float new_y);
+  void publish_auto_mode(const ros::TimerEvent&);
+  void publish_finished_mapping(const ros::TimerEvent&);
 };
 
 }

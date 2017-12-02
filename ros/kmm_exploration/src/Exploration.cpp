@@ -16,9 +16,16 @@ namespace kmm_exploration{
 
     // Publishers
     auto_mode_pub_ = nh_.advertise<std_msgs::Bool>("auto_mode", 1);
+    finished_mapping_pub_ = nh_.advertise<std_msgs::Bool>("finished_mapping", 1);
+
+    // Timers
+    publish_auto_mode_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Exploration::publish_auto_mode, this);
+    publish_finished_mapping_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Exploration::publish_finished_mapping, this);
 
     // Set initial values
     auto_mode_ = false;
+    returning_ = false;
+    finished_mapping_ = false;
 
     // Services
     auto_mode_service_ = nh_.advertiseService("set_auto_mode", &Exploration::set_auto_mode, this);
@@ -61,6 +68,7 @@ namespace kmm_exploration{
       if (are_no_end_points) { // Return to start position if not end points remain
         new_x = 0.2;
         new_y = 0.2;
+        returning_ = true;
       } else {
         target_ = closest;
         new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
@@ -70,6 +78,7 @@ namespace kmm_exploration{
     } else { // Force target update when entering auto-mode
       x_ = -1;
       y_ = -1;
+      returning_ = false;
     }
   }
 
@@ -81,6 +90,9 @@ namespace kmm_exploration{
       x_ = new_x;
       y_ = new_y;
       send_goal();
+      if (returning_) { // Wait to see if we successfully return to start
+        finished_mapping_ = navigation_client_.waitForResult();
+      }
     }
   }
 
@@ -101,9 +113,15 @@ namespace kmm_exploration{
     angle_ = msg.pose.pose.orientation.z;
   }
 
-  void Exploration::publish_auto_mode() {
+  void Exploration::publish_auto_mode(const ros::TimerEvent&) {
     std_msgs::Bool auto_mode;
     auto_mode.data = auto_mode_;
     auto_mode_pub_.publish(auto_mode);
+  }
+
+  void Exploration::publish_finished_mapping(const ros::TimerEvent&) {
+    std_msgs::Bool finished_mapping;
+    finished_mapping.data = finished_mapping_;
+    finished_mapping_pub_.publish(finished_mapping);
   }
 }

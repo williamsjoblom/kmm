@@ -75,11 +75,11 @@ function bindCanvasEvents() {
 }
 
 function bindMenuEvents() {
-  $("#debug-axes").click(function () {
-    debug.axes = !debug.axes;
+  $("#debug-global-frame").click(function () {
+    debug.globalFrame = !debug.globalFrame;
   });
-  $('#debug-axes').removeAttr('checked');
-  debug.axes = false;
+  $('#debug-global-frame').removeAttr('checked');
+  debug.globalFrame = false;
 
   $("#debug-scan").click(function () {
     debug.scan = !debug.scan;
@@ -104,8 +104,6 @@ function bindMenuEvents() {
   $("#debug-velocity").click(function () {
     debug.velocity = !debug.velocity;
   });
-  $('#debug-velocity').removeAttr('checked');
-  debug.velocity = false;
 
   $("#debug-acceleration").click(function () {
     debug.acceleration = !debug.acceleration;
