@@ -2,7 +2,7 @@
 // The canvas 2d context used to draw stuff.
 var ctx = $("#map")[0].getContext("2d");
 var matrix = new Matrix(ctx);
-var globalFrame = new Matrix();
+var globalMatrix = new Matrix();
 
 // Information about the viewport.
 var view = {

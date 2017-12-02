@@ -77,7 +77,7 @@ namespace kmm_exploration{
   Checks if value is new and in that case publishes and sends new goal.
 */
   void Exploration::update_target(float new_x, float new_y) {
-    if (!(new_x == x_ && new_y == y_)){
+    if (!(new_x == x_ && new_y == y_)) {
       x_ = new_x;
       y_ = new_y;
       send_goal();

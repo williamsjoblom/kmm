@@ -12,7 +12,7 @@
           Debug options
           <div class="dropdown">
             <div class="dropdown-row">
-              <label for="debug-axes" class="dropdown-text">Flobal frame</label>
+              <label for="debug-axes" class="dropdown-text">Global frame</label>
               <input id="debug-axes" checked type="checkbox" class="dropdown-checkbox"/>
               <div class="clear"></div>
             </div>
@@ -91,6 +91,10 @@
       </table>
     </div>
 
+    <div id ="fireworks-container">
+      <canvas id="fireworks"></canvas>
+    </div>
+
     <div class="sidebar">
       <div class="table-info-header">Autonomous</div>
       <div style="text-align: center">
@@ -153,6 +157,7 @@
     <script src="lib/matrix.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/roslib.js"></script>
+    <script src="lib/fireworks.js"></script>
     <script src="js/model.js"></script>
     <script src="js/controller.js"></script>
     <script src="js/view.js"></script>
