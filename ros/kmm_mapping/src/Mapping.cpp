@@ -63,8 +63,8 @@ namespace kmm_mapping {
       float y = wall_point.y();
       float eps = 0.000001;
       float rem_x = std::remainder(std::fabs(x), cell_size_);
-      bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
       float rem_y = std::remainder(std::fabs(y), cell_size_);
+      bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
       bool on_vertical_wall = (rem_y > -eps) && (rem_y < eps);
       if (on_horizontal_wall) {
         int row = std::round(x / cell_size_);

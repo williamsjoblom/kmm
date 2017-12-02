@@ -37,7 +37,6 @@ function verify_running_container {
 
 # Verify no container is running
 function verify_no_running_container {
-    verify_associated_container
     if [ $(docker inspect -f {{.State.Running}} $CONTAINER_ID) == "true" ]
     then
        echo "Associated container already running!"
@@ -54,7 +53,7 @@ function echo_help {
     echo "    xc stop  -- Stop compilation container"
 }
 
-verify_sudo
+#verify_sudo
 
 if [ $# -eq 0 ]
 then

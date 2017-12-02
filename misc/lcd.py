@@ -9,7 +9,6 @@ from subprocess import check_output
 
 from RPLCD.gpio import CharLCD
 from RPi import GPIO
-from wireless import Wireless
 
 last_ip = None
 last_ssid = None
@@ -30,21 +29,16 @@ def wlan_ssid():
     """
     Get SSID of current network.
     """
-    output = check_output(["iwlist", "wlan0", "scan"])
-    for line in output.split():
-        if line.startswith("ESSID"):
-            return line.split('"')[1].strip()
-
-    return None
-
+    output = check_output(["iwgetid", "wlan0", "-r"])
+    return output.strip() if output else None
+    
 
 def center(s):
     """
     Return centered string.
     """
-    i = 16 % len(s)
-    print("i = {}".format(i))
-    return ' '*(i/2) + s
+    i = int((16 - len(s)) / 2)
+    return ' '*i + s
 
 
 def refresh(lcd):
@@ -73,9 +67,8 @@ def refresh(lcd):
 
     
 if __name__ == '__main__':
-    GPIO.setmode(GPIO.BOARD)
-    
     try:
+        
         lcd = CharLCD(pin_rs=8, pin_e=10, pin_rw=None,
                       pins_data=[12, 16, 18, 22], cols=16,
                       rows=2, numbering_mode=GPIO.BOARD,
@@ -84,10 +77,11 @@ if __name__ == '__main__':
         while True:
             refresh(lcd)
             time.sleep(2)
-	    print('SSID: ' + wlan_ssid())
-	    print('IP: ' + str(wlan_ip()))                
+            print('SSID: ' + wlan_ssid())
+            print('IP: ' + str(wlan_ip()))                
             
     except Exception as e:
         print("Exception occurred: " + str(e))
     finally:
+        lcd.clear()
         lcd.close(True)
