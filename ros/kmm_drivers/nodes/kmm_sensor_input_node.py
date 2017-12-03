@@ -22,9 +22,9 @@ SENSORS_GRAVITY_STANDARD = 9.80665
 GYRO_RANGE_250DPS = 0.00875
 SENSORS_DPS_TO_RADS = 0.017453293
 
-x_mean = 0
-y_mean = 0 
-z_mean = 0
+x_mean = 0.0
+y_mean = 0.0
+z_mean = 0.0
 
 def reset():
   """
@@ -39,9 +39,6 @@ def reset():
   GPIO.output([29, 31], 0)
   sleep(0.1)
   GPIO.output([29, 31], 1)
-
-def average(data_val):
-  return float(sum(data_val)/len(data_val))
 
 def calibrate():
   """
@@ -74,22 +71,22 @@ def calibrate():
   # Create a 2-d array with covariances and variances for x and y
   covariance_array = np.cov(raw_values['x'], raw_values['y'])
 
-  x_mean = average(raw_values['x'])
-  y_mean = average(raw_values['y'])
-  z_mean = average(raw_values['z'])
+  x_mean = np.mean(raw_values['x'])
+  y_mean = np.mean(raw_values['y'])
+  z_mean = np.mean(raw_values['z'])
 
 
-  calibration_values['x'].append(np.mean(raw_values['x']))
+  calibration_values['x'].append(x_mean)
   calibration_values['x'].append(covariance_array[0][0])
   calibration_values['x'].append(covariance_array[0][1])
 
-  calibration_values['y'].append(np.mean(raw_values['y']))
+  calibration_values['y'].append(y_mean)
   calibration_values['y'].append(covariance_array[1][1])
   calibration_values['y'].append(covariance_array[1][0])
   
   # Only one axis used for gyro. No need for covariance, just call
   # for the variance with np.var
-  calibration_values['z'].append(np.mean(raw_values['z']))
+  calibration_values['z'].append(z_mean)
   calibration_values['z'].append(np.var(raw_values['z']))
 
   return calibration_values
@@ -120,8 +117,11 @@ if __name__ == "__main__":
 
     reset()
 
-    # Run a calibration before starting to send data to the robot.
+    # Try sleeping for some time before running calibrate to avoid sudden wheel movement
+    # interfering with calibration.
+    sleep(0.2)
 
+    # Run a calibration before starting to send data to the robot.
     cal_values = calibrate()
 
     imu_msg = Imu()
