@@ -36,7 +36,9 @@ function updateDOM() {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
+    $("#map").css('cursor', 'default');
     isUsingGoTo = false;
+    goToPos = null;
     if (targetPositionGoal) {
       targetPositionGoal.cancel();
       targetPositionGoal = null;

@@ -146,8 +146,11 @@ function setGoalClickKey(e){
 
 function setGoalClick(e){
   isUsingGoTo = !isUsingGoTo;
-  if (!isInAutoMode && goToPos) { // Cancel current
+  if (!isInAutoMode && !goToPos && isUsingGoTo) { // Set new
+    $("#go-to").html("Set goal");
+    $("#map").css('cursor', 'crosshair');
 
+  } else { // Cancel current
     isUsingGoTo = false;
     goToPos = null;
 
@@ -157,18 +160,6 @@ function setGoalClick(e){
     if (targetPositionGoal) {
       targetPositionGoal.cancel();
     }
-
-  } else if (!isInAutoMode && isUsingGoTo) { // Set new
-
-    $("#go-to").html("Set goal");
-    $("#map").css('cursor', 'crosshair');
-
-  }
-  else { // Cancelled without set goal
-
-    $("#go-to").html("Go to");
-    $("#map").css('cursor', 'default');
-
   }
 }
 
