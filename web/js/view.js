@@ -12,8 +12,6 @@ requestAnimationFrame(render);
 // Update DOM 5Hz
 setInterval(updateDOM, 1000/5);
 
-var wasInAutoMode = false;
-var wasMapping = true;
 $("#mapping-slider").prop("checked", true);
 function updateDOM() {
   //Position
@@ -34,7 +32,7 @@ function updateDOM() {
   $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 
   // Autonomous slider
-  if (isInAutoMode && !wasInAutoMode) {
+  if (isInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
@@ -43,19 +41,17 @@ function updateDOM() {
       targetPositionGoal.cancel();
       targetPositionGoal = null;
     }
-  } else if (!isInAutoMode && wasInAutoMode) {
+  } else {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
   }
-  wasInAutoMode = isInAutoMode;
 
   // Mapping slider
-  if (mapping && !wasMapping) {
+  if (mapping) {
     $("#mapping-slider").prop("checked", true);
-  } else if (!mapping && wasMapping) {
-    $("#mode-slider").prop("checked", false);
+  } else {
+    $("#mapping-slider").prop("checked", false);
   }
-  wasMapping = mapping;
 }
 
 // Rounds to given precision
