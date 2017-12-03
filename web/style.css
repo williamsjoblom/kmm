@@ -159,10 +159,10 @@ html, body {
 }
 
 .table-reset-buttons {
-  width: 100%;
+  width: 490px;
   height: 80px;
-  position: absolute;
-  bottom: 10 px;
+  position: block;
+  text-align: center;
   border-collapse: collapse;
 }
 
@@ -188,7 +188,7 @@ html, body {
 }
 
 .map-button, .reset-button {
-  background: #ccc;
+  background: linear-gradient(#ddd, #bbb);
   height: 36px;
   cursor: pointer;
   display: inline-block;
@@ -202,19 +202,21 @@ html, body {
 }
 
 .map-button:hover, .reset-button:hover {
-  background: #ddd;
+  background: linear-gradient(#bbb, #ddd);
 }
 
 .zoom-button {
   color: #646464;
   font-family: "Inconsolata";
   font-size: 20px;
-  padding: 10px;
+  padding-top: 5px;
   width: 36px;
 }
 
 #zoom-out-button {
   font-size: 30px;
+  padding-top: 0px;
+  padding-bottom: 10px;
 }
 
 #view-state-button {
@@ -227,6 +229,20 @@ html, body {
   background: rgba(0,0,0,0);
   background: url("img/centerViewButton.png") center no-repeat;
   background-size: cover;
+}
+
+#reset-position-button, #reset-position-button-td {
+  width: 120px;
+  padding: 10px;
+}
+
+#reset-map-button {
+  width: 100px;
+  padding: 10px;
+}
+#reset-map-button-td {
+  width: 120px;
+  padding-left: 20px;
 }
 
 /* Mode slider */
@@ -261,7 +277,7 @@ html, body {
   left: 4px;
   bottom: 4px;
   border-radius: 50%;
-  background-color: white;
+  background: linear-gradient(#fff, #ddd);
   -webkit-transition: .4s;
   transition: .4s;
 }

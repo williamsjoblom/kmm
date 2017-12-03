@@ -12,6 +12,8 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
+#include <std_msgs/Bool.h>
+#include <std_srvs/SetBool.h>
 
 namespace kmm_mapping {
 
@@ -38,8 +40,13 @@ private:
     bool horizontal, int row, int col);
   void add_wall(int row, int col, bool horizontal);
   void update_end_points(int row, int col, bool horizontal);
+  void publish_mapping(const ros::TimerEvent&);
   void publish_walls(const ros::TimerEvent&);
   void publish_end_points(const ros::TimerEvent&);
+  bool set_mapping(std_srvs::SetBool::Request &req,
+         std_srvs::SetBool::Response &res);
+  bool reset_map(std_srvs::SetBool::Request &req,
+        std_srvs::SetBool::Response &res);
 
   ros::NodeHandle nh_;
 
@@ -47,14 +54,21 @@ private:
   ros::Subscriber mapping_scan_sub_;
 
   // Publishers
+  ros::Publisher mapping_pub_;
   ros::Publisher walls_pub_;
   ros::Publisher end_points_pub_;
 
   // Timers
+  ros::Timer publish_mapping_timer_;
   ros::Timer publish_walls_timer_;
   ros::Timer publish_end_points_timer_;
 
+  // Services
+  ros::ServiceServer mapping_service_;
+  ros::ServiceServer reset_map_service_;
+
   // Map variables
+  bool mapping_; // True if mapping enabled
   int h_; // Map rows = height
   int w_; // Map cols = width
   float cell_size_; // Size of a cell in meters

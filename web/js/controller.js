@@ -121,8 +121,10 @@ function bindMenuEvents() {
 }
 
 function bindSidebarEvents() {
-  // Bind mode slider.
   $("#mode-slider").click(toggleMode);
+  $("#mapping-slider").click(toggleMapping);
+  //$("#reset-position-button").click(resetPosition);
+  $("#reset-map-button").click(resetMap);
 }
 
 function bindButtonEvents(){
@@ -209,4 +211,26 @@ function toggleMode() {
     data : !isInAutoMode
   });
   setAutoModeClient.callService(setAutoMode, function(result) {});
+}
+
+function toggleMapping() {
+  var setMapping = new ROSLIB.ServiceRequest({
+    data : !mapping
+  });
+  setMappingClient.callService(setMapping, function(result) {});
+}
+
+// TODO: IMPLEMENT THIS!
+/*function resetPosition() {
+  var setMapping = new ROSLIB.ServiceRequest({
+    data : !mapping
+  });
+  setMappingClient.callService(setMapping, function(result) {});
+}*/
+
+function resetMap() {
+  var resetMap = new ROSLIB.ServiceRequest({
+    data : true
+  });
+  resetMapClient.callService(resetMap, function(result) {});
 }

@@ -1,3 +1,10 @@
+// Tooltips
+$("#zoom-in-button").attr('title', 'Zoom in');
+$("#zoom-out-button").attr('title', 'Zoom out');
+$("#view-state-button").attr('title', 'Toggle view state');
+$("#center-view-button").attr('title', 'Center view');
+$("#reset-position-button").attr('title', 'Set position to start position (0.2, 0.2)');
+$("#reset-map-button").attr('title', 'Reset all map data');
 
 // Render canvas 60Hz
 requestAnimationFrame(render);
@@ -6,6 +13,8 @@ requestAnimationFrame(render);
 setInterval(updateDOM, 1000/5);
 
 var wasInAutoMode = false;
+var wasMapping = true;
+$("#mapping-slider").prop("checked", true);
 function updateDOM() {
   //Position
   $("#pos-x").html(precision(robot.position.x, 2) + " m");
@@ -24,6 +33,7 @@ function updateDOM() {
   $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
   $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 
+  // Autonomous slider
   if (isInAutoMode && !wasInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
@@ -37,7 +47,15 @@ function updateDOM() {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
   }
-  lastMode = isInAutoMode;
+  wasInAutoMode = isInAutoMode;
+
+  // Mapping slider
+  if (mapping && !wasMapping) {
+    $("#mapping-slider").prop("checked", true);
+  } else if (!mapping && wasMapping) {
+    $("#mode-slider").prop("checked", false);
+  }
+  wasMapping = mapping;
 }
 
 // Rounds to given precision

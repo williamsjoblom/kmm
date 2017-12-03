@@ -6,14 +6,21 @@ namespace kmm_mapping {
   : nh_(nh)
   {
     // Publishers
+    mapping_pub_ = nh_.advertise<std_msgs::Bool>("mapping", 1);
     walls_pub_ = nh_.advertise<std_msgs::Int8MultiArray>("walls", 1);
     end_points_pub_ = nh_.advertise<sensor_msgs::PointCloud>("end_points", 1);
+
     // Subscribers
     mapping_scan_sub_ = nh_.subscribe("mapping_scan", 1, &Mapping::mapping_scan_callback, this);
 
     // Timers
+    publish_mapping_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_mapping, this);
     publish_walls_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_walls, this);
     publish_end_points_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_end_points, this);
+
+    // Services
+    mapping_service_ = nh_.advertiseService("set_mapping", &Mapping::set_mapping, this);
+    reset_map_service_ = nh_.advertiseService("reset_map", &Mapping::reset_map, this);
 
     // Get map variables
     if (!nh_.getParam("/map_rows", h_)) {
@@ -28,10 +35,14 @@ namespace kmm_mapping {
     offset_ = (w_ - 1) / 2;
     walls_size_ = (w_ + (w_ + 1)) * h_ + w_;
 
+    // Enable mapping_
+    mapping_ = true;
+
     // Initialize wall vector with 0's
-		for (int i = 0; i < walls_size_; i++) { // 53x103 = (2*height + 1) x (2*width + 1)
+		for (int i = 0; i < walls_size_; i++) {
 			walls_.push_back(0);
     };
+
     // Set dimensions of wall array in message
     walls_msg_.layout.dim.push_back(std_msgs::MultiArrayDimension());
     walls_msg_.layout.dim[0].size = walls_.size();
@@ -50,38 +61,39 @@ namespace kmm_mapping {
    * Finally publishes the walls that have enough collisions.
    */
   void Mapping::mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg) {
-    std::vector<Eigen::Vector2f> wall_points;
-    for (const auto &p : msg->points) {
-      Eigen::Vector2f point;
-      point[0] = p.x;
-      point[1] = p.y;
-      wall_points.push_back(point);
-    };
-    // Iterate through wall points.
-    for (Eigen::Vector2f& wall_point: wall_points) {
-      float x = wall_point.x();
-      float y = wall_point.y();
-      float eps = 0.000001;
-      float rem_x = std::remainder(std::fabs(x), cell_size_);
-      float rem_y = std::remainder(std::fabs(y), cell_size_);
-      bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
-      bool on_vertical_wall = (rem_y > -eps) && (rem_y < eps);
-      if (on_horizontal_wall) {
-        int row = std::round(x / cell_size_);
-        int col = std::ceil(std::fabs(y) / cell_size_) * (y < 0 ? -1 : 1); // col can never be 0
-        increment_wall_point_count(hor_wall_point_counts_, true, row, col);
-      } else if (on_vertical_wall) {
-        int row = std::ceil(std::fabs(x) / cell_size_) * (x < 0 ? -1 : 1); // row can never be 0
-        int col = std::round(y / cell_size_);
-        increment_wall_point_count(ver_wall_point_counts_, false, row, col);
-      } else {
-        ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
-          x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
+    if (mapping_) {
+      std::vector<Eigen::Vector2f> wall_points;
+      for (const auto &p : msg->points) {
+        Eigen::Vector2f point;
+        point[0] = p.x;
+        point[1] = p.y;
+        wall_points.push_back(point);
       };
-    };
+      // Iterate through wall points.
+      for (Eigen::Vector2f& wall_point: wall_points) {
+        float x = wall_point.x();
+        float y = wall_point.y();
+        float eps = 0.000001;
+        float rem_x = std::remainder(std::fabs(x), cell_size_);
+        float rem_y = std::remainder(std::fabs(y), cell_size_);
+        bool on_horizontal_wall = (rem_x > -eps) && (rem_x < eps);
+        bool on_vertical_wall = (rem_y > -eps) && (rem_y < eps);
+        if (on_horizontal_wall) {
+          int row = std::round(x / cell_size_);
+          int col = std::ceil(std::fabs(y) / cell_size_) * (y < 0 ? -1 : 1); // col can never be 0
+          increment_wall_point_count(hor_wall_point_counts_, true, row, col);
+        } else if (on_vertical_wall) {
+          int row = std::ceil(std::fabs(x) / cell_size_) * (x < 0 ? -1 : 1); // row can never be 0
+          int col = std::round(y / cell_size_);
+          increment_wall_point_count(ver_wall_point_counts_, false, row, col);
+        } else {
+          ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
+            x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
+        };
+      };
 
-    reset_wall_point_counts();
-
+      reset_wall_point_counts();
+    }
     return;
   }
 
@@ -210,6 +222,12 @@ namespace kmm_mapping {
     };
   }
 
+  void Mapping::publish_mapping(const ros::TimerEvent&) {
+    std_msgs::Bool mapping_msg;
+    mapping_msg.data = mapping_;
+    mapping_pub_.publish(mapping_msg);
+  }
+
   void Mapping::publish_walls(const ros::TimerEvent&) {
     walls_msg_.data.clear();
     for (int& is_wall : walls_) {
@@ -236,5 +254,35 @@ namespace kmm_mapping {
 
   void Mapping::set_times_req(int times_req) {
     times_req_ = times_req;
+  }
+
+  /*
+   * Callback for service requests to set mapping bool.
+   */
+  bool Mapping::set_mapping(std_srvs::SetBool::Request &req,
+         std_srvs::SetBool::Response &res) {
+    mapping_ = req.data;
+    return true;
+  }
+
+  /*
+   * Callback for service requests to reset map.
+   */
+  bool Mapping::reset_map(std_srvs::SetBool::Request &req,
+    std_srvs::SetBool::Response &res) {
+    // Reset walls
+    walls_.clear();
+    for (int i = 0; i < walls_size_; i++) {
+			walls_.push_back(0);
+    };
+
+    // Reset wall point counts
+    hor_wall_point_counts_.clear();
+    ver_wall_point_counts_.clear();
+
+    // Reset end points
+    end_points_.clear();
+
+    return true;
   }
 }

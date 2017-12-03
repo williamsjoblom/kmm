@@ -68,8 +68,6 @@ var robot = {
 
 robot.image.src = "img/robot.png";
 
-var isInAutoMode = false;
-
 // Planned path and target
 var plannedPath = [];
 var targetImage = new Image();
@@ -235,6 +233,7 @@ new ROSLIB.Topic({
 });
 
 // Subscriber for auto_mode
+var isInAutoMode = false;
 new ROSLIB.Topic({
   ros : ros,
   name : '/auto_mode',
@@ -248,6 +247,31 @@ new ROSLIB.Topic({
 var setAutoModeClient = new ROSLIB.Service({
   ros : ros,
   name : '/set_auto_mode',
+  serviceType : 'std_srvs/SetBool'
+});
+
+// Service client for resetting map
+var resetMapClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/reset_map',
+  serviceType : 'std_srvs/SetBool'
+});
+
+// Subscriber for mapping bool
+var mapping = true;
+new ROSLIB.Topic({
+  ros : ros,
+  name : '/mapping',
+  messageType : 'std_msgs/Bool'
+
+}).subscribe(function(message) {
+  mapping = message.data;
+});
+
+// Service client for enabling/disabling mapping
+var setMappingClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/set_mapping',
   serviceType : 'std_srvs/SetBool'
 });
 

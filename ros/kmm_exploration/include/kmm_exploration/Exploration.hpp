@@ -22,6 +22,7 @@ private:
 
   // Bool for manual or autonomous mode
   bool auto_mode_;
+  bool was_in_manual_mode_;
 
   // Bool for saying if we are done mapping and are returning to start
   bool returning_;
@@ -63,6 +64,7 @@ private:
          std_srvs::SetBool::Response &res);
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
+  bool is_at_start_position();
   void send_goal();
   void update_target(float new_x, float new_y);
   void publish_auto_mode(const ros::TimerEvent&);
