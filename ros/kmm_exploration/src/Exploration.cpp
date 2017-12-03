@@ -87,6 +87,7 @@ namespace kmm_exploration{
         target_ = closest;
         new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
         new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
+        returning_ = false;
       }
       update_target(new_x, new_y);
       was_in_manual_mode_ = false;
