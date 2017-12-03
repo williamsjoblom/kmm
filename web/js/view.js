@@ -5,6 +5,7 @@ requestAnimationFrame(render);
 // Update DOM 5Hz
 setInterval(updateDOM, 1000/5);
 
+var wasInAutoMode = false;
 function updateDOM() {
   //Position
   $("#pos-x").html(precision(robot.position.x, 2) + " m");
@@ -23,7 +24,7 @@ function updateDOM() {
   $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
   $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 
-  if (isInAutoMode) {
+  if (isInAutoMode && !wasInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
@@ -32,10 +33,11 @@ function updateDOM() {
       targetPositionGoal.cancel();
       targetPositionGoal = null;
     }
-  } else {
+  } else if (!isInAutoMode && wasInAutoMode) {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
   }
+  lastMode = isInAutoMode;
 }
 
 // Rounds to given precision

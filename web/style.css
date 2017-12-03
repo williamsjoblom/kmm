@@ -158,6 +158,14 @@ html, body {
   margin-right: 0;
 }
 
+.table-reset-buttons {
+  width: 100%;
+  height: 80px;
+  position: absolute;
+  bottom: 10 px;
+  border-collapse: collapse;
+}
+
 #map-container {
   position: fixed;
   top: 50px;
@@ -179,42 +187,43 @@ html, body {
   margin: 10px;
 }
 
-.map-button {
+.map-button, .reset-button {
   background: #ccc;
+  height: 36px;
   cursor: pointer;
   display: inline-block;
+  text-align: center;
+  border-radius: 2px;
+  vertical-align: middle;
   user-select: none; /* Standard */
   -webkit-user-select: none; /* Safari */
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+/Edge */
 }
 
-.map-button:hover {
+.map-button:hover, .reset-button:hover {
   background: #ddd;
 }
 
 .zoom-button {
   color: #646464;
-  border-radius: 2px;
   font-family: "Inconsolata";
-  font-size: 28px;
-  text-align: center;
-  padding: 0 10px;
+  font-size: 20px;
+  padding: 10px;
   width: 36px;
-  height: 36px;
+}
+
+#zoom-out-button {
+  font-size: 30px;
 }
 
 #view-state-button {
   width: 70px;
   padding: 10px;
-  border-radius: 2px;
-  text-align: center;
 }
 
 #center-view-button {
   width: 36px;
-  height: 36px;
-  cursor: pointer;
   background: rgba(0,0,0,0);
   background: url("img/centerViewButton.png") center no-repeat;
   background-size: cover;
@@ -224,7 +233,6 @@ html, body {
 .switch {
   position: relative;
   display: inline-block;
-  /*left: 150px;*/
   width: 60px;
   height: 34px;
 }
