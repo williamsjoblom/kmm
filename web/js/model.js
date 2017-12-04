@@ -250,6 +250,13 @@ var setAutoModeClient = new ROSLIB.Service({
   serviceType : 'std_srvs/SetBool'
 });
 
+// Service client for resetting position
+var resetPositionClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/reset_position',
+  serviceType : 'std_srvs/SetBool'
+});
+
 // Service client for resetting map
 var resetMapClient = new ROSLIB.Service({
   ros : ros,

@@ -23,6 +23,7 @@ namespace kmm_position {
     Eigen::Matrix3f get_state_cov();
 
     // Configure noise.
+    void reset_state();
     void set_predict_noise(float linear, float angular);
     void set_lidar_noise(float linear, float angular);
 

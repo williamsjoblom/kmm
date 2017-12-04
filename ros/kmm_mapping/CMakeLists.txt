@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
   std_msgs
+  std_srvs
   sensor_msgs
   message_generation
   laser_geometry
@@ -49,7 +50,7 @@ generate_dynamic_reconfigure_options(
 ###################################
 
 catkin_package(
-  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs message_runtime dynamic_reconfigure
+  CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs std_srvs message_runtime dynamic_reconfigure
   INCLUDE_DIRS include
   LIBRARIES kmm_mapping
   # DEPENDS system_lib

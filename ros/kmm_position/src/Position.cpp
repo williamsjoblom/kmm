@@ -27,6 +27,9 @@ namespace kmm_position {
     laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
     laser_notifier_->setTolerance(ros::Duration(0.1));
     cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
+
+    // Services
+    reset_position_service_ = nh_.advertiseService("reset_position", &Position::reset_position, this);
   }
 
   Position::~Position() {
@@ -153,5 +156,15 @@ namespace kmm_position {
     msg.pose.covariance[31] = state_cov(2,1);
     msg.pose.covariance[35] = state_cov(2,2);
     position_pub_.publish(msg);
+  }
+
+  /*
+   * Callback for service requests to reset position.
+   */
+  bool Position::reset_position(std_srvs::SetBool::Request &req,
+    std_srvs::SetBool::Response &res) {
+    kalman_.reset_state();
+
+    return true;
   }
 }

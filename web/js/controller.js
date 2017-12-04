@@ -123,7 +123,7 @@ function bindMenuEvents() {
 function bindSidebarEvents() {
   $("#mode-slider").click(toggleMode);
   $("#mapping-slider").click(toggleMapping);
-  //$("#reset-position-button").click(resetPosition);
+  $("#reset-position-button").click(resetPosition);
   $("#reset-map-button").click(resetMap);
 }
 
@@ -211,13 +211,12 @@ function toggleMapping() {
   setMappingClient.callService(setMapping, function(result) {});
 }
 
-// TODO: IMPLEMENT THIS!
-/*function resetPosition() {
-  var setMapping = new ROSLIB.ServiceRequest({
-    data : !mapping
+function resetPosition() {
+  var resetPosition = new ROSLIB.ServiceRequest({
+    data : true
   });
-  setMappingClient.callService(setMapping, function(result) {});
-}*/
+  resetPositionClient.callService(resetPosition, function(result) {});
+}
 
 function resetMap() {
   var resetMap = new ROSLIB.ServiceRequest({
