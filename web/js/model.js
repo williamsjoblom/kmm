@@ -2,7 +2,7 @@
 // The canvas 2d context used to draw stuff.
 var ctx = $("#map")[0].getContext("2d");
 var matrix = new Matrix(ctx);
-var globalFrame = new Matrix();
+var globalMatrix = new Matrix();
 
 // Information about the viewport.
 var view = {
@@ -20,7 +20,7 @@ var view = {
 
 // Debug options
 var debug = {
-  axes : true,
+  globalFrame : true,
   scan: true,
   positionScan: true,
   mappingScan: true,
@@ -67,8 +67,6 @@ var robot = {
 };
 
 robot.image.src = "img/robot.png";
-
-var isInAutoMode = false;
 
 // Planned path and target
 var plannedPath = [];
@@ -189,7 +187,6 @@ new ROSLIB.Topic({
   };
 });
 
-
 // Map endpoints.
 new ROSLIB.Topic({
   ros: ros,
@@ -236,6 +233,7 @@ new ROSLIB.Topic({
 });
 
 // Subscriber for auto_mode
+var isInAutoMode = false;
 new ROSLIB.Topic({
   ros : ros,
   name : '/auto_mode',
@@ -252,9 +250,56 @@ var setAutoModeClient = new ROSLIB.Service({
   serviceType : 'std_srvs/SetBool'
 });
 
+// Service client for resetting position
+var resetPositionClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/reset_position',
+  serviceType : 'std_srvs/SetBool'
+});
+
+// Service client for resetting map
+var resetMapClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/reset_map',
+  serviceType : 'std_srvs/SetBool'
+});
+
+// Subscriber for mapping bool
+var mapping = true;
+new ROSLIB.Topic({
+  ros : ros,
+  name : '/mapping',
+  messageType : 'std_msgs/Bool'
+
+}).subscribe(function(message) {
+  mapping = message.data;
+});
+
+// Service client for enabling/disabling mapping
+var setMappingClient = new ROSLIB.Service({
+  ros : ros,
+  name : '/set_mapping',
+  serviceType : 'std_srvs/SetBool'
+});
+
 // Action client for move to navigation goal.
 var navigationClient = new ROSLIB.ActionClient({
   ros : ros,
   serverName : '/navigation',
   actionName : 'kmm_navigation/MoveToAction'
+});
+
+// Subscriber for finished_mapping
+var finishedMapping;
+new ROSLIB.Topic({
+  ros : ros,
+  name : '/finished_mapping',
+  messageType : 'std_msgs/Bool'
+
+}).subscribe(function(message) {
+  wasFinished = finishedMapping;
+  finishedMapping = message.data;
+  if (!wasFinished && finishedMapping) {
+    var fireworks = new Fireworks();
+  }
 });

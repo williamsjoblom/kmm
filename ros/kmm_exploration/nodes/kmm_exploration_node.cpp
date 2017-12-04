@@ -8,11 +8,5 @@ int main(int argc, char **argv) {
 
   kmm_exploration::Exploration e(nh);
 
-  ros::Rate loop_rate(10);
-
-  while (ros::ok()) {
-    e.publish_auto_mode();
-    ros::spinOnce();
-    loop_rate.sleep();
-  };
+  ros::spin();
 }

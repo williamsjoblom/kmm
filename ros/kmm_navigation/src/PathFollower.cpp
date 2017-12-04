@@ -2,7 +2,9 @@
 
 namespace kmm_navigation {
 
-  PathFollower::PathFollower(){
+  PathFollower::PathFollower()
+  : lowpass_vel_(0, 0)
+  {
     error_p_constant_ = 0;
     max_velocity_ = 0;
   }

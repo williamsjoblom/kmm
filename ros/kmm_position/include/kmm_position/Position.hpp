@@ -12,6 +12,8 @@
 #include "kmm_position/Kalman.h"
 #include "kmm_position/PositionConfig.h"
 #include <dynamic_reconfigure/server.h>
+#include <std_msgs/Bool.h>
+#include <std_srvs/SetBool.h>
 
 namespace kmm_position {
 
@@ -26,6 +28,8 @@ public:
   void broadcast_robot_pose(const ros::TimerEvent&);
   void publish_robot_pose(const ros::TimerEvent&);
   void reconfigure_callback(PositionConfig& config, int level);
+  bool reset_position(std_srvs::SetBool::Request &req,
+        std_srvs::SetBool::Response &res);
 
 private:
   ros::NodeHandle nh_;
@@ -48,6 +52,9 @@ private:
   ros::Publisher mapping_scan_pub_;
   ros::Publisher position_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
+
+  // Services
+  ros::ServiceServer reset_position_service_;
 
   // State estimation
   Kalman kalman_;

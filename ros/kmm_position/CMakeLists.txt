@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  std_srvs
   tf
   dynamic_reconfigure
 )
@@ -109,7 +110,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES kmm_position
-  CATKIN_DEPENDS laser_geometry roscpp rospy std_msgs sensor_msgs tf
+  CATKIN_DEPENDS laser_geometry roscpp rospy std_msgs std_srvs sensor_msgs tf
 #  DEPENDS system_lib
 )
 

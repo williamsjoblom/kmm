@@ -15,6 +15,9 @@ void i2c_init() {
 
   i2c_write8(ACC_WRITE, CTRL_REG1_A, 0x57);   // Power on accelerometer
   i2c_write8(GYRO_WRITE, CTRL_REG1_A, 0x0F);  // Power on gyroscope
+
+  // Increase Gyro range to avoid hitting the range roof.
+  i2c_write8(GYRO_WRITE, CTRL_REG4_A, GYRO_RANGE_500DPS) 
 }
 
 uint8_t i2c_write8(uint8_t slave_address, uint8_t reg_address, uint8_t byte) {

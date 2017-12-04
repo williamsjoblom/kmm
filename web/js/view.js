@@ -1,3 +1,10 @@
+// Tooltips
+$("#zoom-in-button").attr('title', 'Zoom in');
+$("#zoom-out-button").attr('title', 'Zoom out');
+$("#view-state-button").attr('title', 'Toggle view state');
+$("#center-view-button").attr('title', 'Center view');
+$("#reset-position-button").attr('title', 'Set position to start position (0.2, 0.2)');
+$("#reset-map-button").attr('title', 'Reset all map data');
 
 // Render canvas 60Hz
 requestAnimationFrame(render);
@@ -5,6 +12,7 @@ requestAnimationFrame(render);
 // Update DOM 5Hz
 setInterval(updateDOM, 1000/5);
 
+$("#mapping-slider").prop("checked", true);
 function updateDOM() {
   //Position
   $("#pos-x").html(precision(robot.position.x, 2) + " m");
@@ -23,11 +31,14 @@ function updateDOM() {
   $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
   $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 
+  // Autonomous slider
   if (isInAutoMode) {
     $("#mode-slider").prop("checked", true);
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
+    $("#map").css('cursor', 'default');
     isUsingGoTo = false;
+    goToPos = null;
     if (targetPositionGoal) {
       targetPositionGoal.cancel();
       targetPositionGoal = null;
@@ -35,6 +46,13 @@ function updateDOM() {
   } else {
     $("#mode-slider").prop("checked", false);
     $("#go-to").removeClass("menu-option-inactive");
+  }
+
+  // Mapping slider
+  if (mapping) {
+    $("#mapping-slider").prop("checked", true);
+  } else {
+    $("#mapping-slider").prop("checked", false);
   }
 }
 

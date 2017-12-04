@@ -9,14 +9,17 @@
 #define ACC_START 0b10101000 // MSB READ + ADDR
 #define GYRO_START 0b10101100 // MSB READ + ADDRs
 
+#define GYRO_RANGE_250DPS 0x00
+#define GYRO_RANGE_500DPS 0x10
+#define GYRO_RANGE_20000DPS 0x20
+
 #define CTRL_REG1_A 0x20 
+#define CTRL_REG4_A 0x23
 
 #define I2C_START 0
 #define I2C_STOP 1
 #define I2C_DATA_ACK 2
 #define I2C_DATA_NACK 3
-#define I2C_RESTART 4 // 
-#define I2C_ERROR 5 //
 
 
 typedef struct _Packet {

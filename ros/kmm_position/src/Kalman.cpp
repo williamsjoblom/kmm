@@ -35,6 +35,14 @@ namespace kmm_position {
       0              , 0              , angular_variance;
   }
 
+  void Kalman::reset_state() {
+    Eigen::Vector3f reset_state(0.2, 0.2, 0);
+    state_ = reset_state;
+    set_state_cov(0.2, 20 * pi / 180);
+    set_predict_noise(0.05, 0.03);
+    set_lidar_noise(0.1, 0.5 * pi / 180);
+  }
+
   void Kalman::set_state_cov(float linear, float angular) {
     set_cov(state_cov_, linear, angular);
   }

@@ -15,6 +15,7 @@ namespace kmm_navigation {
     // Publishers
     path_pub_ = nh_.advertise<geometry_msgs::PoseArray>("path", 1);
     cmd_vel_pub_ = nh.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+
     // Subscribers
     walls_sub_ = nh_.subscribe("walls", 1, &Navigation::walls_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Navigation::position_callback, this);
@@ -80,17 +81,12 @@ namespace kmm_navigation {
     Eigen::Vector2f target(goal->x, goal->y);
     path_ = path_finder_->find_path(robot_position_, target);
 
-    bool initial_mode = auto_mode_;
-
     bool has_reached_target = false;
     while (!has_reached_target) {
 
       // The navigation request can be preemted by the client.
       // In that case we want to clear the path and stop the robot.
-      bool auto_mode_turned_off = initial_mode && !auto_mode_;
-      bool auto_mode_turned_on = !initial_mode && auto_mode_;
-      bool auto_mode_changed = auto_mode_turned_on || auto_mode_turned_off;
-      if (auto_mode_changed || action_server_.isPreemptRequested() || !ros::ok()) {
+      if (action_server_.isPreemptRequested() || !ros::ok()) {
         publish_vel(0, 0, 0);
         path_.clear();
         action_server_.setPreempted();

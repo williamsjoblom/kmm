@@ -12,8 +12,8 @@
           Debug options
           <div class="dropdown">
             <div class="dropdown-row">
-              <label for="debug-axes" class="dropdown-text">Flobal frame</label>
-              <input id="debug-axes" checked type="checkbox" class="dropdown-checkbox"/>
+              <label for="debug-global-frame" class="dropdown-text">Global frame</label>
+              <input id="debug-global-frame" checked type="checkbox" class="dropdown-checkbox"/>
               <div class="clear"></div>
             </div>
             <div class="dropdown-row">
@@ -76,19 +76,28 @@
           <td>
           <td><!-- nothing --></td>
           <td><!-- nothing --></td>
+          <td><!-- nothing --></td>
+          <td><!-- nothing --></td>
         </tr>
+        <tr height=5/>
         <tr>
           <td>
             <div class="map-button zoom-button" id="zoom-out-button">-</div>
           </td>
+          <td width=5/>
           <td>
             <div class="map-button" id="view-state-button">Global</div>
           </td>
+          <td width=5/>
           <td>
             <div class="map-button" id="center-view-button"></div>
           </td>
         </tr>
       </table>
+    </div>
+
+    <div id ="fireworks-container">
+      <canvas id="fireworks"></canvas>
     </div>
 
     <div class="sidebar">
@@ -149,10 +158,42 @@
         </tr>
       <table>
 
+      <table class="table-reset-buttons"> <!-- 4x5 table -->
+        <tr height=120/> <!-- Space -->
+        <tr> <!-- Mapping slider -->
+          <td/> <!-- 1 -->
+          <td colspan=3> <!-- 2,3,4 -->
+            <!-- Mapping slider -->
+            <div class="table-info-header">Mapping</div>
+            <div style="text-align: center">
+              <label class="switch">
+                <input id="mapping-slider" type="checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </td>
+          <td/> <!-- 5 -->
+        </tr>
+        <tr height=20/> <!-- Space -->
+        <tr><!-- Buttons -->
+          <td width=95/> <!-- 1 -->
+          <!-- Reset Buttons -->
+          <td width=120> <!-- 2 -->
+            <div class="reset-button" id="reset-position-button">Reset position</div>
+          </td>
+          <td width=20/> <!-- 3 -->
+          <td width=120> <!-- 4 -->
+            <div class="reset-button" id="reset-map-button">Reset map</div>
+          </td>
+          <td/> <!-- 5 -->
+        </tr>
+      </table>
+
     </div>
     <script src="lib/matrix.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/roslib.js"></script>
+    <script src="lib/fireworks.js"></script>
     <script src="js/model.js"></script>
     <script src="js/controller.js"></script>
     <script src="js/view.js"></script>

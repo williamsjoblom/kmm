@@ -75,11 +75,11 @@ function bindCanvasEvents() {
 }
 
 function bindMenuEvents() {
-  $("#debug-axes").click(function () {
-    debug.axes = !debug.axes;
+  $("#debug-global-frame").click(function () {
+    debug.globalFrame = !debug.globalFrame;
   });
-  $('#debug-axes').removeAttr('checked');
-  debug.axes = false;
+  $('#debug-global-frame').removeAttr('checked');
+  debug.globalFrame = false;
 
   $("#debug-scan").click(function () {
     debug.scan = !debug.scan;
@@ -104,8 +104,6 @@ function bindMenuEvents() {
   $("#debug-velocity").click(function () {
     debug.velocity = !debug.velocity;
   });
-  $('#debug-velocity').removeAttr('checked');
-  debug.velocity = false;
 
   $("#debug-acceleration").click(function () {
     debug.acceleration = !debug.acceleration;
@@ -123,8 +121,10 @@ function bindMenuEvents() {
 }
 
 function bindSidebarEvents() {
-  // Bind mode slider.
   $("#mode-slider").click(toggleMode);
+  $("#mapping-slider").click(toggleMapping);
+  $("#reset-position-button").click(resetPosition);
+  $("#reset-map-button").click(resetMap);
 }
 
 function bindButtonEvents(){
@@ -146,8 +146,11 @@ function setGoalClickKey(e){
 
 function setGoalClick(e){
   isUsingGoTo = !isUsingGoTo;
-  if (!isInAutoMode && goToPos) { // Cancel current
+  if (!isInAutoMode && !goToPos && isUsingGoTo) { // Set new
+    $("#go-to").html("Set goal");
+    $("#map").css('cursor', 'crosshair');
 
+  } else { // Cancel current
     isUsingGoTo = false;
     goToPos = null;
 
@@ -157,18 +160,6 @@ function setGoalClick(e){
     if (targetPositionGoal) {
       targetPositionGoal.cancel();
     }
-
-  } else if (!isInAutoMode && isUsingGoTo) { // Set new
-
-    $("#go-to").html("Set goal");
-    $("#map").css('cursor', 'crosshair');
-
-  }
-  else { // Cancelled without set goal
-
-    $("#go-to").html("Go to");
-    $("#map").css('cursor', 'default');
-
   }
 }
 
@@ -211,4 +202,25 @@ function toggleMode() {
     data : !isInAutoMode
   });
   setAutoModeClient.callService(setAutoMode, function(result) {});
+}
+
+function toggleMapping() {
+  var setMapping = new ROSLIB.ServiceRequest({
+    data : !mapping
+  });
+  setMappingClient.callService(setMapping, function(result) {});
+}
+
+function resetPosition() {
+  var resetPosition = new ROSLIB.ServiceRequest({
+    data : true
+  });
+  resetPositionClient.callService(resetPosition, function(result) {});
+}
+
+function resetMap() {
+  var resetMap = new ROSLIB.ServiceRequest({
+    data : true
+  });
+  resetMapClient.callService(resetMap, function(result) {});
 }
