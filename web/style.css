@@ -123,6 +123,10 @@ html, body {
   margin-top: 30px;
 }
 
+.table-info-header:first-child {
+  margin-top: 0;
+}
+
 .table-info td {
   padding: 0;
 }
@@ -160,7 +164,6 @@ html, body {
 
 .table-reset-buttons {
   width: 470px;
-  height: 170px;
   text-align: center;
   border-collapse: collapse;
 }
