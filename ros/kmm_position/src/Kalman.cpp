@@ -61,11 +61,15 @@ namespace kmm_position {
       int hz = std::floor(1 / dt);
       predict_ts_ = ros::Time::now();
       if (hz > 1) {
-        state_ += dt * u;
+        Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(state_[2], Eigen::Vector3f(0, 0, 1)));
+        Eigen::Vector3f global_u = t * u; // Rotate into global frame.
+
+        state_ += dt * global_u;
+
         Eigen::Matrix3f cov_increment = predict_noise_ * dt;
-        cov_increment(0, 0) *= u[0];
-        cov_increment(1, 1) *= u[1];
-        cov_increment(2, 2) *= u[2];
+        /*cov_increment(0, 0) *= abs(u[0]);
+        cov_increment(1, 1) *= abs(u[1]);
+        cov_increment(2, 2) *= abs(u[2]);*/
         state_cov_ += cov_increment;
       } else {
         ROS_WARN("Too low frequency control signal to make position prediction: %d Hz", hz);
