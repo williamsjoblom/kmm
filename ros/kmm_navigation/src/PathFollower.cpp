@@ -66,6 +66,8 @@ namespace kmm_navigation {
     }
 
     if (has_reached_target) {
+      lowpass_vel_[0] = 0;
+      lowpass_vel_[1] = 0;
       vel[0] = 0;
       vel[1] = 0;
     } else {
@@ -78,17 +80,18 @@ namespace kmm_navigation {
         offset_vel_component = offset_vel_component.normalized() * max_velocity_;
       }
 
+      // Lowpass filter forward velocity.
+      Eigen::Vector2f total_vel(0, 0);
       float dt = (ros::Time::now() - vel_ts_).toSec();
       int hz = std::floor(1 / dt);
       vel_ts_ = ros::Time::now();
       if (hz > 1) {
-        Eigen::Vector2f total_vel = offset_vel_component + forward_vel_component;
-        lowpass_vel_ += (total_vel - lowpass_vel_) * (dt / (dt + filter_constant_));
+        lowpass_vel_ += (forward_vel_component - lowpass_vel_) * (dt / (dt + filter_constant_));
+        total_vel = offset_vel_component + lowpass_vel_;
       } else {
         ROS_WARN("Too low frequency control signal to lowpass velocity: %d Hz", hz);
       }
-
-      vel = lowpass_vel_;
+      vel = total_vel;
     }
   }
 }
