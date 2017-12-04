@@ -76,14 +76,19 @@
           <td>
           <td><!-- nothing --></td>
           <td><!-- nothing --></td>
+          <td><!-- nothing --></td>
+          <td><!-- nothing --></td>
         </tr>
+        <tr height=5/>
         <tr>
           <td>
             <div class="map-button zoom-button" id="zoom-out-button">-</div>
           </td>
+          <td width=5/>
           <td>
             <div class="map-button" id="view-state-button">Global</div>
           </td>
+          <td width=5/>
           <td>
             <div class="map-button" id="center-view-button"></div>
           </td>
@@ -153,27 +158,34 @@
         </tr>
       <table>
 
-
-      <!-- Mapping slider -->
-      <div class="table-info-header">Mapping</div>
-      <div style="text-align: center">
-        <label class="switch">
-          <input id="mapping-slider" type="checkbox">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <!-- Reset Buttons -->
-      <table class="table-reset-buttons">
-        <tr>
-          <td/>
-          <td id = "reset-map-button-td">
+      <table class="table-reset-buttons"> <!-- 4x5 table -->
+        <tr height=120/> <!-- Space -->
+        <tr> <!-- Mapping slider -->
+          <td/> <!-- 1 -->
+          <td colspan=3> <!-- 2,3,4 -->
+            <!-- Mapping slider -->
+            <div class="table-info-header">Mapping</div>
+            <div style="text-align: center">
+              <label class="switch">
+                <input id="mapping-slider" type="checkbox">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </td>
+          <td/> <!-- 5 -->
+        </tr>
+        <tr height=20/> <!-- Space -->
+        <tr><!-- Buttons -->
+          <td width=95/> <!-- 1 -->
+          <!-- Reset Buttons -->
+          <td width=120> <!-- 2 -->
             <div class="reset-button" id="reset-position-button">Reset position</div>
           </td>
-          <td id = "reset-map-button-td">
+          <td width=20/> <!-- 3 -->
+          <td width=120> <!-- 4 -->
             <div class="reset-button" id="reset-map-button">Reset map</div>
           </td>
-          <td/>
-          <td/>
+          <td/> <!-- 5 -->
         </tr>
       </table>
 
