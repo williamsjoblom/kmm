@@ -83,7 +83,7 @@ void i2c_init(){
   //i2c_enable_reading(GYRO_ADDR, 0x0F);
   i2c_write(ACC_ADDR,0x20, 0x57);
   i2c_write(GYRO_ADDR,0x20, 0x0F);
-  i2c_write(GYRO_ADDR,0x23, GYRO_RANGE_250DPS);
+  i2c_write(GYRO_ADDR, 0x23, GYRO_RANGE_250DPS);
 }
 
 uint8_t read8(uint8_t address, uint8_t reg){

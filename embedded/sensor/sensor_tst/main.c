@@ -25,7 +25,6 @@ void get_acc_data(uint8_t buf[], Packet *acc_packet) {
   i2c_select_slave(ACC_WRITE, acc_packet);
   i2c_select_register(ACC_START, acc_packet);
 
-  //i2c_stop();
   i2c_start_or_repstart(acc_packet);
   i2c_select_slave(ACC_READ, acc_packet);
 
@@ -46,7 +45,6 @@ void get_gyro_data(uint8_t buf[], Packet *gyro_packet) {
   i2c_select_slave(GYRO_WRITE, gyro_packet);
   i2c_select_register(GYRO_START, gyro_packet);
 
-  //i2c_stop();
   i2c_start_or_repstart(gyro_packet);
   i2c_select_slave(GYRO_READ, gyro_packet);
 
@@ -76,6 +74,7 @@ int main() {
   acc_packet.data = NULL;
   gyro_packet.transmission_error = 0;
   gyro_packet.data = NULL;
+
   buf[0] = 0x00;
   buf[1] = 0x00;
   buf[2] = 0x00;

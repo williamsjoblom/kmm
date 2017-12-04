@@ -12,7 +12,6 @@ import numpy as np
 from time import time, sleep
 from bitstring import Bits as B
 from sensor_msgs.msg import Imu
-from geometry_msgs.msg import Vector3
 
 # Values from adafruit c++ acc code to modify raw data.
 ACC_MG_LSB  = 0.001
@@ -20,6 +19,7 @@ SENSORS_GRAVITY_STANDARD = 9.80665
 
 # Values from adafruit c++ gyro code to modfy raw data.
 GYRO_RANGE_250DPS = 0.00875
+GYRO_RANGE_500DPS = 0.0175
 SENSORS_DPS_TO_RADS = 0.017453293
 
 x_mean = 0.0
@@ -157,7 +157,7 @@ if __name__ == "__main__":
       # Convert values to understandable format and package into Imu message.
       x_acc = (sensor_data[0] - x_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
       y_acc = (sensor_data[1] - y_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
-      z_gyro = (sensor_data[2] - z_mean) * GYRO_RANGE_250DPS * SENSORS_DPS_TO_RADS
+      z_gyro = (sensor_data[2] - z_mean) * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS
 
       rospy.loginfo("Acc x: {0}\nAcc y: {1}\nGyro z: {2}".format(x_acc, y_acc, z_gyro))
 
