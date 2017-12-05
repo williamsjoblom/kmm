@@ -41,14 +41,17 @@ namespace kmm_position {
     config_ = config;
     kalman_.set_predict_noise(config_.predict_noise_linear, config_.predict_noise_angular);
     kalman_.set_lidar_noise(config_.lidar_noise_linear, config_.lidar_noise_angular);
+    use_predictions_ = config_.use_predictions;
+    use_lidar_ = config_.use_lidar;
+    use_accelerometer_ = config_.use_accelerometer;
+    use_gyroscope_ = config_.use_gyroscope;
   }
 
   void Position::cmd_vel_callback(geometry_msgs::Twist msg) {
-    Eigen::Vector3f state = kalman_.get_state();
-    Eigen::Vector3f u(msg.linear.x, msg.linear.y, msg.angular.z);
-    Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(state[2], Eigen::Vector3f(0, 0, 1)));
-    u = t * u; // Rotate into global frame.
-    kalman_.predict(u);
+    if (use_predictions_) {
+      Eigen::Vector3f u(msg.linear.x, msg.linear.y, msg.angular.z);
+      kalman_.predict(u);
+    }
   }
 
   void Position::laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg) {
@@ -95,7 +98,9 @@ namespace kmm_position {
       result.angle
     );
 
-    kalman_.lidar_measurement(messurement);
+    if (use_lidar_) {
+      kalman_.lidar_measurement(messurement);
+    }
 
     publish_scan(mapping_scan_pub_, mapping_scan);
     publish_scan(position_scan_pub_, position_scan);

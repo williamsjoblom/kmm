@@ -58,6 +58,10 @@ private:
 
   // State estimation
   Kalman kalman_;
+  bool use_predictions_;
+  bool use_lidar_;
+  bool use_accelerometer_;
+  bool use_gyroscope_;
 };
 
 }

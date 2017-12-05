@@ -123,6 +123,10 @@ html, body {
   margin-top: 30px;
 }
 
+.table-info-header:first-child {
+  margin-top: 0;
+}
+
 .table-info td {
   padding: 0;
 }
@@ -159,9 +163,7 @@ html, body {
 }
 
 .table-reset-buttons {
-  width: 490px;
-  height: 80px;
-  position: block;
+  width: 470px;
   text-align: center;
   border-collapse: collapse;
 }
@@ -231,18 +233,14 @@ html, body {
   background-size: cover;
 }
 
-#reset-position-button, #reset-position-button-td {
+#reset-position-button {
   width: 120px;
   padding: 10px;
 }
 
 #reset-map-button {
-  width: 100px;
-  padding: 10px;
-}
-#reset-map-button-td {
   width: 120px;
-  padding-left: 20px;
+  padding: 10px;
 }
 
 /* Mode slider */
