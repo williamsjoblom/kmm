@@ -58,15 +58,15 @@ namespace kmm_exploration{
   void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
     if (auto_mode_) {
       geometry_msgs::Point32 closest;
-      bool are_no_end_points = true;
+      bool are_end_points = false;
       float min_distance = FLT_MAX;
       for (geometry_msgs::Point32 point : msg.points){
-        are_no_end_points = false;
+        are_end_points = true;
         float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
         /* If point is equal to the previous, there shouldn't be a new target
          * unless we were in manual mode since last target was sent */
          bool point_equals_prev_target = point.x == target_.x && point.y == target_.y;
-        if (!was_in_manual_mode_ && point_equals_prev_target) {
+       if (!was_in_manual_mode_ && point_equals_prev_target) {
           return;
           //Uncomment these to make target change goal around point while moving.
           //closest = point;
@@ -77,20 +77,22 @@ namespace kmm_exploration{
           min_distance = distance;
         }
       }
-      float new_x;
-      float new_y;
-      if (are_no_end_points) { // Return to start position if not end points remain
-        new_x = 0.2;
-        new_y = 0.2;
-        returning_ = true;
-      } else {
-        target_ = closest;
-        new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
-        new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
-        returning_ = false;
+      if (are_end_points || !is_at_start_position()) {
+        float new_x;
+        float new_y;
+        if (are_end_points) {
+          target_ = closest;
+          new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
+          new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
+          returning_ = false;
+        } else { // Return to start position if not end points remain
+          new_x = 0.2;
+          new_y = 0.2;
+          returning_ = true;
+        }
+        update_target(new_x, new_y);
+        was_in_manual_mode_ = false;
       }
-      update_target(new_x, new_y);
-      was_in_manual_mode_ = false;
     } else { // Force target update when entering auto-mode
       was_in_manual_mode_ = true;
       returning_ = false;
@@ -126,8 +128,6 @@ namespace kmm_exploration{
     if (returning_ && is_at_start_position()) {
       finished_mapping_ = true;
       returning_ = false;
-    } else {
-      finished_mapping_ = false;
     }
   }
 
@@ -151,5 +151,8 @@ namespace kmm_exploration{
     std_msgs::Bool finished_mapping;
     finished_mapping.data = finished_mapping_;
     finished_mapping_pub_.publish(finished_mapping);
+    if (finished_mapping_) { // Only send finished mapping once
+      finished_mapping_ = false;
+    }
   }
 }

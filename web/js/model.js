@@ -273,6 +273,7 @@ new ROSLIB.Topic({
 
 }).subscribe(function(message) {
   mapping = message.data;
+  console.log(mapping);
 });
 
 // Service client for enabling/disabling mapping

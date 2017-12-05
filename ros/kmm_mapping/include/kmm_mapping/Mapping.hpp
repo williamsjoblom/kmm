@@ -22,7 +22,8 @@ struct WallPointCount {
   Eigen::Vector2f position;
   int pnt_cnt; // Number of points located on this wall in one scan
   int times; // Number of times points have suggested wall here
-  bool published; // True if this wall has been published as wall
+  bool found; // True if found after scan (enough points were on it)
+  bool added; // True if this wall has been added to walls_
 };
 
 class Mapping {
@@ -34,11 +35,16 @@ public:
 
 private:
   void mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
-  WallPointCount make_wall_point_count(int row, int col, int cnt);
+  WallPointCount make_wall_point_count(int row, int col);
   void reset_wall_point_counts();
+  void increment_horizontal_wall_point_count(int row, int col);
+  void increment_vertical_wall_point_count(int row, int col);
   void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
     bool horizontal, int row, int col);
-  void add_wall(int row, int col, bool horizontal);
+  void add_wall_at(int row, int col, bool horizontal);
+  bool is_horizontal_wall_at(int row, int col);
+  bool is_vertical_wall_at(int row, int col);
+  bool is_wall_at(int row, int col, bool horizontal);
   void update_end_points(int row, int col, bool horizontal);
   void publish_mapping(const ros::TimerEvent&);
   void publish_walls(const ros::TimerEvent&);

@@ -398,8 +398,10 @@ var Fireworks = function(){
 	/* Main Loop
 	/*=============================================================================*/
 	self.canvasLoop = function(){
+		// Get random firework
 		var randSetting = fireworkSettingsList[rand(0,fireworkSettingsList.length - 1)];
 		self.setFireworkSettings(randSetting);
+
 		requestAnimFrame(self.canvasLoop, self.canvas);
     self.updateDelta();
 		self.ctx.globalCompositeOperation = 'destination-out';
@@ -414,11 +416,11 @@ var Fireworks = function(){
 
 	self.init();
 
-	var launchCount = 40;
+	var launchCount = 20;
 	while(launchCount--) {
 		setTimeout(function() {
 			self.fireworks.push(new Firework(self.cw/2, self.ch, rand(50,
 				self.cw-50), rand(50, self.ch/2)-50));
-		}, launchCount*200);
+		}, launchCount*400);
 	}
 }

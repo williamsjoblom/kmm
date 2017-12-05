@@ -81,43 +81,78 @@ namespace kmm_mapping {
         if (on_horizontal_wall) {
           int row = std::round(x / cell_size_);
           int col = std::ceil(std::fabs(y) / cell_size_) * (y < 0 ? -1 : 1); // col can never be 0
-          increment_wall_point_count(hor_wall_point_counts_, true, row, col);
+          if (!is_horizontal_wall_at(row, col)) {
+            increment_horizontal_wall_point_count(row, col);
+          }
         } else if (on_vertical_wall) {
           int row = std::ceil(std::fabs(x) / cell_size_) * (x < 0 ? -1 : 1); // row can never be 0
           int col = std::round(y / cell_size_);
-          increment_wall_point_count(ver_wall_point_counts_, false, row, col);
+          if (!is_vertical_wall_at(row, col)) {
+            increment_vertical_wall_point_count(row, col);
+          }
         } else {
           ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
             x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
         };
       };
-
       reset_wall_point_counts();
     }
     return;
   }
 
-  /* Create new WallPointCount object with given parameters*/
-  WallPointCount Mapping::make_wall_point_count(int row, int col, int cnt) {
+  /* Create new WallPointCount struct */
+  WallPointCount Mapping::make_wall_point_count(int row, int col) {
     Eigen::Vector2f pos(row, col);
     WallPointCount wall_point_count;
     wall_point_count.position = pos;
-    wall_point_count.pnt_cnt = cnt;
+    wall_point_count.pnt_cnt = 1; // Initially one because it is added when point is found
     wall_point_count.times = 0;
-    wall_point_count.published = false;
+    wall_point_count.found = true; // Initially true because it is only added when found
+    wall_point_count.added = false;
     return wall_point_count;
   }
 
-  /* Sets all wall point count to 0. Called each time we analyze points. */
+  /*
+   * Set all wall point counts to 0. Also set times to 0 if wall wasn't
+   * found (meaning enough points were on it) during this scan.
+   * Finally reset found to false for next scan.
+   */
   void Mapping::reset_wall_point_counts() {
     // Reset horizontal wall point counts
+    std::vector<WallPointCount> new_hor_wall_point_counts;
     for (WallPointCount& wall_point_count : hor_wall_point_counts_) {
-      wall_point_count.pnt_cnt = 0;
+      if (!wall_point_count.added) { // Drop wall count if already added
+        wall_point_count.pnt_cnt = 0;
+        if (!wall_point_count.found) {
+          wall_point_count.times = 0;
+        }
+        wall_point_count.found = false;
+        new_hor_wall_point_counts.push_back(wall_point_count);
+      }
     };
+    hor_wall_point_counts_ = new_hor_wall_point_counts;
+
     // Reset vertical wall point counts
+    std::vector<WallPointCount> new_ver_wall_point_counts;
     for (WallPointCount& wall_point_count : ver_wall_point_counts_) {
-      wall_point_count.pnt_cnt = 0;
+      if (!wall_point_count.added) { // Drop wall count if already added
+        wall_point_count.pnt_cnt = 0;
+        if (!wall_point_count.found) {
+          wall_point_count.times = 0;
+        }
+        wall_point_count.found = false;
+        new_ver_wall_point_counts.push_back(wall_point_count);
+      }
     };
+    ver_wall_point_counts_ = new_ver_wall_point_counts;
+  }
+
+  void Mapping::increment_horizontal_wall_point_count(int row, int col) {
+    return increment_wall_point_count(hor_wall_point_counts_, true, row, col);
+  }
+
+  void Mapping::increment_vertical_wall_point_count(int row, int col) {
+    return increment_wall_point_count(ver_wall_point_counts_, false, row, col);
   }
 
   /*
@@ -134,37 +169,55 @@ namespace kmm_mapping {
     for (WallPointCount& wall_point_count : wall_point_counts) {
       existing_wall_row = wall_point_count.position[0];
       existing_wall_col = wall_point_count.position[1];
-      if ((existing_wall_row == row) && (existing_wall_col == col)) {
+      bool found_existing_wall_point_count = (existing_wall_row == row) && (existing_wall_col == col);
+      if (found_existing_wall_point_count && !wall_point_count.added) {
         wall_point_count.pnt_cnt++;
-        if (wall_point_count.pnt_cnt == pnt_cnt_req_ &&
-            !wall_point_count.published) {
+        if (wall_point_count.pnt_cnt == pnt_cnt_req_) {
+          wall_point_count.found = true;
           wall_point_count.times++;
           if (wall_point_count.times == times_req_) {
-            wall_point_count.published = true;
-            add_wall(row, col, horizontal);
+            add_wall_at(row, col, horizontal);
+            wall_point_count.added = true;
             update_end_points(row, col, horizontal);
           };
         };
         return;
       };
     };
-    wall_point_counts.push_back(make_wall_point_count(row, col, 1));
+    wall_point_counts.push_back(make_wall_point_count(row, col));
     return;
   }
 
   /*
    * Add wall to wall_positions_msg_ and walls_.
    */
-  void Mapping::add_wall(int row, int col, bool horizontal) {
-    geometry_msgs::Point wall;
-    wall.x = row;
-    wall.y = col;
-    wall.z = 0;
+  void Mapping::add_wall_at(int row, int col, bool horizontal) {
     if (horizontal) {
       int t = (col >= 1 ? 1 : 0);
       walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 1;
     } else {
       walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
+    };
+  }
+
+  bool Mapping::is_horizontal_wall_at(int row, int col) {
+    return is_wall_at(row, col, true);
+  }
+
+  bool Mapping::is_vertical_wall_at(int row, int col) {
+    return is_wall_at(row, col, false);
+  }
+
+  /*
+   * Returns true if there is a wall at given row, col.
+   * Set horizontal = true if horizontal wall, else false.
+   */
+  bool Mapping::is_wall_at(int row, int col, bool horizontal) {
+    if (horizontal) {
+      int t = (col >= 1 ? 1 : 0);
+      return walls_[row*w_ + row*(w_ + 1) + offset_ + col - t];
+    } else {
+      return walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col];
     };
   }
 
