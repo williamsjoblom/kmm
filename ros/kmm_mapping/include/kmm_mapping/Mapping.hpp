@@ -23,6 +23,14 @@ struct WallPointCount {
   bool published; // True if this wall has been published as wall
 };
 
+struct Crossing {
+  Eigen::Vector2f position;
+  int nr_of_walls // Number of walls connected at this crossing
+  std::vector<int> wall_index; // The wall index, of the walls connected here.
+};
+
+
+
 class Mapping {
 public:
   Mapping(ros::NodeHandle nh);
@@ -31,8 +39,34 @@ public:
   void set_times_req(int times_req);
 
 private:
+  void get_end_points(
+    int row,
+    int col, bool horizontal,
+    std::pair<float,
+    float> end_points[2]
+  );
+  Eigen::Vector2f Mapping::get_end_point(
+    int row,
+    int col,
+    bool horizontal,
+    bool first
+  );
+
+
+  void add_end_point(int row, int col, bool horizontal, bool first);
+  bool within_bounds(int wall_index);
+  int get_wall_index(int row, int col, int horizontal);
+  int remove_crossings_from_horizontal(int row, int col, bool first);
+  int remove_crossings_from_vertical(int row, int col, bool first);
+  bool remove_end_point(int row, int col, bool horizontal, bool first);
+  bool remove_wall(int row, int col, bool horizontal);
+  int count_crossings_from_vertical(int row, int col, bool first);
+  int count_crossings_from_horizontal(int row, int col, bool first);
+  void check_three_way_crossing(int row, int col, bool horizontal);
+  bool wall_exists(int row, int col, bool horizontal);
   void mapping_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col, int cnt);
+  Crossing make_crossing(int x, int y, int count, int wall_index);
   void reset_wall_point_counts();
   void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
     bool horizontal, int row, int col);
@@ -76,6 +110,6 @@ private:
   std::vector<int> walls_;
 
   // End points
-  std::vector<Eigen::Vector2f> end_points_;
+  std::vector<Crossing> end_points_;
 };
 }
