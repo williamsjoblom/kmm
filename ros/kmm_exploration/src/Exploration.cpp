@@ -57,23 +57,24 @@ namespace kmm_exploration{
    */
   void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
     if (auto_mode_) {
+      if (end_points_changed(msg)){
+        x_ = -1;
+        y_ = -1;
+      }
       geometry_msgs::Point32 closest;
       bool are_end_points = false;
       float min_distance = FLT_MAX;
-      for (geometry_msgs::Point32 point : msg.points){
+      for (int i = 0; i < msg.points.size(); i++){
         are_end_points = true;
-        float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
+        float distance = std::sqrt(std::pow(msg.points[i].x - pos_x_, 2) + std::pow(msg.points[i].y - pos_y_ , 2));
         /* If point is equal to the previous, there shouldn't be a new target
          * unless we were in manual mode since last target was sent */
-         bool point_equals_prev_target = point.x == target_.x && point.y == target_.y;
+         bool point_equals_prev_target = msg.points[i].x == target_.x && msg.points[i].y == target_.y;
        if (!was_in_manual_mode_ && point_equals_prev_target) {
           return;
-          //Uncomment these to make target change goal around point while moving.
-          //closest = point;
-          //break;
         }
         else if (distance < min_distance) {
-          closest = point;
+          closest = msg.points[i];
           min_distance = distance;
         }
       }
@@ -97,6 +98,22 @@ namespace kmm_exploration{
       was_in_manual_mode_ = true;
       returning_ = false;
     }
+  }
+
+  bool Exploration::end_points_changed(sensor_msgs::PointCloud msg){
+    bool res = false;
+    if (old_points != NULL){
+      for (int i = 0; i < msg.points.size(); i++){
+        if (old_points[i].x != msg.points[i].x && old_points[i].y != msg.points[i].y){
+          res = true;
+          break;
+        }
+      }
+    }
+    for (int i = 0; i < msg.points.size(); i++){
+      old_points[i] = msg.points[i];
+    }
+    return res;
   }
 
 /*

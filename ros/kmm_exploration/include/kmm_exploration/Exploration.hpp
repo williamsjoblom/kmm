@@ -42,6 +42,9 @@ private:
   //Stores last point chosen
   geometry_msgs::Point32 target_;
 
+  //Stores previous end points so that  path updates when walls appears
+  geometry_msgs::Point32 old_points[];
+
   //Action Client
   actionlib::SimpleActionClient<kmm_navigation::MoveToAction> navigation_client_;
 
@@ -69,6 +72,7 @@ private:
   void update_target(float new_x, float new_y);
   void publish_auto_mode(const ros::TimerEvent&);
   void publish_finished_mapping(const ros::TimerEvent&);
+  bool end_points_changed(sensor_msgs::PointCloud msg);
 };
 
 }
