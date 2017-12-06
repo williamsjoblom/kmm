@@ -34,6 +34,36 @@ public:
   void set_times_req(int times_req);
 
 private:
+  void calculate_wall(int row, int col, bool horizontal);
+  Eigen::Vector2f get_end_point(
+      int row,
+      int col,
+      bool horizontal,
+      bool first
+    );
+  int count_connecting_walls_at(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_north_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_south_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_west_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_east_end_point(Eigen::Vector2f crossing);
+  void remove_illegal_walls(int walls_at_1, int walls_at_2,
+  Eigen::Vector2f end_point_1, Eigen::Vector2f end_point_2);
+  void add_legal_wall(int wall_index, int walls_at_1, int walls_at_2,
+  Eigen::Vector2f end_point_1, Eigen::Vector2f end_point_2);
+  void remove_north_wall(Eigen::Vector2f crossing);
+  void remove_south_wall(Eigen::Vector2f crossing);
+  void remove_west_wall(Eigen::Vector2f crossing);
+  void remove_east_wall(Eigen::Vector2f crossing);
+  void remove_wall(int wall_index, Eigen::Vector2f end_point);
+  bool wall_exists(int wall_index);
+  int get_wall_index(int row, int col, int horizontal);
+  bool within_bounds(int wall_index);
+  void get_end_points(int row, int col, bool horizontal,
+    std::vector<Eigen::Vector2f> &end_points);
+  int convert_to_wall_index(Eigen::Vector2f end_point, bool horizontal);
+  bool is_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2);
+  void remove_end_point(Eigen::Vector2f end_point);
+
   void mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
   WallPointCount make_wall_point_count(int row, int col);
   void reset_wall_point_counts();
@@ -45,7 +75,12 @@ private:
   bool is_horizontal_wall_at(int row, int col);
   bool is_vertical_wall_at(int row, int col);
   bool is_wall_at(int row, int col, bool horizontal);
-  void update_end_points(int row, int col, bool horizontal);
+
+  void update_end_points(
+    int walls_at_1,
+    int walls_at_2,
+    Eigen::Vector2f end_point_1,
+    Eigen::Vector2f end_point_2);
   void publish_mapping(const ros::TimerEvent&);
   void publish_walls(const ros::TimerEvent&);
   void publish_end_points(const ros::TimerEvent&);
