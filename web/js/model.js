@@ -15,6 +15,7 @@ var view = {
   isDragging: false,
   prevDragPos: { x: 0, y: 0 },
   state: "global",
+  sidebarState: true,
   PX_PER_METER: 150
 };
 
