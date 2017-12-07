@@ -2,6 +2,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include "sensor_msgs/Imu.h"
 #include <Eigen/Dense>
 #include "kmm_position/Pose.h"
 #include <tf/transform_broadcaster.h>
@@ -24,6 +25,7 @@ public:
 
   void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
   void cmd_vel_callback(geometry_msgs::Twist msg);
+  void imu_callback(sensor_msgs::Imu msg);
   void publish_scan(ros::Publisher& pub, std::vector<Eigen::Vector2f>& scan);
   void broadcast_robot_pose(const ros::TimerEvent&);
   void publish_robot_pose(const ros::TimerEvent&);
@@ -46,6 +48,7 @@ private:
   message_filters::Subscriber<sensor_msgs::LaserScan>* laser_sub_;
   tf::MessageFilter<sensor_msgs::LaserScan>* laser_notifier_;
   ros::Subscriber cmd_vel_sub_;
+  ros::Subscriber imu_sub_;
 
   // Publishers
   ros::Publisher position_scan_pub_;

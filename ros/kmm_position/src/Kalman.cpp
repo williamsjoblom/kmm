@@ -56,6 +56,30 @@ namespace kmm_position {
     set_cov(lidar_noise_, linear, angular);
   }
 
+  // New section maintained by mr Hamp
+  // No new object members added yet.
+
+  void Kalman::set_gyro_cov(
+    Eigen::Matrix3f& cov,
+    const Eigen::Matrix3f gyro_m
+  ) {
+    cov = gyro_m;
+    }
+
+  void Kalman::set_accel_cov(
+    Eigen::Matrix3f& cov,
+    const Eigen::Matrix3f accel_m
+  ){}
+
+  void Kalman::set_gyro_noise(const Eigen::Matrix3f gyro_m) {
+    set_gyro_cov(gyro_noise_, gyro_m); 
+  }
+
+  void Kalman::set_accel_noise(const Eigen::Matrix3f accel_m) {
+    // Evaluate if acccelero should be used due to behaviour when moving.
+    set_accel_cov(accel_noise_, accel_m);
+  }
+
   void Kalman::predict(const Eigen::Vector3f& u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
       int hz = std::floor(1 / dt);
@@ -82,8 +106,23 @@ namespace kmm_position {
       state_cov_ *= (I_ - K);
   }
 
-  void Kalman::accel_gyro_measurement(const Eigen::Vector3f y) {
+  void Kalman::gyro_accel_measurement(
+    const Eigen::Vector3f gyro_vec, 
+    const Eigen::Vector3f accel_vec
+  ) {
 
+    gyro_measurement(gyro_vec);
+    //accel_measurement(accel_vec);
+  }
+
+  void Kalman::gyro_measurement(const Eigen::Vector3f y) {
+    Eigen::Matrix3f K = state_cov_ * (state_cov_ + gyro_noise_).inverse();
+    state_ += K * y;
+    state_cov_ *= (I_ - K);
+  }
+
+  void Kalman::accel_measurement(const Eigen::Vector3f y) {
+    // Evaluate if needed due to the behaviour of data when running.
   }
 
   Eigen::Vector3f Kalman::get_state() {

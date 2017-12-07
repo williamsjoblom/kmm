@@ -27,6 +27,7 @@ namespace kmm_position {
     laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
     laser_notifier_->setTolerance(ros::Duration(0.1));
     cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
+    imu_sub_ = nh_.subscribe("imu", 1, &Position::imu_callback, this);
 
     // Services
     reset_position_service_ = nh_.advertiseService("reset_position", &Position::reset_position, this);
@@ -51,6 +52,42 @@ namespace kmm_position {
     if (use_predictions_) {
       Eigen::Vector3f u(msg.linear.x, msg.linear.y, msg.angular.z);
       kalman_.predict(u);
+    }
+  }
+
+  void Position::imu_callback(sensor_msgs::Imu msg){
+    if (use_predictions_) {
+      // Create a vector with present measurements from sensor
+      Eigen::Vector3f gyro_vector(
+        0, 
+        0,
+        msg.angular_velocity.z);
+
+        // Create a vector with present measurements from sensor
+      Eigen::Vector3f accel_vector(
+        msg.linear_acceleration.x, 
+        msg.linear_acceleration.y,
+        0);
+  
+      kalman_.gyro_accel_measurement(gyro_vector, accel_vector);
+
+      // Create matrices for gyro and accelerometer.
+      Eigen::Matrix3f gyro_m;
+
+      gyro_m <<
+        0, 0, 0,
+        0, 0, 0,
+        0, 0, (float)msg.angular_velocity_covariance[9];
+
+      Eigen::Matrix3f accel_m;
+
+      accel_m << 
+        (float)msg.linear_acceleration_covariance[0], (float)msg.linear_acceleration_covariance[1], 0,
+        (float)msg.linear_acceleration_covariance[3], (float)msg.linear_acceleration_covariance[4], 0,
+        0,                                            0,                                            0;
+      
+      kalman_.set_gyro_noise(gyro_m);
+      //kalman_.set_accel_noise(accel_m)
     }
   }
 
