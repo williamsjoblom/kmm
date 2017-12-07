@@ -155,15 +155,17 @@ namespace kmm_mapping {
     return increment_wall_point_count(ver_wall_point_counts_, false, row, col);
   }
 
+  /*
+   * Counts the number of walls that connects at the point crossing, and returns
+   * this value.
+   */
   int Mapping::count_connecting_walls_at(Eigen::Vector2f crossing) {
     int count = 0;
-    Eigen::Vector2f north = get_north_end_point(crossing);
     Eigen::Vector2f south = get_south_end_point(crossing);
-    Eigen::Vector2f west = get_west_end_point(crossing);
     Eigen::Vector2f east = get_east_end_point(crossing);
-    int north_wall = convert_to_wall_index(crossing, false);  //north wall
-    int south_wall = convert_to_wall_index(south, false);       // south wall
-    int east_wall = convert_to_wall_index(east, true);        // east wall
+    int north_wall = convert_to_wall_index(crossing, false);
+    int south_wall = convert_to_wall_index(south, false);
+    int east_wall = convert_to_wall_index(east, true);
     int west_wall = convert_to_wall_index(crossing, true);
     if (wall_exists(north_wall)) {
       count++;
@@ -180,188 +182,193 @@ namespace kmm_mapping {
     return count;
   }
 
+  /*
+   * Gets the north end point of a vertical wall that
+   * has it's south end point at crossing.
+   */
   Eigen::Vector2f Mapping::get_north_end_point(Eigen::Vector2f crossing) {
     Eigen::Vector2f north(crossing.x() - cell_size_, crossing.y());
     return north;
   }
 
+  /*
+   * Gets the south end point of a vertical wall that
+   * has it's north end point at crossing.
+   */
   Eigen::Vector2f Mapping::get_south_end_point(Eigen::Vector2f crossing) {
     Eigen::Vector2f south(crossing.x() + cell_size_, crossing.y());
     return south;
   }
 
+  /*
+   * Gets the west end point of a horizontal wall that
+   * has it's east end point at crossing.
+   */
   Eigen::Vector2f Mapping::get_west_end_point(Eigen::Vector2f crossing) {
     Eigen::Vector2f west(crossing.x(), crossing.y() + cell_size_);
     return west;
   }
 
+  /*
+   * Gets the east end point of a vertical wall that
+   * has it's west end point at crossing.
+   */
   Eigen::Vector2f Mapping::get_east_end_point(Eigen::Vector2f crossing) {
     Eigen::Vector2f east(crossing.x(), crossing.y() - cell_size_);
     return east;
   }
 
-
-  void Mapping::calculate_wall(int row, int col, bool horizontal) {
+  /*
+   * Updates end_points_ and checks if an illegal crossing was made when the
+   * horizontal/vertical wall at (row, col) was added. If so it removes the
+   * walls at that crossing.
+   */
+  void Mapping::secure_wall_validity(int row, int col, bool horizontal) {
     int wall_index = get_wall_index(row, col, horizontal);
     Eigen::Vector2f end_point_1 = get_end_point(row, col, horizontal, true);
     Eigen::Vector2f end_point_2 = get_end_point(row, col, horizontal, false);
     int walls_at_1 = count_connecting_walls_at(end_point_1);
     int walls_at_2 = count_connecting_walls_at(end_point_2);
-    if (walls_at_1 >= 2 || walls_at_2 >= 2) {
-      assert(false);
-      remove_illegal_walls(walls_at_1, walls_at_2, end_point_1, end_point_2);
+    ROS_INFO("Nr of walls at 1: %d", walls_at_1);
+    ROS_INFO("Nr of walls at 2: %d", walls_at_2);
+    if (walls_at_1 >= 3 || walls_at_2 >= 3) {
+      /* An illegal crosing is found. The walls at that crossing are removed */
+      if (walls_at_1 >= 3) {
+        remove_walls_at(end_point_1);
+      }
+      if (walls_at_2 >= 3){
+        remove_walls_at(end_point_2);
+      };
     } else {
-      update_end_points(walls_at_1, walls_at_2,
-        end_point_1, end_point_2);
-      add_wall_at(row, col, horizontal);
+      update_end_points(walls_at_1, end_point_1);
+      update_end_points(walls_at_2, end_point_2);
     }
   }
 
-  void Mapping::remove_illegal_walls(int walls_at_1, int walls_at_2,
-    Eigen::Vector2f end_point_1, Eigen::Vector2f end_point_2) {
-      if (walls_at_1 >= 2) {
-        remove_north_wall(end_point_1);
-        remove_south_wall(end_point_1);
-        remove_west_wall(end_point_1);
-        remove_east_wall(end_point_1);
-      } if (walls_at_2 >= 2) {
-        remove_north_wall(end_point_2);
-        remove_south_wall(end_point_2);
-        remove_west_wall(end_point_2);
-        remove_east_wall(end_point_2);
-      }
+  /*
+   * Removes all the walls that connect to the point crossing.
+   */
+  void Mapping::remove_walls_at(Eigen::Vector2f crossing) {
+    remove_north_wall(crossing);
+    remove_south_wall(crossing);
+    remove_west_wall(crossing);
+    remove_east_wall(crossing);
     }
+
 
   /*
-     updates the end points
-  */
-  void Mapping::update_end_points(
-    int walls_at_1,
-    int walls_at_2,
-    Eigen::Vector2f end_point_1,
-    Eigen::Vector2f end_point_2) {
-    if (walls_at_1 == 0) {
+   * Takes the number of walls that connects to a crossing, and the position of
+   * the crossing. If only one wall connects to this crossings, it's an
+   * end_point and is added to end_points_. If there are 2 (it's
+   * assumed that no more than 2 walls can be connected), the
+   * crossing is removed from end_points_.
+   */
+  void Mapping::update_end_points(int walls_at, Eigen::Vector2f crossing) {
+    if (walls_at == 1) {
       //  Add new end point
-      end_points_.push_back(end_point_1);
+      end_points_.push_back(crossing);
     } else {
-      remove_end_point(end_point_1);
+      // walls_at == 2 and this is no longer an endpoint.
+      remove_end_point(crossing);
     }
-    if (walls_at_2 == 0) {
-      // Add new end point
-      end_points_.push_back(end_point_2);
-    } else {
-      remove_end_point(end_point_2);
-    }
-    }
+  }
 
+  /*
+   * Removes the north vertical wall from crossing and updates end_points_
+   */
   void Mapping::remove_north_wall(Eigen::Vector2f crossing) {
     Eigen::Vector2f north_end_point = get_north_end_point(crossing);
     int north_wall = convert_to_wall_index(crossing, false);
     remove_wall(north_wall, north_end_point);
   }
 
+
+  /*
+   * Removes the south vertical wall from crossing and updates end_points_
+   */
   void Mapping::remove_south_wall(Eigen::Vector2f crossing) {
     Eigen::Vector2f south_end_point = get_south_end_point(crossing);
     int south_wall = convert_to_wall_index(south_end_point, false);
     remove_wall(south_wall, south_end_point);
   }
 
+
+  /*
+   * Removes the west horizontal wall from crossing and updates end_points_
+   */
   void Mapping::remove_west_wall(Eigen::Vector2f crossing) {
     Eigen::Vector2f west_end_point = get_west_end_point(crossing);
     int west_wall = convert_to_wall_index(crossing, true);
     remove_wall(west_wall, west_end_point);
   }
 
+  /*
+   * Removes the east horizontal wall from crossing and updates end_points_
+   */
   void Mapping::remove_east_wall(Eigen::Vector2f crossing) {
     Eigen::Vector2f east_end_point = get_east_end_point(crossing);
     int east_wall = convert_to_wall_index(east_end_point, true);
     remove_wall(east_wall, east_end_point);
   }
 
-/*
-  * Removes wall from walls_ if it exsists and updates the end_points
-  */
- void Mapping::remove_wall(int wall_index, Eigen::Vector2f end_point) {
-   if (wall_exists(wall_index)) {
-     walls_[wall_index] = 0;
-     int nr_of_walls = count_connecting_walls_at(end_point);
-     if (nr_of_walls == 0) {
-       remove_end_point(end_point);
-     } else if (nr_of_walls == 1) {
-       // add new end point
-       end_points_.push_back(end_point);
-     } else {
-       //TODO: ERROR!
-     }
-   }
- }
+  /*
+   * Removes wall from walls_ if it exsists and updates end_points_
+   */
+   void Mapping::remove_wall(int wall_index, Eigen::Vector2f end_point) {
+     if (wall_exists(wall_index)) {
+       walls_[wall_index] = 0;  // remove wall
+       int nr_of_walls = count_connecting_walls_at(end_point);
+       if (nr_of_walls == 0) {
+         remove_end_point(end_point);
+       } else if (nr_of_walls == 1) {
+         // add new end point
+         end_points_.push_back(end_point);
+       }
+    };
+  }
 
-
+  /*
+   * Return true if the index is within bounds and a wall exists at this index,
+   * otherwise false
+   */
   bool Mapping::wall_exists(int wall_index) {
-    bool is_within_bounds = within_bounds(wall_index);
-    if (is_within_bounds) {
-      bool is_wall = (walls_[wall_index] == 1);
-      return is_wall;
+    if (within_bounds(wall_index)) {
+      return walls_[wall_index];
     }
+    ROS_INFO("OUTSIDE OF BOUNDS");
     return false;
-}
+  }
 
- /* Returns the wall index for wall*/
+  /*
+   * Returns the wall index for wall
+   */
   int Mapping::get_wall_index(int row, int col, int horizontal) {
     if (horizontal) {
       int t = (col >= 1 ? 1 : 0);
       return row*w_ + row*(w_ + 1) + offset_ + col - t;
     } else {
+      if (row == 0) {
+        // Illegal row for vertical
+        return -1;
+      };
       return row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
-    }
-}
-
-/*
-  * Returns true if the wall index is within bounds.
-  */
- bool Mapping::within_bounds(int wall_index) {
-   return (0 <= wall_index < walls_size_);
-}
-
-  /*
-  * Saves the end points of the wall in end_points[2], the first endpoint
-  * (north on vertical, west on horizontal) first, and then the second.
-  */
-void Mapping::get_end_points(
-    int row,
-    int col,
-    bool horizontal,
-    std::vector<Eigen::Vector2f> &end_points
-  )
-  {
-    float x_1;
-    float y_1;
-    float x_2;
-    float y_2;
-    if (horizontal) {
-      x_2 = row * cell_size_;
-      y_2 = (col - 1*(col >= 1 ? 1 : 0)) * cell_size_;
-      x_1 = x_2;
-      y_1 = y_2 + cell_size_;
-    } else {
-      x_1 = (row - 1) * cell_size_;
-      y_1 = col * cell_size_;
-      x_2 = x_1 + cell_size_;
-      y_2 = y_1;
     };
-    Eigen::Vector2f end_point_1(x_1, y_1);
-    Eigen::Vector2f end_point_2(x_2, y_2);
-    end_points[0] = end_point_1;
-    end_points[1] = end_point_2;
-}
-
-
+  }
 
   /*
-  * Saves the end points of the wall in end_points[2], the first endpoint
-  * (north on vertical, west on horizontal) first, and then the second.
+   * Returns true if the wall index is within bounds, otherwise false
+   */
+ bool Mapping::within_bounds(int wall_index) {
+   return (0 <= wall_index && wall_index < walls_size_);
+ }
+
+  /*
+  * Returns the end point of a wall. If first is true, the first endpoint
+  * (north on vertical, west on horizontal) is returned, otherwise
+  * the second end point is returned (the south on vertical and
+  * east on horizontal).
   */
-Eigen::Vector2f Mapping::get_end_point(
+  Eigen::Vector2f Mapping::get_end_point(
     int row,
     int col,
     bool horizontal,
@@ -385,34 +392,37 @@ Eigen::Vector2f Mapping::get_end_point(
     };
     Eigen::Vector2f end_point(x, y);
     return end_point;
-}
+  }
 
-/* translates the second end point (the south end in vertical wall and east
-    side on horizontal wall) of a wall to it's wall index.
-*/
-int Mapping::convert_to_wall_index(
-  Eigen::Vector2f end_point,
-  bool horizontal) {
-    float x = end_point[0];
-    float y = end_point[1];
-    assert (cell_size_ != 0);
-    int row = round(y / cell_size_);
-    int col = round(x / cell_size_);
-    if (horizontal && col >= 0) {
-      col++;
-    }
-    int wall_index = get_wall_index(row, col, horizontal);
-    return wall_index;
-}
+  /*
+   * Converts the second end point (the south end in vertical wall and the east
+   * end on horizontal wall) of a wall to it's wall index.
+    */
+  int Mapping::convert_to_wall_index(
+    Eigen::Vector2f end_point,
+    bool horizontal) {
+      float x = end_point[0];
+      float y = end_point[1];
+      assert (cell_size_ != 0);
+      int row = round(x / cell_size_);
+      int col = round(y / cell_size_);
+      if (horizontal && col >= 0) {
+        col++;
+      }
+      int wall_index = get_wall_index(row, col, horizontal);
+      return wall_index;
+  }
 
-/* Return true if vector1 == vector2, otherwise false*/
+  /*
+   * Return true if vector1 == vector2, otherwise false
+   */
   bool Mapping::is_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2){
     float eps = 0.000001;
     float diff_x = fabs(vector1.x() - vector2.x());
     float diff_y = fabs(vector1.y() - vector2.y());
     bool point_equal = (diff_x < eps) && (diff_y < eps);
     return point_equal;
-}
+  }
 
   /*
    * Increment the wall point count (pnt_cnt) of a wall.
@@ -435,9 +445,10 @@ int Mapping::convert_to_wall_index(
           wall_point_count.found = true;
           wall_point_count.times++;
           if (wall_point_count.times == times_req_) {
-            //add_wall_at(row, col, horizontal);
+
             wall_point_count.added = true;
-            calculate_wall(row, col, horizontal);
+            add_wall_at(row, col, horizontal);
+            secure_wall_validity(row, col, horizontal);
           };
         };
         return;
@@ -480,16 +491,22 @@ int Mapping::convert_to_wall_index(
     };
   }
 
+  /*
+   * Removes end_point from end_points_ (if it exists).
+  */
   void Mapping::remove_end_point(Eigen::Vector2f end_point) {
-    bool found;
-    Eigen::Vector2f curr_end_point;
+    float eps = 0.000001;
+    float x = end_point.x();
+    float y = end_point.y();
     for (auto it = end_points_.begin(); it < end_points_.end(); ) {
-      curr_end_point = (*it);
-      found = is_equal(end_point, curr_end_point);
-      if (found) {
-        end_points_.erase(it);
+      float diff_x = fabs((*it).x() - x);
+      float diff_y = fabs((*it).y() - y);
+      bool end_point_equal = (diff_x < eps) && (diff_y < eps);
+      if (end_point_equal) {
+        it = end_points_.erase(it);
         return;
-      };
+      }
+      it++;
     };
   }
 
