@@ -56,7 +56,7 @@ namespace kmm_position {
   }
 
   void Position::imu_callback(sensor_msgs::Imu msg){
-    if (use_predictions_) {
+    if (use_gyroscope_) {
       // Create a vector with present measurements from sensor
       Eigen::Vector3f gyro_vector(
         0, 
