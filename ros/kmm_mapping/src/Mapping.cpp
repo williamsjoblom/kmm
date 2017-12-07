@@ -233,6 +233,7 @@ namespace kmm_mapping {
     ROS_INFO("Nr of walls at 2: %d", walls_at_2);
     if (walls_at_1 >= 3 || walls_at_2 >= 3) {
       /* An illegal crosing is found. The walls at that crossing are removed */
+      remove_wall(row, col, horizontal);
       if (walls_at_1 >= 3) {
         remove_walls_at(end_point_1);
       }
@@ -467,6 +468,18 @@ namespace kmm_mapping {
       walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 1;
     } else {
       walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
+    };
+  }
+
+  /*
+   * Remove wall from walls_.
+   */
+  void Mapping::remove_wall(int row, int col, bool horizontal) {
+    if (horizontal) {
+      int t = (col >= 1 ? 1 : 0);
+      walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 0;
+    } else {
+      walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 0;
     };
   }
 

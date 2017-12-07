@@ -41,6 +41,7 @@ private:
       bool horizontal,
       bool first
     );
+  void remove_wall(int row, int col, bool horizontal);
   int count_connecting_walls_at(Eigen::Vector2f crossing);
   Eigen::Vector2f get_north_end_point(Eigen::Vector2f crossing);
   Eigen::Vector2f get_south_end_point(Eigen::Vector2f crossing);
