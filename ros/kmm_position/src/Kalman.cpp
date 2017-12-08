@@ -116,6 +116,7 @@ namespace kmm_position {
   }
 
   void Kalman::gyro_measurement(const Eigen::Vector3f y) {
+    y[2] -= state_[2];
     ROS_INFO_STREAM("y: " << y);
     ROS_INFO_STREAM("state_cov_: " << state_cov_);
     ROS_INFO_STREAM("gyro_noise_: " << gyro_noise_);
