@@ -218,7 +218,7 @@ namespace kmm_mapping {
     return east;
   }
 
-  /*
+  /* TODO: REMOVE
    * Updates end_points_ and checks if an illegal crossing was made when the
    * horizontal/vertical wall at (row, col) was added. If so it removes the
    * walls at that crossing.
@@ -233,7 +233,7 @@ namespace kmm_mapping {
     ROS_INFO("Nr of walls at 2: %d", walls_at_2);
     if (walls_at_1 >= 3 || walls_at_2 >= 3) {
       /* An illegal crosing is found. The walls at that crossing are removed */
-      remove_wall(row, col, horizontal);
+      remove_wall_at(row, col, horizontal);
       if (walls_at_1 >= 3) {
         remove_walls_at(end_point_1);
       }
@@ -241,8 +241,8 @@ namespace kmm_mapping {
         remove_walls_at(end_point_2);
       };
     } else {
-      update_end_points(walls_at_1, end_point_1);
-      update_end_points(walls_at_2, end_point_2);
+      update_end_points_old(walls_at_1, end_point_1);
+      update_end_points_old(walls_at_2, end_point_2);
     }
   }
 
@@ -257,14 +257,15 @@ namespace kmm_mapping {
     }
 
 
-  /*
+  /* TODO: REMOVE
+   * void Mapping::update_end_points(Eigen::Vector2f end_point)
    * Takes the number of walls that connects to a crossing, and the position of
    * the crossing. If only one wall connects to this crossings, it's an
    * end_point and is added to end_points_. If there are 2 (it's
    * assumed that no more than 2 walls can be connected), the
    * crossing is removed from end_points_.
    */
-  void Mapping::update_end_points(int walls_at, Eigen::Vector2f crossing) {
+  void Mapping::update_end_points_old(int walls_at, Eigen::Vector2f crossing) {
     if (walls_at == 1) {
       //  Add new end point
       end_points_.push_back(crossing);
@@ -273,6 +274,30 @@ namespace kmm_mapping {
       remove_end_point(crossing);
     }
   }
+
+  /*
+   * Updates end_points_ .
+  */
+  void Mapping::update_end_points(Eigen::Vector2f end_point) {
+    float eps = 0.000001;
+    float x = end_point.x();
+    float y = end_point.y();
+    bool found_end_point = false;
+    for (auto it = end_points_.begin(); it < end_points_.end(); ) {
+      float diff_x = fabs((*it).x() - x);
+      float diff_y = fabs((*it).y() - y);
+      bool end_point_equal = (diff_x < eps) && (diff_y < eps);
+      if (end_point_equal) {
+        it = end_points_.erase(it);
+        found_end_point = true;
+      }
+      it++;
+    };
+    if (!found_end_point) {
+      end_points_.push_back(end_point);
+    }
+  }
+
 
   /*
    * Removes the north vertical wall from crossing and updates end_points_
@@ -312,16 +337,32 @@ namespace kmm_mapping {
     remove_wall(east_wall, east_end_point);
   }
 
+
+  void Mapping::illegal_walls_callback(Eigen::Vector2f end_point) {
+      remove_end_point(end_point);
+      remove_walls_at(end_point);
+    }
+
   /*
    * Removes wall from walls_ if it exsists and updates end_points_
    */
    void Mapping::remove_wall(int wall_index, Eigen::Vector2f end_point) {
      if (wall_exists(wall_index)) {
        walls_[wall_index] = 0;  // remove wall
+       update_end_points(end_point);
+       }
+     }
+
+  /* TODO: REMOVE
+   * Removes wall from walls_ if it exsists and updates end_points_
+   */
+   void Mapping::remove_wall_old(int wall_index, Eigen::Vector2f end_point) {
+     if (wall_exists(wall_index)) {
+       walls_[wall_index] = 0;  // remove wall
        int nr_of_walls = count_connecting_walls_at(end_point);
-       if (nr_of_walls == 0) {
+       if (nr_of_walls == 0 || nr_of_walls == 2) {
          remove_end_point(end_point);
-       } else if (nr_of_walls == 1) {
+       } else if (nr_of_walls == 1 || nr_of_walls == 3) {
          // add new end point
          end_points_.push_back(end_point);
        }
@@ -446,10 +487,14 @@ namespace kmm_mapping {
           wall_point_count.found = true;
           wall_point_count.times++;
           if (wall_point_count.times == times_req_) {
-
             wall_point_count.added = true;
             add_wall_at(row, col, horizontal);
-            secure_wall_validity(row, col, horizontal);
+            Eigen::Vector2f end_point_1 = get_end_point(row, col,
+              horizontal, true);
+            Eigen::Vector2f end_point_2 = get_end_point(row, col,
+               horizontal, false);
+            update_end_points(end_point_1);
+            update_end_points(end_point_2);
           };
         };
         return;
@@ -474,7 +519,7 @@ namespace kmm_mapping {
   /*
    * Remove wall from walls_.
    */
-  void Mapping::remove_wall(int row, int col, bool horizontal) {
+  void Mapping::remove_wall_at(int row, int col, bool horizontal) {
     if (horizontal) {
       int t = (col >= 1 ? 1 : 0);
       walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 0;

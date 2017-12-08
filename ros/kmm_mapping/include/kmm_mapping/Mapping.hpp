@@ -41,7 +41,10 @@ private:
       bool horizontal,
       bool first
     );
-  void remove_wall(int row, int col, bool horizontal);
+  void illegal_walls_callback(Eigen::Vector2f end_point);
+  void remove_wall_old(int wall_index, Eigen::Vector2f end_point);
+  void update_end_points(Eigen::Vector2f end_point);
+  void remove_wall_at(int row, int col, bool horizontal);
   int count_connecting_walls_at(Eigen::Vector2f crossing);
   Eigen::Vector2f get_north_end_point(Eigen::Vector2f crossing);
   Eigen::Vector2f get_south_end_point(Eigen::Vector2f crossing);
@@ -72,7 +75,7 @@ private:
   bool is_vertical_wall_at(int row, int col);
   bool is_wall_at(int row, int col, bool horizontal);
 
-  void update_end_points(int walls_at, Eigen::Vector2f end_point);
+  void update_end_points_old(int walls_at, Eigen::Vector2f end_point);
   void publish_mapping(const ros::TimerEvent&);
   void publish_walls(const ros::TimerEvent&);
   void publish_end_points(const ros::TimerEvent&);
