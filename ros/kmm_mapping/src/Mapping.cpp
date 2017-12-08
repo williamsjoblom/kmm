@@ -3,7 +3,8 @@
 namespace kmm_mapping {
 
   Mapping::Mapping(ros::NodeHandle nh)
-  : nh_(nh)
+  : nh_(nh),
+    action_server_(nh_, "remove_walls", boost::bind(&Mapping::remove_walls_callback, this, _1), false)
   {
     // Publishers
     mapping_pub_ = nh_.advertise<std_msgs::Bool>("mapping", 1);
@@ -52,6 +53,10 @@ namespace kmm_mapping {
     // Wall point count requirements
     pnt_cnt_req_ = 5;
     times_req_ = 5;
+
+    // Start the action server when all other
+    // instance variables are initiated.
+    action_server_.start();
   }
 
   Mapping::~Mapping() {
@@ -585,5 +590,13 @@ namespace kmm_mapping {
     end_points_.clear();
 
     return true;
+  }
+
+  /*
+   * Action server callback. Gets an end point that kmm_exploration has
+   * deemed unreachable. Removes it and all walls connected to it.
+  */
+  void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
+
   }
 }

@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <std_msgs/Bool.h>
 #include <std_srvs/SetBool.h>
+#include <actionlib/server/simple_action_server.h>
+#include <kmm_mapping/RemoveWallsAction.h>
 
 namespace kmm_mapping {
 
@@ -80,6 +82,7 @@ private:
          std_srvs::SetBool::Response &res);
   bool reset_map(std_srvs::SetBool::Request &req,
         std_srvs::SetBool::Response &res);
+  void remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point);
 
   ros::NodeHandle nh_;
 
@@ -99,6 +102,11 @@ private:
   // Services
   ros::ServiceServer mapping_service_;
   ros::ServiceServer reset_map_service_;
+
+  // Action Server
+  actionlib::SimpleActionServer<kmm_mapping::RemoveWallsAction> action_server_;
+  kmm_mapping::RemoveWallsFeedback feedback_;
+  kmm_mapping::RemoveWallsResult result_;
 
   // Map variables
   bool mapping_; // True if mapping enabled

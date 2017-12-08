@@ -8,10 +8,12 @@
 namespace kmm_exploration{
 
   Exploration::Exploration(ros::NodeHandle nh)
-  : nh_(nh), navigation_client_("navigation", true)
+  : nh_(nh), navigation_client_("navigation", true),
+  remove_walls_client_("remove_walls", true)
   {
     // Subscribers
     end_points_sub_ = nh_.subscribe("end_points", 1, &Exploration::end_points_callback, this);
+    path_sub_ = nh_.subscribe("path", 1, &Exploration::path_callback, this);
     position_sub_ = nh_.subscribe("position", 1, &Exploration::position_callback, this);
 
     // Publishers
@@ -24,6 +26,7 @@ namespace kmm_exploration{
 
     // Set initial values
     auto_mode_ = false;
+    has_target_end_point_ = false;
     was_in_manual_mode_ = true;
     returning_ = false;
     finished_mapping_ = false;
@@ -82,10 +85,12 @@ namespace kmm_exploration{
         float new_y;
         if (are_end_points) {
           target_ = closest;
+          has_target_end_point_ = true;
           new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
           new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
           returning_ = false;
         } else { // Return to start position if not end points remain
+          has_target_end_point_ = false;
           new_x = 0.2;
           new_y = 0.2;
           returning_ = true;
@@ -103,10 +108,17 @@ namespace kmm_exploration{
   Checks if value is new and in that case publishes and sends new goal.
 */
   void Exploration::update_target(float new_x, float new_y) {
-    if (was_in_manual_mode_ || !(new_x == x_ && new_y == y_)) {
+    bool new_target_equals_old_target = new_x == x_ && new_y == y_;
+    if (was_in_manual_mode_ || !new_target_equals_old_target) {
       x_ = new_x;
       y_ = new_y;
       send_goal();
+    } else {
+      bool target_unreachable = has_target_end_point_ && path_.empty();
+      bool target_unexplorable = has_target_end_point_ && is_at_target_position();
+      if (target_unreachable || target_unexplorable) {
+        send_remove_walls();
+      }
     }
   }
 
@@ -121,6 +133,22 @@ namespace kmm_exploration{
     navigation_client_.sendGoal(goal); // Send new goal
   }
 
+  /*
+   *  Sends an end point to mapping to remove it and the walls surrounding it.
+   */
+  void Exploration::send_remove_walls() {
+    kmm_mapping::RemoveWallsGoal end_point;
+    end_point.x = target_.x;
+    end_point.x = target_.y;
+    remove_walls_client_.sendGoal(end_point);
+    if (remove_walls_client_.waitForResult()) {
+      has_target_end_point_ = false;
+    } else {
+      ROS_ERROR("Failed to remove illegal end point and its walls!");
+      assert(false);
+    }
+  }
+
   void Exploration::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
     pos_x_ = msg.pose.pose.position.x;
     pos_y_ = msg.pose.pose.position.y;
@@ -128,6 +156,14 @@ namespace kmm_exploration{
     if (returning_ && is_at_start_position()) {
       finished_mapping_ = true;
       returning_ = false;
+    }
+  }
+
+  void Exploration::path_callback(geometry_msgs::PoseArray msg) {
+    path_.clear();
+    for (const auto &p : msg.poses) {
+      Eigen::Vector2f point(p.position.x, p.position.y);
+      path_.push_back(point);
     }
   }
 
@@ -139,6 +175,14 @@ namespace kmm_exploration{
     float diff_y = fabs(pos_y_ - start_pos_y);
     bool is_at_start_position = (diff_x < eps) && (diff_y < eps);
     return is_at_start_position;
+  }
+
+  bool Exploration::is_at_target_position() {
+    float eps = 0.04;
+    float diff_x = fabs(pos_x_ - x_);
+    float diff_y = fabs(pos_y_ - y_);
+    bool is_at_target_position = (diff_x < eps) && (diff_y < eps);
+    return is_at_target_position;
   }
 
   void Exploration::publish_auto_mode(const ros::TimerEvent&) {

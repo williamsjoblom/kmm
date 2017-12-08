@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   kmm_navigation
+  kmm_mapping
   actionlib
   actionlib_msgs
   std_srvs
@@ -31,6 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 #generate_messages(
 #  DEPENDENCIES
+#  actionlib_msgs
 #  std_msgs
 #  sensor_msgs
 #  geometry_msgs
@@ -67,6 +69,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${kmm_navigation_INCLUDE_DIRS}
+  ${kmm_mapping_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable
@@ -83,10 +86,12 @@ add_dependencies(kmm_exploration_node
   ${kmm_exploration_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   kmm_navigation # MoveTo.action
+  kmm_mapping
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_exploration_node
   kmm_navigation
+  kmm_mapping
   ${catkin_LIBRARIES}
 )

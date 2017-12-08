@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   laser_geometry
+  actionlib_msgs
+  actionlib
   dynamic_reconfigure
 )
 
@@ -28,12 +30,19 @@ add_message_files(
  wall_positions.msg
 )
 
+## Generate actions in the 'action' folder
+add_action_files(
+  FILES
+  RemoveWalls.action
+)
+
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
  DEPENDENCIES
  geometry_msgs
  sensor_msgs
  std_msgs
+ actionlib_msgs
 )
 
 ################################################
@@ -48,6 +57,11 @@ generate_dynamic_reconfigure_options(
 ###################################
 ## catkin specific configuration ##
 ###################################
+
+# Declare a C++ library
+add_library(kmm_mapping
+  src/Mapping.cpp
+)
 
 catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs std_srvs message_runtime dynamic_reconfigure
