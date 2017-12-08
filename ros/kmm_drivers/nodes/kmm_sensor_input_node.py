@@ -20,7 +20,7 @@ SENSORS_GRAVITY_STANDARD = 9.80665
 # Values from adafruit c++ gyro code to modfy raw data.
 GYRO_RANGE_250DPS = 0.00875
 GYRO_RANGE_500DPS = 0.0175
-SENSORS_DPS_TO_RADS = 0.017453293
+SENSORS_DPS_TO_RADS = 0.017453293 * 0.5
 
 x_mean = 0.0
 y_mean = 0.0
@@ -154,6 +154,7 @@ if __name__ == "__main__":
       imu_msg.header.stamp = rospy.Time.now()
       imu_msg.header.frame_id = 'imu'
 
+      z_mean = 0
       # Convert values to understandable format and package into Imu message.
       x_acc = (sensor_data[0] - x_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
       y_acc = (sensor_data[1] - y_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
