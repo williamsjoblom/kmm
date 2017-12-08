@@ -43,7 +43,6 @@ private:
       bool horizontal,
       bool first
     );
-  void illegal_walls_callback(Eigen::Vector2f end_point);
   void remove_wall_old(int wall_index, Eigen::Vector2f end_point);
   void update_end_points(Eigen::Vector2f end_point);
   void remove_wall_at(int row, int col, bool horizontal);

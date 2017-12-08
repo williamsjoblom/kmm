@@ -342,12 +342,6 @@ namespace kmm_mapping {
     remove_wall(east_wall, east_end_point);
   }
 
-
-  void Mapping::illegal_walls_callback(Eigen::Vector2f end_point) {
-      remove_end_point(end_point);
-      remove_walls_at(end_point);
-    }
-
   /*
    * Removes wall from walls_ if it exsists and updates end_points_
    */
@@ -642,6 +636,8 @@ namespace kmm_mapping {
    * deemed unreachable. Removes it and all walls connected to it.
   */
   void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
-
+    Eigen::Vector2f e(end_point->x, end_point->y);
+    remove_end_point(e);
+    remove_walls_at(e);
   }
 }
