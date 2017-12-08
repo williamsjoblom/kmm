@@ -57,37 +57,37 @@ namespace kmm_position {
 
   void Position::imu_callback(sensor_msgs::Imu msg){
     if (use_gyroscope_) {
-      // Create a vector with present measurements from sensor
-      Eigen::Vector3f gyro_vector(
-        0, 
-        0,
-        msg.angular_velocity.z);
-
-        // Create a vector with present measurements from sensor
-      Eigen::Vector3f accel_vector(
-        msg.linear_acceleration.x, 
-        msg.linear_acceleration.y,
-        0);
-  
-      kalman_.gyro_accel_measurement(gyro_vector, accel_vector);
-
       // Create matrices for gyro and accelerometer.
       Eigen::Matrix3f gyro_m;
 
       gyro_m <<
         0, 0, 0,
         0, 0, 0,
-        0, 0, (float)msg.angular_velocity_covariance[9];
+        0, 0, config_.gyro_noise;//(float)msg.angular_velocity_covariance[8];
 
       Eigen::Matrix3f accel_m;
 
-      accel_m << 
+      accel_m <<
         (float)msg.linear_acceleration_covariance[0], (float)msg.linear_acceleration_covariance[1], 0,
         (float)msg.linear_acceleration_covariance[3], (float)msg.linear_acceleration_covariance[4], 0,
         0,                                            0,                                            0;
-      
+
       kalman_.set_gyro_noise(gyro_m);
       //kalman_.set_accel_noise(accel_m)
+
+      // Create a vector with present measurements from sensor
+      Eigen::Vector3f gyro_vector(
+        0,
+        0,
+        msg.angular_velocity.z);
+
+        // Create a vector with present measurements from sensor
+      Eigen::Vector3f accel_vector(
+        msg.linear_acceleration.x,
+        msg.linear_acceleration.y,
+        0);
+
+      kalman_.gyro_accel_measurement(gyro_vector, accel_vector);
     }
   }
 

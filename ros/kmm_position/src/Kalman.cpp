@@ -72,7 +72,7 @@ namespace kmm_position {
   ){}
 
   void Kalman::set_gyro_noise(const Eigen::Matrix3f gyro_m) {
-    set_gyro_cov(gyro_noise_, gyro_m); 
+    set_gyro_cov(gyro_noise_, gyro_m);
   }
 
   void Kalman::set_accel_noise(const Eigen::Matrix3f accel_m) {
@@ -107,7 +107,7 @@ namespace kmm_position {
   }
 
   void Kalman::gyro_accel_measurement(
-    const Eigen::Vector3f gyro_vec, 
+    const Eigen::Vector3f gyro_vec,
     const Eigen::Vector3f accel_vec
   ) {
 
@@ -116,9 +116,20 @@ namespace kmm_position {
   }
 
   void Kalman::gyro_measurement(const Eigen::Vector3f y) {
-    Eigen::Matrix3f K = state_cov_ * (state_cov_ + gyro_noise_).inverse();
+    ROS_INFO_STREAM("y: " << y);
+    ROS_INFO_STREAM("state_cov_: " << state_cov_);
+    ROS_INFO_STREAM("gyro_noise_: " << gyro_noise_);
+    //Eigen::Matrix3f K = state_cov_ * (state_cov_ + gyro_noise_).inverse();
+    Eigen::Matrix3f K;
+    K <<
+      0, 0, 0,
+      0, 0, 0,
+      0, 0, state_cov_(8) / (state_cov_(8) + gyro_noise_(8));
     state_ += K * y;
     state_cov_ *= (I_ - K);
+    ROS_INFO_STREAM("K: " << K);
+    ROS_INFO_STREAM("state_: " << state_);
+    ROS_INFO_STREAM("state_cov_: " << state_cov_);
   }
 
   void Kalman::accel_measurement(const Eigen::Vector3f y) {
