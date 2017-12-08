@@ -80,7 +80,7 @@ namespace kmm_position {
     set_accel_cov(accel_noise_, accel_m);
   }
 
-  void Kalman::predict(const Eigen::Vector3f& u) {
+  void Kalman::predict(Eigen::Vector3f u) {
       float dt = (ros::Time::now() - predict_ts_).toSec();
       int hz = std::floor(1 / dt);
       predict_ts_ = ros::Time::now();
@@ -100,7 +100,7 @@ namespace kmm_position {
       }
   }
 
-  void Kalman::lidar_measurement(const Eigen::Vector3f y) {
+  void Kalman::lidar_measurement(Eigen::Vector3f y) {
       Eigen::Matrix3f K = state_cov_ * (state_cov_ + lidar_noise_).inverse();
       state_ += K * y;
       state_cov_ *= (I_ - K);
@@ -115,7 +115,7 @@ namespace kmm_position {
     //accel_measurement(accel_vec);
   }
 
-  void Kalman::gyro_measurement(const Eigen::Vector3f y) {
+  void Kalman::gyro_measurement(Eigen::Vector3f y) {
     y[2] -= state_[2];
     ROS_INFO_STREAM("y: " << y);
     ROS_INFO_STREAM("state_cov_: " << state_cov_);
@@ -133,7 +133,7 @@ namespace kmm_position {
     ROS_INFO_STREAM("state_cov_: " << state_cov_);
   }
 
-  void Kalman::accel_measurement(const Eigen::Vector3f y) {
+  void Kalman::accel_measurement(Eigen::Vector3f y) {
     // Evaluate if needed due to the behaviour of data when running.
   }
 

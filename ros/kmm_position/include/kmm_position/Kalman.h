@@ -12,13 +12,13 @@ namespace kmm_position {
     Kalman(float x, float y, float angle);
 
     // Predict next state based on steering signal.
-    void predict(const Eigen::Vector3f& u);
+    void predict(Eigen::Vector3f u);
 
     // Update the estimated state based on measured values.
-    void lidar_measurement(const Eigen::Vector3f y);
-    void gyro_accel_measurement(const Eigen::Vector3f gyro_vec, const Eigen::Vector3f accel_vec);
-    void gyro_measurement(const Eigen::Vector3f y);
-    void accel_measurement(const Eigen::Vector3f y);
+    void lidar_measurement(Eigen::Vector3f y);
+    void gyro_accel_measurement(Eigen::Vector3f gyro_vec, Eigen::Vector3f accel_vec);
+    void gyro_measurement(Eigen::Vector3f y);
+    void accel_measurement(Eigen::Vector3f y);
 
     // Current state.
     Eigen::Vector3f get_state();
