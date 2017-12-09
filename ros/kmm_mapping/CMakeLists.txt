@@ -25,10 +25,10 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(
- FILES
- wall_positions.msg
-)
+#add_message_files(
+# FILES
+# wall_positions.msg
+#)
 
 ## Generate actions in the 'action' folder
 add_action_files(
@@ -99,5 +99,6 @@ add_dependencies(kmm_mapping_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_mapping_node
+  kmm_mapping
   ${catkin_LIBRARIES}
 )

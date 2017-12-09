@@ -6,7 +6,6 @@
 #include "std_msgs/MultiArrayLayout.h"
 #include "std_msgs/MultiArrayDimension.h"
 #include "std_msgs/Int8MultiArray.h"
-#include "kmm_mapping/wall_positions.h"
 #include <Eigen/Dense>
 #include <iostream>
 #include <vector>
