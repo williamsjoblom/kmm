@@ -15,9 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   laser_geometry
-  actionlib_msgs
-  actionlib
   dynamic_reconfigure
+  actionlib
 )
 
 ################################################
@@ -30,10 +29,9 @@ find_package(catkin REQUIRED COMPONENTS
 # wall_positions.msg
 #)
 
-## Generate actions in the 'action' folder
 add_action_files(
-  FILES
-  RemoveWalls.action
+  DIRECTORY action
+  FILES RemoveWalls.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -57,11 +55,6 @@ generate_dynamic_reconfigure_options(
 ###################################
 ## catkin specific configuration ##
 ###################################
-
-# Declare a C++ library
-add_library(kmm_mapping
-  src/Mapping.cpp
-)
 
 catkin_package(
   CATKIN_DEPENDS geometry_msgs sensor_msgs roscpp std_msgs std_srvs message_runtime dynamic_reconfigure
@@ -92,7 +85,6 @@ add_executable(kmm_mapping_node
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_mapping_node
-  kmm_mapping_generate_messages_cpp
   ${kmm_mapping_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg
@@ -100,6 +92,5 @@ add_dependencies(kmm_mapping_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_mapping_node
-  kmm_mapping
   ${catkin_LIBRARIES}
 )
