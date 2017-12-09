@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   message_generation
   laser_geometry
+  kmm_mapping
   actionlib_msgs
   actionlib
   nav_msgs
@@ -51,7 +52,7 @@ add_library(kmm_navigation
 )
 
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  CATKIN_DEPENDS std_msgs
 #  LIBRARIES kmm_navigation
 #  DEPENDS system_lib
@@ -66,6 +67,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${kmm_mapping_INCLUDE_DIRS}
 )
 
 ## Declare a C++ executable
@@ -84,9 +86,11 @@ add_executable(kmm_navigation_node
 add_dependencies(kmm_navigation_node
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  kmm_mapping
 )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kmm_navigation_node
+  kmm_mapping
   ${catkin_LIBRARIES}
 )
