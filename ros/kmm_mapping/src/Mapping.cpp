@@ -639,5 +639,6 @@ namespace kmm_mapping {
     Eigen::Vector2f e(end_point->x, end_point->y);
     remove_end_point(e);
     remove_walls_at(e);
+    action_server_.setSucceeded(result_);
   }
 }
