@@ -84,6 +84,7 @@ add_executable(kmm_navigation_node
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_navigation_node
+  kmm_mapping_generate_messages_cpp
   ${kmm_navigation_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   kmm_mapping

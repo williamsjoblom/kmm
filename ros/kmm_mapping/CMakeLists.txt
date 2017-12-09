@@ -92,6 +92,7 @@ add_executable(kmm_mapping_node
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(kmm_mapping_node
+  kmm_mapping_generate_messages_cpp
   ${kmm_mapping_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg
