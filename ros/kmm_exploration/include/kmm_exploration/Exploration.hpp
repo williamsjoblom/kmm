@@ -30,24 +30,27 @@ private:
   bool auto_mode_;
   bool was_in_manual_mode_;
 
+  // Stores robot position
+  float pos_x_;
+  float pos_y_;
+  float angle_;
+
+  // Stores the current target position
+  float target_x_;
+  float target_y_;
+
+  // Stores last end point chosen
+  bool has_target_end_point_;
+  geometry_msgs::Point32 target_end_point_;
+
+  // Count for times a target has been unreachable
+  int target_unreachable_cnt_;
+
   // Bool for saying if we are done mapping and are returning to start
   bool returning_;
 
   // Bool for saying if mapping is finished and we have returned to start
   bool finished_mapping_;
-
-  //Stores the returned target position
-  float x_;
-  float y_;
-
-  //Stores robot coords
-  float pos_x_;
-  float pos_y_;
-  float angle_;
-
-  //Stores last point chosen
-  bool has_target_end_point_;
-  geometry_msgs::Point32 target_;
 
   // Path
   std::vector<Eigen::Vector2f> path_;
@@ -74,14 +77,21 @@ private:
 
   bool set_auto_mode(std_srvs::SetBool::Request &req,
          std_srvs::SetBool::Response &res);
+
+  bool is_target_unreachable();
+  bool is_target_unexplorable();
+
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void path_callback(geometry_msgs::PoseArray msg);
+
   bool is_at_start_position();
   bool is_at_target_position();
-  void send_goal();
+
   void send_remove_walls();
-  void update_target(float new_x, float new_y);
+  void set_new_target(float new_x, float new_y);
+  void send_goal();
+
   void publish_auto_mode(const ros::TimerEvent&);
   void publish_finished_mapping(const ros::TimerEvent&);
 };

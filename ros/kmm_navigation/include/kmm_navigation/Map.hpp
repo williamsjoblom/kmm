@@ -17,6 +17,7 @@ namespace kmm_navigation {
     int get_cols();
     int get_offset();
     float get_cell_size();
+    void set_walls(std::vector<int> walls);
 
     Eigen::Vector2f get_cell(Eigen::Vector2f grid_pos);
 
@@ -34,7 +35,16 @@ namespace kmm_navigation {
     bool is_west_reachable_from_cell(Eigen::Vector2f cell);
     bool is_north_west_reachable_from_cell(Eigen::Vector2f cell);
 
-    void set_walls(std::vector<int> walls);
+    bool is_north_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_north_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_south_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_south_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_south_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+    bool is_north_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2);
+
+    bool is_wall_in_path(const std::vector<Eigen::Vector2f>& path);
 
   private:
 

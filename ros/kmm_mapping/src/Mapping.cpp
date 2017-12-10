@@ -232,6 +232,7 @@ namespace kmm_mapping {
   void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
     Eigen::Vector2f e(end_point->x, end_point->y);
     remove_walls_at_crossing(e);
+    toggle_end_point(e);
     action_server_.setSucceeded(result_);
   }
 
@@ -440,7 +441,7 @@ namespace kmm_mapping {
    * Returns the end point north of crossing
    */
   Eigen::Vector2f Mapping::get_north_end_point(Eigen::Vector2f crossing) {
-    Eigen::Vector2f north(crossing.x() - cell_size_, crossing.y());
+    Eigen::Vector2f north(crossing.x() + cell_size_, crossing.y());
     return north;
   }
 
@@ -448,7 +449,7 @@ namespace kmm_mapping {
    * Returns the end point south of crossing
    */
   Eigen::Vector2f Mapping::get_south_end_point(Eigen::Vector2f crossing) {
-    Eigen::Vector2f south(crossing.x() + cell_size_, crossing.y());
+    Eigen::Vector2f south(crossing.x() - cell_size_, crossing.y());
     return south;
   }
 

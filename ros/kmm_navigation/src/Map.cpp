@@ -136,4 +136,94 @@ namespace kmm_navigation {
     bool is_path_west = is_west_reachable_from_cell(cell) && is_north_reachable_from_cell(west_cell);
     return is_path_north && is_path_west;
   }
+
+  bool Map::is_north_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) + 1 == round(cell_2.x())
+      && round(cell_1.y()) == round(cell_2.y());
+  }
+
+  bool Map::is_north_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) + 1 == round(cell_2.x())
+      && round(cell_1.y()) - 1 == round(cell_2.y());
+  }
+
+  bool Map::is_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) == round(cell_2.x())
+      && round(cell_1.y()) - 1 == round(cell_2.y());
+  }
+
+  bool Map::is_south_east_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) - 1 == round(cell_2.x())
+      && round(cell_1.y()) - 1 == round(cell_2.y());
+  }
+
+  bool Map::is_south_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) - 1 == round(cell_2.x())
+      && round(cell_1.y()) == round(cell_2.y());
+  }
+
+  bool Map::is_south_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) - 1 == round(cell_2.x())
+      && round(cell_1.y()) + 1 == round(cell_2.y());
+  }
+
+  bool Map::is_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) == round(cell_2.x())
+      && round(cell_1.y()) + 1 == round(cell_2.y());
+  }
+
+  bool Map::is_north_west_of_cell(Eigen::Vector2f cell_1, Eigen::Vector2f cell_2) {
+    return round(cell_1.x()) + 1 == round(cell_2.x())
+      && round(cell_1.y()) + 1 == round(cell_2.y());
+  }
+
+  bool Map::is_wall_in_path(const std::vector<Eigen::Vector2f>& path) {
+
+    Eigen::Vector2f curr_pos;
+    Eigen::Vector2f next_pos;
+
+    Eigen::Vector2f curr_cell;
+    Eigen::Vector2f next_cell;
+
+    bool is_next_reachable;
+
+    for (int i = 0; i < path.size() - 10; i += 10) {
+      curr_pos = path[i];
+      next_pos = path[i + 10];
+
+      curr_cell = get_cell(curr_pos);
+      next_cell = get_cell(next_pos);
+
+      if (is_north_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_north_reachable_from_cell(curr_cell);
+
+      } else if (is_north_east_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_north_east_reachable_from_cell(curr_cell);
+
+      } else if (is_east_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_east_reachable_from_cell(curr_cell);
+
+      } else if (is_south_east_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_south_east_reachable_from_cell(curr_cell);
+
+      } else if (is_south_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_south_reachable_from_cell(curr_cell);
+
+      } else if (is_south_west_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_south_west_reachable_from_cell(curr_cell);
+
+      } else if (is_west_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_west_reachable_from_cell(curr_cell);
+
+      } else if (is_north_west_of_cell(curr_cell, next_cell)) {
+        is_next_reachable = is_north_west_reachable_from_cell(curr_cell);
+      }
+
+      if (!is_next_reachable) {
+        return true;
+      }
+
+    }
+    return false;
+  }
 }
