@@ -66,16 +66,22 @@ namespace kmm_exploration{
       for (geometry_msgs::Point32 point : msg.points){
         are_end_points = true;
         float distance = std::sqrt(std::pow(point.x - pos_x_, 2) + std::pow(point.y - pos_y_ , 2));
-        /* If point is equal to the previous, there shouldn't be a new target
-         * unless we were in manual mode since last target was sent */
-         bool point_equals_prev_target = point.x == target_.x && point.y == target_.y;
-       if (!was_in_manual_mode_ && point_equals_prev_target) {
-          return;
-          //Uncomment these to make target change goal around point while moving.
-          //closest = point;
-          //break;
-        }
-        else if (distance < min_distance) {
+        bool point_equals_prev_target = point.x == target_.x && point.y == target_.y;
+        if (point_equals_prev_target && !was_in_manual_mode_) {
+          ROS_INFO("Looking for illegal wall...");
+          bool target_unreachable = has_target_end_point_ && path_.empty();
+          bool target_unexplorable = has_target_end_point_ && is_at_target_position();
+          if (target_unreachable || target_unexplorable) {
+            // Found illegal wall, remove it and keep looking for next end point
+            ROS_INFO("FOUND ILLEGAL WALL!");
+            send_remove_walls();
+            has_target_end_point_ = false;
+          } else {
+            // Keep old end point as target
+            return;
+          }
+
+        } else if (distance < min_distance) {
           closest = point;
           min_distance = distance;
         }
@@ -89,7 +95,8 @@ namespace kmm_exploration{
           new_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
           new_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
           returning_ = false;
-        } else { // Return to start position if not end points remain
+        } else {
+          // Return to start position if not end points remain
           has_target_end_point_ = false;
           new_x = 0.2;
           new_y = 0.2;
@@ -113,13 +120,6 @@ namespace kmm_exploration{
       x_ = new_x;
       y_ = new_y;
       send_goal();
-    } else {
-      bool target_unreachable = has_target_end_point_ && path_.empty();
-      bool target_unexplorable = has_target_end_point_ && is_at_target_position();
-      if (target_unreachable || target_unexplorable) {
-        ROS_INFO("FOUND ILLEGAL WALL!");
-        send_remove_walls();
-      }
     }
   }
 
@@ -142,7 +142,7 @@ namespace kmm_exploration{
     end_point.x = target_.x;
     end_point.x = target_.y;
     remove_walls_client_.sendGoal(end_point);
-    ROS_INFO("SENT GOAL!");
+    ROS_INFO("SENT REMOVE WALLS GOAL!");
     if (remove_walls_client_.waitForResult()) {
       has_target_end_point_ = false;
     } else {
