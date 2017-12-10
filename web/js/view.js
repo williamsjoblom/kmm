@@ -5,6 +5,7 @@ $("#view-state-button").attr('title', 'Toggle view state');
 $("#center-view-button").attr('title', 'Center view');
 $("#reset-position-button").attr('title', 'Set position to start position (0.2, 0.2)');
 $("#reset-map-button").attr('title', 'Reset all map data');
+$("#hide-button").attr('title', 'Hide/show the sidebar');
 
 // Render canvas 60Hz
 requestAnimationFrame(render);
@@ -53,6 +54,22 @@ function updateDOM() {
     $("#mapping-slider").prop("checked", true);
   } else {
     $("#mapping-slider").prop("checked", false);
+  }
+
+  var sidebar = $(".sidebar");
+  var map = $("#map-container");
+  var hideButton = $(".hide-button");
+  // Hidden or shown sidebar
+  if(view.sidebarState && sidebar.is(".sidebar-hidden")) {
+    sidebar.removeClass("sidebar-hidden");
+    map.removeClass("map-container-full");
+    hideButton.removeClass("hide-button-hidden");
+    setTimeout(resizeCanvas, 60);
+  } else if(!view.sidebarState && !sidebar.is(".sidebar-hidden")) {
+    sidebar.addClass("sidebar-hidden");
+    map.addClass("map-container-full");
+    hideButton.addClass("hide-button-hidden");
+    setTimeout(resizeCanvas, 60);
   }
 }
 

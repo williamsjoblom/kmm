@@ -109,6 +109,11 @@ html, body {
   padding: 20px;
   box-shadow: -5px 0 5px rgba(0,0,0,0.2);
   z-index: 2;
+  transition: right 50ms ease-out;
+}
+
+.sidebar-hidden {
+  right: -490px;
 }
 
 .table-info {
@@ -168,12 +173,17 @@ html, body {
   border-collapse: collapse;
 }
 
-#map-container {
+.map-container {
   position: fixed;
   top: 50px;
   left: 0;
   right: 450px;
   bottom: 0;
+  transition: right 50ms ease-out;
+}
+
+.map-container-full {
+  right: 0px;
 }
 
 #map {
@@ -189,7 +199,7 @@ html, body {
   margin: 10px;
 }
 
-.map-button, .reset-button {
+.map-button, .reset-button, .hide-button {
   background: linear-gradient(#ddd, #bbb);
   height: 36px;
   cursor: pointer;
@@ -203,7 +213,7 @@ html, body {
   -ms-user-select: none; /* IE10+/Edge */
 }
 
-.map-button:hover, .reset-button:hover {
+.map-button:hover, .reset-button:hover, .hide-button:hover {
   background: linear-gradient(#bbb, #ddd);
 }
 
@@ -213,6 +223,18 @@ html, body {
   font-size: 20px;
   padding-top: 5px;
   width: 36px;
+}
+
+.hide-button {
+  position: fixed;
+  top: 50px;
+  right: 490px;
+  margin: 10px;
+  transition: right 50ms ease-out;
+}
+
+.hide-button-hidden {
+  right: 0px;
 }
 
 #zoom-out-button {
@@ -241,6 +263,14 @@ html, body {
 #reset-map-button {
   width: 120px;
   padding: 10px;
+}
+
+#hide-button {
+  color: #646464;
+  font-size: 12px;
+  padding-top: 7px;
+  height: 28px;
+  width: 28px;
 }
 
 /* Mode slider */

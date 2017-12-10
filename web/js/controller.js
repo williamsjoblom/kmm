@@ -125,6 +125,7 @@ function bindSidebarEvents() {
   $("#mapping-slider").click(toggleMapping);
   $("#reset-position-button").click(resetPosition);
   $("#reset-map-button").click(resetMap);
+  $("#hide-button").click(hideOrShowSidebar);
 }
 
 function bindButtonEvents(){
@@ -223,4 +224,15 @@ function resetMap() {
     data : true
   });
   resetMapClient.callService(resetMap, function(result) {});
+}
+
+function hideOrShowSidebar() {
+  var $showHideElem = $("#hide-button");
+  if(view.sidebarState) {
+    view.sidebarState = false;
+    $showHideElem.html("&lt;&lt;");
+  } else {
+    view.sidebarState = true;
+    $showHideElem.html("&gt;&gt;");
+  }
 }
