@@ -231,7 +231,6 @@ namespace kmm_mapping {
   */
   void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
     Eigen::Vector2f e(end_point->x, end_point->y);
-    ROS_INFO("CALLBACK!");
     remove_walls_at_crossing(e);
     action_server_.setSucceeded(result_);
   }
@@ -241,7 +240,6 @@ namespace kmm_mapping {
    * End points associated with removed walls will be updated.
    */
   void Mapping::remove_walls_at_crossing(Eigen::Vector2f crossing) {
-    ROS_INFO("REMOVE WALLS AT CROSSING!");
     remove_wall_north_of_crossing(crossing);
     remove_wall_east_of_crossing(crossing);
     remove_wall_south_of_crossing(crossing);
@@ -253,7 +251,6 @@ namespace kmm_mapping {
    * End point north of crossing is updated.
    */
   void Mapping::remove_wall_north_of_crossing(Eigen::Vector2f crossing) {
-    ROS_INFO("REMOVE WALLS NORTH OF CROSSING!");
     int cs_mults_x = get_num_cell_size_multiples(crossing.x());
     int cs_mults_y = get_num_cell_size_multiples(crossing.y());
 
