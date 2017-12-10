@@ -117,6 +117,7 @@ namespace kmm_exploration{
       bool target_unreachable = has_target_end_point_ && path_.empty();
       bool target_unexplorable = has_target_end_point_ && is_at_target_position();
       if (target_unreachable || target_unexplorable) {
+        ROS_INFO("FOUND ILLEGAL WALL!");
         send_remove_walls();
       }
     }
@@ -141,6 +142,7 @@ namespace kmm_exploration{
     end_point.x = target_.x;
     end_point.x = target_.y;
     remove_walls_client_.sendGoal(end_point);
+    ROS_INFO("SENT GOAL!");
     if (remove_walls_client_.waitForResult()) {
       has_target_end_point_ = false;
     } else {
