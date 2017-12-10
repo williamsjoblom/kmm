@@ -137,24 +137,3 @@ private:
   std::vector<Eigen::Vector2f> end_points_;
 };
 }
-
-
-//void secure_wall_validity(int row, int col, bool horizontal);
-/*Eigen::Vector2f get_end_point(
-    int row,
-    int col,
-    bool horizontal,
-    bool first
-  );*/
-//void remove_wall_old(int wall_index, Eigen::Vector2f end_point);
-//int count_connecting_walls_at(Eigen::Vector2f crossing);
-//void remove_north_wall(Eigen::Vector2f crossing);
-//void remove_south_wall(Eigen::Vector2f crossing);
-//void remove_west_wall(Eigen::Vector2f crossing);
-//void remove_east_wall(Eigen::Vector2f crossing);
-//void remove_wall(int wall_index, Eigen::Vector2f end_point);
-//bool wall_exists(int wall_index);
-//int convert_to_wall_index(Eigen::Vector2f end_point, bool horizontal);
-//void remove_end_point(Eigen::Vector2f end_point);
-//void update_end_points_old(int walls_at, Eigen::Vector2f end_point);
-//void remove_wall_at(int row, int col, bool horizontal);
