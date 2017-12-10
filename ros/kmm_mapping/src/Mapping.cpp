@@ -231,7 +231,6 @@ namespace kmm_mapping {
   */
   void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
     Eigen::Vector2f e(end_point->x, end_point->y);
-    toggle_end_point(e);
     remove_walls_at_crossing(e);
     action_server_.setSucceeded(result_);
   }
@@ -337,9 +336,15 @@ namespace kmm_mapping {
    */
   bool Mapping::is_wall_at(int row, int col, bool horizontal) {
     if (horizontal) {
+      if (col == 0 || row < 0) { // Illegal row for horizontal
+        return false;
+      };
       int t = (col >= 1 ? 1 : 0);
       return walls_[row*w_ + row*(w_ + 1) + offset_ + col - t];
     } else {
+      if (row == 0) { // Illegal row for vertical
+        return false;
+      };
       return walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col];
     };
   }
