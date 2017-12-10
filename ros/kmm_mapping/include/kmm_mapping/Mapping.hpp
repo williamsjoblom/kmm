@@ -35,55 +35,57 @@ public:
   void set_times_req(int times_req);
 
 private:
-  void secure_wall_validity(int row, int col, bool horizontal);
-  Eigen::Vector2f get_end_point(
-      int row,
-      int col,
-      bool horizontal,
-      bool first
-    );
-  void remove_wall_old(int wall_index, Eigen::Vector2f end_point);
-  void update_end_points(Eigen::Vector2f end_point);
-  void remove_wall_at(int row, int col, bool horizontal);
-  int count_connecting_walls_at(Eigen::Vector2f crossing);
-  Eigen::Vector2f get_north_end_point(Eigen::Vector2f crossing);
-  Eigen::Vector2f get_south_end_point(Eigen::Vector2f crossing);
-  Eigen::Vector2f get_west_end_point(Eigen::Vector2f crossing);
-  Eigen::Vector2f get_east_end_point(Eigen::Vector2f crossing);
-  void remove_walls_at(Eigen::Vector2f end_point_2);
-  void remove_north_wall(Eigen::Vector2f crossing);
-  void remove_south_wall(Eigen::Vector2f crossing);
-  void remove_west_wall(Eigen::Vector2f crossing);
-  void remove_east_wall(Eigen::Vector2f crossing);
-  void remove_wall(int wall_index, Eigen::Vector2f end_point);
-  bool wall_exists(int wall_index);
-  int get_wall_index(int row, int col, int horizontal);
-  bool within_bounds(int wall_index);
-  int convert_to_wall_index(Eigen::Vector2f end_point, bool horizontal);
-  bool is_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2);
-  void remove_end_point(Eigen::Vector2f end_point);
-
   void mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
+
+  // Wall point count functions
   WallPointCount make_wall_point_count(int row, int col);
   void reset_wall_point_counts();
   void increment_horizontal_wall_point_count(int row, int col);
   void increment_vertical_wall_point_count(int row, int col);
   void increment_wall_point_count(std::vector<WallPointCount>& wall_point_counts,
     bool horizontal, int row, int col);
+
+  // Wall functions
   void add_wall_at(int row, int col, bool horizontal);
+
+  void remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point);
+  void remove_walls_at_crossing(Eigen::Vector2f crossing);
+  void remove_wall_north_of_crossing(Eigen::Vector2f crossing);
+  void remove_wall_east_of_crossing(Eigen::Vector2f crossing);
+  void remove_wall_south_of_crossing(Eigen::Vector2f crossing);
+  void remove_wall_west_of_crossing(Eigen::Vector2f crossing);
+
   bool is_horizontal_wall_at(int row, int col);
   bool is_vertical_wall_at(int row, int col);
   bool is_wall_at(int row, int col, bool horizontal);
 
-  void update_end_points_old(int walls_at, Eigen::Vector2f end_point);
-  void publish_mapping(const ros::TimerEvent&);
-  void publish_walls(const ros::TimerEvent&);
-  void publish_end_points(const ros::TimerEvent&);
+  int get_horizontal_wall_index(int row, int col);
+  int get_vertical_wall_index(int row, int col);
+  int get_wall_index(int row, int col, int horizontal);
+  bool is_wall_index_within_bounds(int wall_index);
+
+  // End points functions
+  void update_end_points(int row, int col, bool horizontal);
+  void toggle_end_point(Eigen::Vector2f end_point);
+  Eigen::Vector2f get_north_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_south_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_west_end_point(Eigen::Vector2f crossing);
+  Eigen::Vector2f get_east_end_point(Eigen::Vector2f crossing);
+
+  // General help functions
+  int get_num_cell_size_multiples(float f);
+  bool are_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2);
+
+  // Reset/set functions called from GUI
   bool set_mapping(std_srvs::SetBool::Request &req,
          std_srvs::SetBool::Response &res);
   bool reset_map(std_srvs::SetBool::Request &req,
         std_srvs::SetBool::Response &res);
-  void remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point);
+
+  // Publish functions
+  void publish_mapping(const ros::TimerEvent&);
+  void publish_walls(const ros::TimerEvent&);
+  void publish_end_points(const ros::TimerEvent&);
 
   ros::NodeHandle nh_;
 
@@ -135,3 +137,24 @@ private:
   std::vector<Eigen::Vector2f> end_points_;
 };
 }
+
+
+//void secure_wall_validity(int row, int col, bool horizontal);
+/*Eigen::Vector2f get_end_point(
+    int row,
+    int col,
+    bool horizontal,
+    bool first
+  );*/
+//void remove_wall_old(int wall_index, Eigen::Vector2f end_point);
+//int count_connecting_walls_at(Eigen::Vector2f crossing);
+//void remove_north_wall(Eigen::Vector2f crossing);
+//void remove_south_wall(Eigen::Vector2f crossing);
+//void remove_west_wall(Eigen::Vector2f crossing);
+//void remove_east_wall(Eigen::Vector2f crossing);
+//void remove_wall(int wall_index, Eigen::Vector2f end_point);
+//bool wall_exists(int wall_index);
+//int convert_to_wall_index(Eigen::Vector2f end_point, bool horizontal);
+//void remove_end_point(Eigen::Vector2f end_point);
+//void update_end_points_old(int walls_at, Eigen::Vector2f end_point);
+//void remove_wall_at(int row, int col, bool horizontal);

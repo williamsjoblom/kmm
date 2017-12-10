@@ -108,7 +108,7 @@ namespace kmm_exploration{
   Checks if value is new and in that case publishes and sends new goal.
 */
   void Exploration::update_target(float new_x, float new_y) {
-    bool new_target_equals_old_target = new_x == x_ && new_y == y_;
+    bool new_target_equals_old_target = (new_x == x_ && new_y == y_);
     if (was_in_manual_mode_ || !new_target_equals_old_target) {
       x_ = new_x;
       y_ = new_y;
@@ -178,7 +178,7 @@ namespace kmm_exploration{
   }
 
   bool Exploration::is_at_target_position() {
-    float eps = 0.04;
+    float eps = 0.05;
     float diff_x = fabs(pos_x_ - x_);
     float diff_y = fabs(pos_y_ - y_);
     bool is_at_target_position = (diff_x < eps) && (diff_y < eps);
