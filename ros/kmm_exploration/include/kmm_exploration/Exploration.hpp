@@ -94,7 +94,6 @@ private:
 
   void publish_auto_mode(const ros::TimerEvent&);
   void publish_finished_mapping(const ros::TimerEvent&);
-  bool end_points_changed(sensor_msgs::PointCloud msg);
 };
 
 }
