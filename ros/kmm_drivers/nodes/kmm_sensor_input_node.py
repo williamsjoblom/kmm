@@ -16,6 +16,7 @@ from sensor_msgs.msg import Imu
 # Values from adafruit c++ acc code to modify raw data.
 ACC_MG_LSB  = 0.001
 SENSORS_GRAVITY_STANDARD = 9.80665
+CALIBRATION_SAMPLES = 2000
 
 # Values from adafruit c++ gyro code to modfy raw data.
 GYRO_RANGE_250DPS = 0.00875
@@ -59,7 +60,7 @@ def calibrate():
 
   calibration_values = {'x': [], 'y': [], 'z': []}
 
-  while(n < 1000):
+  while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
     raw_values['x'].append(float(B(uint=((byte_data[1] << 8) | byte_data[0]), length=16).int))
@@ -131,7 +132,7 @@ if __name__ == "__main__":
       0, 0, 0,
       0, 0, get_variance('z', cal_values)
     ]
-    
+
     imu_msg.linear_acceleration_covariance = [
       get_variance('x', cal_values), get_covariance('x', cal_values), 0,
       get_covariance('y', cal_values), get_variance('y', cal_values), 0,

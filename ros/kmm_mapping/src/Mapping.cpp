@@ -3,7 +3,8 @@
 namespace kmm_mapping {
 
   Mapping::Mapping(ros::NodeHandle nh)
-  : nh_(nh)
+  : nh_(nh),
+    action_server_(nh_, "remove_walls", boost::bind(&Mapping::remove_walls_callback, this, _1), false)
   {
     // Publishers
     mapping_pub_ = nh_.advertise<std_msgs::Bool>("mapping", 1);
@@ -52,9 +53,21 @@ namespace kmm_mapping {
     // Wall point count requirements
     pnt_cnt_req_ = 5;
     times_req_ = 5;
+
+    // Start the action server when all other
+    // instance variables are initiated.
+    action_server_.start();
   }
 
   Mapping::~Mapping() {
+  }
+
+  void Mapping::set_pnt_cnt_req(int pnt_cnt_req) {
+    pnt_cnt_req_ = pnt_cnt_req;
+  }
+
+  void Mapping::set_times_req(int times_req) {
+    times_req_ = times_req;
   }
 
   /* Analyzes points by counting number of collisions on the same wall.
@@ -99,6 +112,12 @@ namespace kmm_mapping {
     }
     return;
   }
+
+
+  /*
+   * WALL POINT COUNT FUNCTIONS
+   */
+
 
   /* Create new WallPointCount struct */
   WallPointCount Mapping::make_wall_point_count(int row, int col) {
@@ -176,8 +195,8 @@ namespace kmm_mapping {
           wall_point_count.found = true;
           wall_point_count.times++;
           if (wall_point_count.times == times_req_) {
-            add_wall_at(row, col, horizontal);
-            wall_point_count.added = true;
+            wall_point_count.added = true; // ?
+            add_wall_at(row, col, horizontal); // ?
             update_end_points(row, col, horizontal);
           };
         };
@@ -188,8 +207,14 @@ namespace kmm_mapping {
     return;
   }
 
+
   /*
-   * Add wall to wall_positions_msg_ and walls_.
+   * WALL FUNCTIONS
+   */
+
+
+  /*
+   * Add wall to walls_.
    */
   void Mapping::add_wall_at(int row, int col, bool horizontal) {
     if (horizontal) {
@@ -198,6 +223,104 @@ namespace kmm_mapping {
     } else {
       walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
     };
+  }
+
+  /*
+   * Action server callback. Gets an end point that kmm_exploration has
+   * deemed unreachable. Removes it and all walls connected to it.
+  */
+  void Mapping::remove_walls_callback(const kmm_mapping::RemoveWallsGoalConstPtr &end_point) {
+    Eigen::Vector2f e(end_point->x, end_point->y);
+    remove_walls_at_crossing(e);
+    toggle_end_point(e);
+    action_server_.setSucceeded(result_);
+  }
+
+  /*
+   * Removes all the walls that connect to the point crossing.
+   * End points associated with removed walls will be updated.
+   */
+  void Mapping::remove_walls_at_crossing(Eigen::Vector2f crossing) {
+    remove_wall_north_of_crossing(crossing);
+    remove_wall_east_of_crossing(crossing);
+    remove_wall_south_of_crossing(crossing);
+    remove_wall_west_of_crossing(crossing);
+  }
+
+  /*
+   * Removes the wall north of crossing.
+   * End point north of crossing is updated.
+   */
+  void Mapping::remove_wall_north_of_crossing(Eigen::Vector2f crossing) {
+    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
+    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+
+    int row = cs_mults_x + 1;
+    int col = cs_mults_y;
+
+    int index = get_vertical_wall_index(row, col);
+    if (is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
+      walls_[index] = 0;
+      toggle_end_point(get_north_end_point(crossing));
+    }
+  }
+
+  /*
+   * Removes the wall east of crossing.
+   * End point east of crossing is updated.
+   */
+  void Mapping::remove_wall_east_of_crossing(Eigen::Vector2f crossing) {
+    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
+    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+
+    int row = cs_mults_x;
+
+    int t = (cs_mults_y <= 0 ? 1 : 0);
+    int col = cs_mults_y - t;
+
+    int index = get_horizontal_wall_index(row, col);
+    if (is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
+      walls_[index] = 0;
+      toggle_end_point(get_east_end_point(crossing));
+    }
+  }
+
+  /*
+   * Removes the wall south of crossing.
+   * End point south of crossing is updated.
+   */
+  void Mapping::remove_wall_south_of_crossing(Eigen::Vector2f crossing) {
+    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
+    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+
+    int row = cs_mults_x;
+    int col = cs_mults_y;
+
+    int index = get_vertical_wall_index(row, col);
+    if (is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
+      walls_[index] = 0;
+      toggle_end_point(get_south_end_point(crossing));
+    }
+  }
+
+  /*
+   * Removes the wall west of crossing.
+   * End point west of crossing is updated.
+   */
+  void Mapping::remove_wall_west_of_crossing(Eigen::Vector2f crossing) {
+    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
+    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+
+    int row = cs_mults_x;
+
+    int t = (cs_mults_y >= 0 ? 1 : 0);
+    int col = cs_mults_y + t;
+
+    int index = get_horizontal_wall_index(row, col);
+    if (is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
+      walls_[index] = 0;
+      toggle_end_point(get_west_end_point(crossing));
+    }
   }
 
   bool Mapping::is_horizontal_wall_at(int row, int col) {
@@ -214,100 +337,173 @@ namespace kmm_mapping {
    */
   bool Mapping::is_wall_at(int row, int col, bool horizontal) {
     if (horizontal) {
+      if (col == 0 || row < 0) { // Illegal row for horizontal
+        return false;
+      };
       int t = (col >= 1 ? 1 : 0);
       return walls_[row*w_ + row*(w_ + 1) + offset_ + col - t];
     } else {
+      if (row == 0) { // Illegal row for vertical
+        return false;
+      };
       return walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col];
     };
   }
 
-  void Mapping::update_end_points(int row, int col, bool horizontal) {
-    // Calculate the two end points associated with wall.
-    float x_1;
-    float y_1;
-    float x_2;
-    float y_2;
+  /*
+   * Returns the wall index of horizontal wall
+   */
+  int Mapping::get_horizontal_wall_index(int row, int col) {
+    return get_wall_index(row, col, true);
+  }
+
+  /*
+   * Returns the wall index of vertical wall
+   */
+  int Mapping::get_vertical_wall_index(int row, int col) {
+    return get_wall_index(row, col, false);
+  }
+
+  /*
+   * Returns the wall index of wall
+   */
+  int Mapping::get_wall_index(int row, int col, int horizontal) {
     if (horizontal) {
-      x_1 = row * cell_size_;
-      y_1 = (col - 1*(col >= 1 ? 1 : 0)) * cell_size_;
-      x_2 = x_1;
-      y_2 = y_1 + cell_size_;
-    } else {
-      x_1 = (row - 1) * cell_size_;
-      y_1 = col * cell_size_;
-      x_2 = x_1 + cell_size_;
-      y_2 = y_1;
-    };
-    // Determine if end points in list equal any of the two new end points.
-    bool found_end_point_1 = false;
-    bool found_end_point_2 = false;
-    float eps = 0.000001;
-    for (auto it = end_points_.begin(); it < end_points_.end(); ) {
-      float diff_x_1 = fabs((*it).x() - x_1);
-      float diff_y_1 = fabs((*it).y() - y_1);
-      bool end_point_1_equal = (diff_x_1 < eps) && (diff_y_1 < eps);
-      float diff_x_2 = fabs((*it).x() - x_2);
-      float diff_y_2 = fabs((*it).y() - y_2);
-      bool end_point_2_equal = (diff_x_2 < eps) && (diff_y_2 < eps);
-      // Remove end point from list if we found a match
-      if (end_point_1_equal) {
-        it = end_points_.erase(it);
-        found_end_point_1 = true;
-      } else if (end_point_2_equal) {
-        it = end_points_.erase(it);
-        found_end_point_2 = true;
-      } else {
-        it++;
+      if (col == 0 || row < 0) { // Illegal row for horizontal
+        return -1;
       };
-    };
-    // Add end points to list if we didn't find a match.
-    if (!found_end_point_1) {
-      Eigen::Vector2f end_point_1;
-      end_point_1[0] = x_1;
-      end_point_1[1] = y_1;
-      end_points_.push_back(end_point_1);
-    };
-    if (!found_end_point_2) {
-      Eigen::Vector2f end_point_2;
-      end_point_2[0] = x_2;
-      end_point_2[1] = y_2;
-      end_points_.push_back(end_point_2);
+      int t = (col >= 1 ? 1 : 0);
+      return row*w_ + row*(w_ + 1) + offset_ + col - t;
+    } else {
+      if (row == 0) { // Illegal row for vertical
+        return -1;
+      };
+      return row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
     };
   }
 
-  void Mapping::publish_mapping(const ros::TimerEvent&) {
-    std_msgs::Bool mapping_msg;
-    mapping_msg.data = mapping_;
-    mapping_pub_.publish(mapping_msg);
+  /*
+   * Returns true if the wall index is within bounds, otherwise false
+   */
+  bool Mapping::is_wall_index_within_bounds(int wall_index) {
+   return (0 <= wall_index && wall_index < walls_size_);
   }
 
-  void Mapping::publish_walls(const ros::TimerEvent&) {
-    walls_msg_.data.clear();
-    for (int& is_wall : walls_) {
-        walls_msg_.data.push_back(is_wall);
+
+  /*
+   * END POINTS FUNCTIONS
+   */
+
+
+  /*
+  * Calculates the two end points associated with wall and toggles them.
+  */
+  void Mapping::update_end_points(int row, int col, bool horizontal) {
+    Eigen::Vector2f end_point_1;
+    Eigen::Vector2f end_point_2;
+    if (horizontal) {
+      end_point_1[0] = row * cell_size_;
+      end_point_1[1] = (col - 1*(col >= 1 ? 1 : 0)) * cell_size_;
+
+      end_point_2[0] = end_point_1[0];
+      end_point_2[1] = end_point_1[1] + cell_size_;
+    } else {
+      end_point_1[0] = (row - 1) * cell_size_;
+      end_point_1[1] = col * cell_size_;
+
+      end_point_2[0] = end_point_1[0] + cell_size_;
+      end_point_2[1] = end_point_1[1];
     }
-    walls_pub_.publish(walls_msg_);
+    toggle_end_point(end_point_1);
+    toggle_end_point(end_point_2);
   }
 
-  void Mapping::publish_end_points(const ros::TimerEvent&) {
-    end_points_msg_.points.clear();
-    for (Eigen::Vector2f end_point : end_points_) {
-      geometry_msgs::Point32 point;
-      point.x = end_point.x();
-      point.y = end_point.y();
-      point.z = 0;
-      end_points_msg_.points.push_back(point);
+  /*
+   * Adds end_point to end_points_ if it wasn't already there.
+   * Removes end_point from end_points_ if it was already there.
+   */
+  void Mapping::toggle_end_point(Eigen::Vector2f end_point) {
+    bool found_end_point = false;
+    for (auto it = end_points_.begin(); it < end_points_.end(); ) {
+      if (are_equal(end_point, *it)) {
+        it = end_points_.erase(it);
+        found_end_point = true;
+        break;
+      }
+      it++;
     };
-    end_points_pub_.publish(end_points_msg_);
+    if (!found_end_point) {
+      end_points_.push_back(end_point);
+    }
   }
 
-  void Mapping::set_pnt_cnt_req(int pnt_cnt_req) {
-    pnt_cnt_req_ = pnt_cnt_req;
+  /*
+   * Returns the end point north of crossing
+   */
+  Eigen::Vector2f Mapping::get_north_end_point(Eigen::Vector2f crossing) {
+    Eigen::Vector2f north(crossing.x() + cell_size_, crossing.y());
+    return north;
   }
 
-  void Mapping::set_times_req(int times_req) {
-    times_req_ = times_req;
+  /*
+   * Returns the end point south of crossing
+   */
+  Eigen::Vector2f Mapping::get_south_end_point(Eigen::Vector2f crossing) {
+    Eigen::Vector2f south(crossing.x() - cell_size_, crossing.y());
+    return south;
   }
+
+  /*
+   * Returns the end point west of crossing
+   */
+  Eigen::Vector2f Mapping::get_west_end_point(Eigen::Vector2f crossing) {
+    Eigen::Vector2f west(crossing.x(), crossing.y() + cell_size_);
+    return west;
+  }
+
+  /*
+   * Returns the end point east of crossing
+   */
+  Eigen::Vector2f Mapping::get_east_end_point(Eigen::Vector2f crossing) {
+    Eigen::Vector2f east(crossing.x(), crossing.y() - cell_size_);
+    return east;
+  }
+
+
+  /*
+   * GENERAL HELP FUNCTIONS
+   */
+
+
+   /*
+    * Return the number of times cell_size_ goes in float f.
+    */
+   int Mapping::get_num_cell_size_multiples(float f) {
+     int times = 0;
+     float rem = fabs(f);
+     while (rem >= cell_size_) {
+       rem -= cell_size_;
+       times++;
+     }
+     return times * (std::signbit(f) ? -1 : 1); // Return times with the sign of f.
+   }
+
+  /*
+   * Return true if vector1 == vector2, otherwise false
+   */
+  bool Mapping::are_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2){
+    float eps = 0.000001;
+    float diff_x = fabs(vector1.x() - vector2.x());
+    float diff_y = fabs(vector1.y() - vector2.y());
+    bool point_equal = (diff_x < eps) && (diff_y < eps);
+    return point_equal;
+  }
+
+
+  /*
+   * RESET/SET FUNCTIONS CALLED FROM GUI
+   */
+
 
   /*
    * Callback for service requests to set mapping bool.
@@ -333,9 +529,40 @@ namespace kmm_mapping {
     hor_wall_point_counts_.clear();
     ver_wall_point_counts_.clear();
 
-    // Reset end points
     end_points_.clear();
 
     return true;
+  }
+
+
+  /*
+   * PUBLISHING FUNCTIONS
+   */
+
+
+  void Mapping::publish_mapping(const ros::TimerEvent&) {
+    std_msgs::Bool mapping_msg;
+    mapping_msg.data = mapping_;
+    mapping_pub_.publish(mapping_msg);
+  }
+
+  void Mapping::publish_walls(const ros::TimerEvent&) {
+    walls_msg_.data.clear();
+    for (int& is_wall : walls_) {
+        walls_msg_.data.push_back(is_wall);
+    }
+    walls_pub_.publish(walls_msg_);
+  }
+
+  void Mapping::publish_end_points(const ros::TimerEvent&) {
+    end_points_msg_.points.clear();
+    for (Eigen::Vector2f end_point : end_points_) {
+      geometry_msgs::Point32 point;
+      point.x = end_point.x();
+      point.y = end_point.y();
+      point.z = 0;
+      end_points_msg_.points.push_back(point);
+    };
+    end_points_pub_.publish(end_points_msg_);
   }
 }

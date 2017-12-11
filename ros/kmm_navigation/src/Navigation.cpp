@@ -77,12 +77,15 @@ namespace kmm_navigation {
   */
   void Navigation::navigation_callback(const kmm_navigation::MoveToGoalConstPtr &goal) {
     ros::Rate rate(30);
-    // Find a path from robot position to target for the robot to follow.
+
     Eigen::Vector2f target(goal->x, goal->y);
     path_ = path_finder_->find_path(robot_position_, target);
-
     bool has_reached_target = false;
+
     while (!has_reached_target) {
+      if (map_->is_wall_in_path(path_)) {
+        path_ = path_finder_->find_path(robot_position_, target);
+      }
 
       // The navigation request can be preemted by the client.
       // In that case we want to clear the path and stop the robot.
