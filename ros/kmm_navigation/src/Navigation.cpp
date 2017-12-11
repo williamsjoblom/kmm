@@ -82,9 +82,12 @@ namespace kmm_navigation {
     path_ = path_finder_->find_path(robot_position_, target);
     bool has_reached_target = false;
 
-    while (!has_reached_target) {
+    while (!path_.empty() && !has_reached_target) {
       if (map_->is_wall_in_path(path_)) {
         path_ = path_finder_->find_path(robot_position_, target);
+        if (path_.empty()) {
+          break;
+        }
       }
 
       // The navigation request can be preemted by the client.
