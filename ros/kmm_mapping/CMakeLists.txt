@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   laser_geometry
   dynamic_reconfigure
+  actionlib
 )
 
 ################################################
@@ -23,9 +24,14 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-add_message_files(
- FILES
- wall_positions.msg
+#add_message_files(
+# FILES
+# wall_positions.msg
+#)
+
+add_action_files(
+  DIRECTORY action
+  FILES RemoveWalls.action
 )
 
 ## Generate added messages and services with any dependencies listed here
@@ -34,6 +40,7 @@ generate_messages(
  geometry_msgs
  sensor_msgs
  std_msgs
+ actionlib_msgs
 )
 
 ################################################
