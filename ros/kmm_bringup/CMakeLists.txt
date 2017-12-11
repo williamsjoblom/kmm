@@ -185,6 +185,8 @@ include_directories(
 ## Testing ##
 #############
 
+install(PROGRAMS scripts/http-server.sh DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 ## Add gtest based cpp test target and link libraries
 # catkin_add_gtest(${PROJECT_NAME}-test test/test_kmm_bringup.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
