@@ -426,7 +426,7 @@ namespace kmm_mapping {
     for (auto it = end_points_.begin(); it < end_points_.end(); ) {
       if (are_equal(end_point, *it)) {
         it = end_points_.erase(it);
-        break;
+        return;
       }
       it++;
     };
