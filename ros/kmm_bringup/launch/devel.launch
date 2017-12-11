@@ -5,6 +5,7 @@
     cell_size: 0.4
     produce_cmd_vel: false
   </rosparam>
+  <node name="httpserver" pkg="kmm_bringup" type="httpserver.sh" />
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
   <node name="tf_rplidar_laser" pkg="tf" type="static_transform_publisher" args="0 0 -0.01 0 0 180 1 base_link laser 100" />
   <node name="kmm_position" pkg="kmm_position" type="kmm_position_node"/>

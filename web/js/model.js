@@ -79,7 +79,7 @@ var targetPositionGoal = null;
 var walls = [];
 var endPoints = [];
 
-var url = window.location.href.replace("http://", "").replace("/", "");
+var url = window.location.href.replace("http://", "").replace("/", "").replace(":8080", "");
 
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
