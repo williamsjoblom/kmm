@@ -423,18 +423,14 @@ namespace kmm_mapping {
    * Removes end_point from end_points_ if it was already there.
    */
   void Mapping::toggle_end_point(Eigen::Vector2f end_point) {
-    bool found_end_point = false;
     for (auto it = end_points_.begin(); it < end_points_.end(); ) {
       if (are_equal(end_point, *it)) {
         it = end_points_.erase(it);
-        found_end_point = true;
         break;
       }
       it++;
     };
-    if (!found_end_point) {
-      end_points_.push_back(end_point);
-    }
+    end_points_.push_back(end_point);
   }
 
   /*
@@ -479,13 +475,14 @@ namespace kmm_mapping {
     * Return the number of times cell_size_ goes in float f.
     */
    int Mapping::get_num_cell_size_multiples(float f) {
-     int times = 0;
+     return round(f/0.4);
+     /*int times = 0;
      float rem = fabs(f);
      while (rem >= cell_size_) {
        rem -= cell_size_;
        times++;
      }
-     return times * (std::signbit(f) ? -1 : 1); // Return times with the sign of f.
+     return times * (std::signbit(f) ? -1 : 1);*/ // Return times with the sign of f.
    }
 
   /*
