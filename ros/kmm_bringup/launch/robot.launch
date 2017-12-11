@@ -8,7 +8,7 @@
   </rosparam>
 
   <!-- Built in ros nodes -->
-  <node name="http-server" pkg="kmm_bringup" type="http-server.sh" />
+  <node name="httpserver" pkg="kmm_bringup" type="httpserver.sh" />
   <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
   <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
   <node name="tf_rplidar_laser" pkg="tf" type="static_transform_publisher" args="0 0 -0.01 0 0 180 1 base_link laser 100" />
