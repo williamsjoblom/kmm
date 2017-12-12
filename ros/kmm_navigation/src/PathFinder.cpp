@@ -80,10 +80,7 @@ namespace kmm_navigation {
       };
     }
 
-    std::vector<Eigen::Vector2f> path = get_path(start, end);
-    std::vector<Eigen::Vector2f> smooth = make_smooth(path);
-
-    return smooth;
+    return get_path(start, end);
   }
 
   /*

@@ -31,6 +31,7 @@ public:
   PathFinder(Map* map);
   ~PathFinder();
   std::vector<Eigen::Vector2f> find_path(Eigen::Vector2f from, Eigen::Vector2f to);
+  std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
 
 private:
   Cell* make_cell(int row, int col);
@@ -38,7 +39,6 @@ private:
   void reset_cells();
   std::set<Cell*> get_neighbors(Cell* cell);
   std::vector<Eigen::Vector2f> get_path(Cell* start, Cell* end);
-  std::vector<Eigen::Vector2f> make_smooth(const std::vector<Eigen::Vector2f>& path);
 
   Map* map_;
 

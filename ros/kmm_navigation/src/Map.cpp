@@ -179,6 +179,10 @@ namespace kmm_navigation {
 
   bool Map::is_wall_in_path(const std::vector<Eigen::Vector2f>& path) {
 
+    if (path.size() < 2) {
+      return false;
+    }
+
     Eigen::Vector2f curr_pos;
     Eigen::Vector2f next_pos;
 
@@ -186,10 +190,10 @@ namespace kmm_navigation {
     Eigen::Vector2f next_cell;
 
     bool is_next_reachable;
-    int resolution = 10; // Added extra points in path to smooth it
-    for (int i = 0; i < path.size() - resolution; i += resolution) {
+
+    for (int i = 0; i < path.size() - 1; i ++) {
       curr_pos = path[i];
-      next_pos = path[i + resolution];
+      next_pos = path[i + 1];
 
       curr_cell = get_cell(curr_pos);
       next_cell = get_cell(next_pos);
