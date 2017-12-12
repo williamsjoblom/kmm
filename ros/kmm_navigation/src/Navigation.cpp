@@ -79,12 +79,16 @@ namespace kmm_navigation {
     ros::Rate rate(30);
 
     Eigen::Vector2f target(goal->x, goal->y);
+    ROS_INFO("BEFORE OUTSIDE PATH");
     path_ = path_finder_->find_path(robot_position_, target);
+    ROS_INFO("AFTER OUTSIDE PATH");
     bool has_reached_target = false;
 
     while (!path_.empty() && !has_reached_target) {
       if (map_->is_wall_in_path(path_)) {
+        ROS_INFO("BEFORE INSIDE PATH");
         path_ = path_finder_->find_path(robot_position_, target);
+        ROS_INFO("AFTER INSIDE PATH");
         if (path_.empty()) {
           break;
         }
@@ -101,7 +105,9 @@ namespace kmm_navigation {
 
       // Calculate velocity to stay on the path.
       Eigen::Vector2f vel;
+      ROS_INFO("BEFORE VELOCITY");
       path_follower_.get_velocity(path_, robot_position_, vel, has_reached_target);
+      ROS_INFO("AFTER VELOCITY");
       Eigen::Vector3f vel3(vel[0], vel[1], 0);
       Eigen::Transform<float, 3, Eigen::Affine> t(Eigen::AngleAxis<float>(robot_angle_ * -1, Eigen::Vector3f(0, 0, 1)));
       vel3 = t * vel3; // Rotate into robot frame.
