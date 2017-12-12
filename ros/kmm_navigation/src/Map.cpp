@@ -51,10 +51,10 @@ namespace kmm_navigation {
 
   bool Map::is_cell_within_bounds(Eigen::Vector2f cell) {
     int index_row = (int)cell.x();
-    int index_col = (int)cell.y() + get_offset();
+    int index_col = (int)cell.y() + get_offset(); // Offset is to make positive
 
     bool row_ok = index_row >= 0 && index_row < get_rows();
-    bool col_ok = index_col >= 0 && index_col <= get_offset(); // (w_ - 1) / 2
+    bool col_ok = index_col >= 0 && index_col < get_cols(); // (w_ - 1) / 2
 
     bool is_cell_within_bounds = row_ok && col_ok;
 
