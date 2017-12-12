@@ -49,6 +49,18 @@ namespace kmm_navigation {
     return cell_pos;
   }
 
+  bool Map::is_cell_within_bounds(Eigen::Vector2f cell) {
+    int index_row = (int)cell.x();
+    int index_col = (int)cell.y() + get_offset();
+
+    bool row_ok = index_row >= 0 && index_row < get_rows();
+    bool col_ok = index_col >= 0 && index_col <= get_offset(); // (w_ - 1) / 2
+
+    bool is_cell_within_bounds = row_ok && col_ok;
+
+    return is_cell_within_bounds;
+  }
+
   bool Map::is_wall_north_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());

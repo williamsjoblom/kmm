@@ -44,6 +44,14 @@ namespace kmm_navigation {
     Eigen::Vector2f start_cell = map_->get_cell(from);
     Eigen::Vector2f end_cell = map_->get_cell(to);
 
+    bool cells_within_bounds = map_->is_cell_within_bounds(start_cell)
+      && map_->is_cell_within_bounds(end_cell);
+
+    if (!cells_within_bounds) {
+      ROS_ERROR("Cell out of bounds in PathFinder::find_path!");
+      assert(false);
+    }
+
     Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->get_offset()];
     Cell* end = cells_[(int)end_cell.x()][(int)end_cell.y() + map_->get_offset()];
 
