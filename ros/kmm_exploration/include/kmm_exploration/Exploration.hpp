@@ -26,6 +26,11 @@ public:
 private:
   ros::NodeHandle nh_;
 
+  // Map info
+  int map_rows_;
+  int map_cols_;
+  float cell_size_;
+
   // Bool for manual or autonomous mode
   bool auto_mode_;
   bool was_in_manual_mode_;
@@ -41,7 +46,7 @@ private:
 
   // Stores last end point chosen
   bool has_target_end_point_;
-  geometry_msgs::Point32 target_end_point_;
+  Eigen::Vector2f target_end_point_;
 
   // Count for times a target has been unreachable
   int target_unreachable_cnt_;
@@ -81,6 +86,8 @@ private:
   bool is_target_unreachable();
   bool is_target_unexplorable();
 
+  Eigen::Vector2f get_new_target(Eigen::Vector2f closest_end_point);
+
   void end_points_callback(sensor_msgs::PointCloud msg);
   void position_callback(geometry_msgs::PoseWithCovarianceStamped msg);
   void path_callback(geometry_msgs::PoseArray msg);
@@ -89,7 +96,7 @@ private:
   bool is_at_target_position();
 
   void send_remove_walls();
-  void set_new_target(float new_x, float new_y);
+  void set_new_target(Eigen::Vector2f new_target);
   void send_goal();
 
   void publish_auto_mode(const ros::TimerEvent&);
