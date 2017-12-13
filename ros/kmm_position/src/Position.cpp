@@ -58,7 +58,7 @@ namespace kmm_position {
 
   void Position::imu_callback(sensor_msgs::Imu msg){
     if (use_gyroscope_) {
-      kalman_.gyro_measurement(msg.angular_velocity.z * 0.5);
+      kalman_.gyro_measurement(msg.angular_velocity.z);
     }
   }
 
