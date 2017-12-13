@@ -63,9 +63,9 @@ def calibrate():
   while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
-    raw_values['x'].append(float(B(uint=((byte_data[1] << 8) | byte_data[0]), length=16).int))
-    raw_values['y'].append(float(B(uint=((byte_data[3] << 8) | byte_data[2]), length=16).int))
-    raw_values['z'].append(float(B(uint=((byte_data[5] << 8) | byte_data[4]), length=16).int))
+    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 6))
+    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 6))
+    raw_values['z'].append(float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int))
 
     n = n + 1
 
@@ -148,10 +148,11 @@ if __name__ == "__main__":
     while not rospy.is_shutdown():
       idx = 0
       rawdata = spi.readbytes(6)
-      for i in range(0,6,2):
-        sensor_data[idx] = float(B(uint=((rawdata[i+1] << 8) | rawdata[i]), length=16).int)
+      for i in range(0,4,2):
+        sensor_data[idx] = float(B(uint=(rawdata[i] | (rawdata[i+1] << 8)), length=16).int >> 6)
         idx = idx + 1
 
+      sensor_data[2] = float(B(uint=(rawdata[4] | (rawdata[5] << 8)), length=16).int)
       imu_msg.header.stamp = rospy.Time.now()
       imu_msg.header.frame_id = 'imu'
 
