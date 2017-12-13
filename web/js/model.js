@@ -79,9 +79,11 @@ var targetPositionGoal = null;
 var walls = [];
 var endPoints = [];
 
+var url = window.location.href.replace("http://", "").replace("/", "").replace(":8080", "");
+
 // Setup ROS connection
 var ros = new ROSLIB.Ros({
-  url : 'ws://localhost:9090'
+  url : 'ws://' + url + ':9090'
 
 }).on('connection', function() {
   console.log('Connected to a websocket server.');
