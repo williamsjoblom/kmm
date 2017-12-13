@@ -79,12 +79,17 @@ namespace kmm_navigation {
     ros::Rate rate(30);
 
     Eigen::Vector2f target(goal->x, goal->y);
-    path_ = path_finder_->find_path(robot_position_, target);
+    std::vector<Eigen::Vector2f> raw_path = path_finder_->find_path(robot_position_, target);
+    path_ = path_finder_->make_smooth(raw_path);
     bool has_reached_target = false;
 
-    while (!has_reached_target) {
-      if (map_->is_wall_in_path(path_)) {
-        path_ = path_finder_->find_path(robot_position_, target);
+    while (!raw_path.empty() && !has_reached_target) {
+      if (map_->is_wall_in_path(raw_path)) {
+        raw_path = path_finder_->find_path(robot_position_, target);
+        path_ = path_finder_->make_smooth(raw_path);
+        if (raw_path.empty()) {
+          break;
+        }
       }
 
       // The navigation request can be preemted by the client.

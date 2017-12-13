@@ -49,6 +49,18 @@ namespace kmm_navigation {
     return cell_pos;
   }
 
+  bool Map::is_cell_within_bounds(Eigen::Vector2f cell) {
+    int index_row = (int)cell.x();
+    int index_col = (int)cell.y() + get_offset(); // Offset is to make positive
+
+    bool row_ok = index_row >= 0 && index_row < get_rows();
+    bool col_ok = index_col >= 0 && index_col < get_cols(); // (w_ - 1) / 2
+
+    bool is_cell_within_bounds = row_ok && col_ok;
+
+    return is_cell_within_bounds;
+  }
+
   bool Map::is_wall_north_of_cell(Eigen::Vector2f cell) {
     int x = round(cell.x());
     int y = round(cell.y());
@@ -179,6 +191,10 @@ namespace kmm_navigation {
 
   bool Map::is_wall_in_path(const std::vector<Eigen::Vector2f>& path) {
 
+    if (path.size() < 2) {
+      return false;
+    }
+
     Eigen::Vector2f curr_pos;
     Eigen::Vector2f next_pos;
 
@@ -187,9 +203,9 @@ namespace kmm_navigation {
 
     bool is_next_reachable;
 
-    for (int i = 0; i < path.size() - 10; i += 10) {
+    for (int i = 0; i < path.size() - 1; i ++) {
       curr_pos = path[i];
-      next_pos = path[i + 10];
+      next_pos = path[i + 1];
 
       curr_cell = get_cell(curr_pos);
       next_cell = get_cell(next_pos);

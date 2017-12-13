@@ -20,6 +20,7 @@ namespace kmm_navigation {
     void set_walls(std::vector<int> walls);
 
     Eigen::Vector2f get_cell(Eigen::Vector2f grid_pos);
+    bool is_cell_within_bounds(Eigen::Vector2f cell);
 
     bool is_wall_north_of_cell(Eigen::Vector2f cell);
     bool is_wall_east_of_cell(Eigen::Vector2f cell);
