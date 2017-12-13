@@ -14,5 +14,4 @@
   <node name="kmm_mapping" pkg="kmm_mapping" type="kmm_mapping_node"/>
   <node name="kmm_exploration" pkg="kmm_exploration" type="kmm_exploration_node"/>
   <node name="kmm_navigation" pkg="kmm_navigation" type="kmm_navigation_node"/>
-
 </launch>

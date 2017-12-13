@@ -37,6 +37,22 @@ namespace kmm_exploration{
 
     // Services
     auto_mode_service_ = nh_.advertiseService("set_auto_mode", &Exploration::set_auto_mode, this);
+
+    // ROS parameters
+    if (!nh_.getParam("/map_rows", map_rows_)) {
+        ROS_ERROR("Couldn't set map_rows_ in Exploration!");
+        assert(false);
+    }
+
+    if (!nh_.getParam("/map_cols", map_cols_)) {
+        ROS_ERROR("Couldn't set map_cols_ in Exploration!");
+        assert(false);
+    }
+
+    if (!nh_.getParam("/cell_size", cell_size_)) {
+        ROS_ERROR("Couldn't set cell_size_ in Exploration!");
+        assert(false);
+    }
   }
 
   Exploration::~Exploration(){}
@@ -73,13 +89,43 @@ namespace kmm_exploration{
     return has_target_end_point_ && is_at_target_position();
   }
 
+  Eigen::Vector2f Exploration::get_new_target(Eigen::Vector2f closest_end_point) {
+
+    float new_target_x = closest_end_point.x() + (closest_end_point.x() - pos_x_ > 0 ? 0.2 : - 0.2);
+    float new_target_y = closest_end_point.y() + (closest_end_point.y() - pos_y_ > 0 ? 0.2 : - 0.2);
+
+    float x_lower_limit = 0;
+    float x_upper_limit = cell_size_ * map_rows_;
+
+    float abs_y_limit = cell_size_ * (map_cols_ - 1) / 2; // cell_size * (w_ - 1) / 2
+    float y_lower_limit = -abs_y_limit;
+    float y_upper_limit = abs_y_limit;
+
+    // Check if out of map bounds, in that case adjust target
+    if (new_target_x < x_lower_limit) {
+      new_target_x += cell_size_;
+    } else if (new_target_x > x_upper_limit) {
+      new_target_x -= cell_size_;
+    }
+
+    if (new_target_y < y_lower_limit) {
+      new_target_y += cell_size_;
+    } else if (new_target_y > y_upper_limit) {
+      new_target_y -= cell_size_;
+    }
+
+    Eigen::Vector2f new_target(new_target_x, new_target_y);
+
+    return new_target;
+  }
+
   /*
    * Callback for end_points. If robot is not in manual mode, eventually updates
    * target and publishes and sets goal based on if previous target is explored.
    */
   void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
     if (auto_mode_) {
-      geometry_msgs::Point32 closest;
+      Eigen::Vector2f closest_end_point;
 
       bool are_end_points = msg.points.size();
       float min_distance = FLT_MAX;
@@ -88,8 +134,8 @@ namespace kmm_exploration{
         float distance = std::sqrt(std::pow(end_point.x - pos_x_, 2)
           + std::pow(end_point.y - pos_y_ , 2));
 
-        bool point_equals_prev_target = end_point.x == target_end_point_.x
-          && end_point.y == target_end_point_.y;
+        bool point_equals_prev_target = end_point.x == target_end_point_.x()
+          && end_point.y == target_end_point_.y();
         bool check_on_old_target = point_equals_prev_target && !was_in_manual_mode_;
         if (check_on_old_target) {
 
@@ -102,37 +148,37 @@ namespace kmm_exploration{
           }
 
         } else if (distance < min_distance) {
-          closest = end_point;
+          Eigen::Vector2f new_closest_end_point(end_point.x, end_point.y);
+          closest_end_point = new_closest_end_point;
           min_distance = distance;
         }
       }
 
       bool done_exploring = !are_end_points && is_at_start_position();
       if (!done_exploring) {
-        float new_target_x;
-        float new_target_y;
+
+        Eigen::Vector2f new_target;
 
         if (are_end_points) {
-          target_end_point_ = closest;
-          new_target_x = closest.x + (closest.x - pos_x_ > 0 ? 0.2 : - 0.2);
-          new_target_y = closest.y + (closest.y - pos_y_ > 0 ? 0.2 : - 0.2);
+          target_end_point_ = closest_end_point;
+          new_target = get_new_target(closest_end_point);
           has_target_end_point_ = true;
           returning_ = false;
+
         } else {
-          // Return to start position if no end points remain
-          new_target_x = 0.2;
-          new_target_y = 0.2;
+          Eigen::Vector2f start_position(0.2, 0.2);
+          new_target = start_position;
           has_target_end_point_ = false;
           returning_ = true;
         }
 
-        bool is_new_target = new_target_x != target_x_
-          || new_target_y != target_y_;
+        bool is_new_target = new_target.x() != target_x_
+          || new_target.y() != target_y_;
 
         bool target_not_set = is_new_target || was_in_manual_mode_;
 
         if (target_not_set) {
-          set_new_target(new_target_x, new_target_y);
+          set_new_target(new_target);
           was_in_manual_mode_ = false;
         }
       }
@@ -146,10 +192,10 @@ namespace kmm_exploration{
 /*
   Checks if value is new and in that case publishes and sends new goal.
 */
-  void Exploration::set_new_target(float new_target_x, float new_target_y) {
+  void Exploration::set_new_target(Eigen::Vector2f new_target) {
     target_unreachable_cnt_ = 0;
-    target_x_ = new_target_x;
-    target_y_ = new_target_y;
+    target_x_ = new_target.x();
+    target_y_ = new_target.y();
     send_goal();
   }
 
@@ -169,8 +215,8 @@ namespace kmm_exploration{
    */
   void Exploration::send_remove_walls() {
     kmm_mapping::RemoveWallsGoal end_point;
-    end_point.x = target_end_point_.x;
-    end_point.y = target_end_point_.y;
+    end_point.x = target_end_point_.x();
+    end_point.y = target_end_point_.y();
     remove_walls_client_.sendGoal(end_point);
     if (remove_walls_client_.waitForResult()) {
       has_target_end_point_ = false;
