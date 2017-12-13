@@ -124,7 +124,6 @@ namespace kmm_position {
 
   void Kalman::gyro_measurement(float y) {
     y -= state_[5];
-    ROS_INFO_STREAM("state_cov_ --> " << state_cov_);
     float K = state_cov_[5] / (state_cov_[5] + gyro_noise_);
     state_[5] += K * y;
     state_cov_[5] *= (1 - K);
