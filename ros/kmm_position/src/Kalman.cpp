@@ -83,13 +83,21 @@ namespace kmm_position {
       state_[4] += dt * a[1];
       state_[5] += dt * a[2];
 
-      state_cov_[0] += state_cov_[3] * dt + 0.5 * dt*dt * predict_noise_[0];
+      /*state_cov_[0] += state_cov_[3] * dt + 0.5 * dt*dt * predict_noise_[0];
       state_cov_[1] += state_cov_[4] * dt + 0.5 * dt*dt * predict_noise_[1];
       state_cov_[2] += state_cov_[5] * dt + 0.5 * dt*dt * predict_noise_[2];
 
       state_cov_[3] += dt * predict_noise_[0];
       state_cov_[4] += dt * predict_noise_[1];
-      state_cov_[5] += dt * predict_noise_[2];
+      state_cov_[5] += dt * predict_noise_[2];*/
+
+      state_cov_[0] += predict_noise_[0];
+      state_cov_[1] += predict_noise_[1];
+      state_cov_[2] += predict_noise_[2];
+
+      state_cov_[3] += predict_noise_[0];
+      state_cov_[4] += predict_noise_[1];
+      state_cov_[5] += predict_noise_[2];
 
       /*cov_increment(0, 0) *= abs(u[0]);
       cov_increment(1, 1) *= abs(u[1]);
