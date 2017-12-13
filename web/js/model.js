@@ -28,7 +28,6 @@ var debug = {
   endPoints: true,
   path: true,
   velocity: true,
-  acceleration: true,
   walls: true
 };
 
@@ -59,11 +58,6 @@ var robot = {
     w: 0
   },
   wheelVelocities: [0, 0, 0],
-  acceleration: {
-    x: 0,
-    y: 0,
-    angle: 0
-  },
   image: new Image()
 };
 

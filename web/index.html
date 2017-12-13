@@ -47,11 +47,6 @@
               <div class="clear"></div>
             </div>
             <div class="dropdown-row">
-              <label for="debug-acceleration" class="dropdown-text">Acceleration</label>
-              <input id="debug-acceleration" checked type="checkbox" class="dropdown-checkbox"/>
-              <div class="clear"></div>
-            </div>
-            <div class="dropdown-row">
               <label for="debug-walls" class="dropdown-text">Walls</label>
               <input id="debug-walls" checked type="checkbox" class="dropdown-checkbox"/>
               <div class="clear"></div>
@@ -99,10 +94,10 @@
     <div id ="fireworks-container">
       <canvas id="fireworks"></canvas>
     </div>
-    
+
     <div class="sidebar">
-      <!-- &gt is an entity '>' to not trigger html code--> 
-      <div class="hide-button" id="hide-button">&gt;&gt;</div> 
+      <!-- &gt is an entity '>' to not trigger html code-->
+      <div class="hide-button" id="hide-button">&gt;&gt;</div>
       <div class="table-info-header">Autonomous</div>
       <div style="text-align: center">
         <!-- Mode slider -->
@@ -136,18 +131,6 @@
         </tr>
       <table>
 
-      <div class="table-info-header">Acceleration</div>
-      <table class="table-info">
-        <tr>
-          <td class="table-info-label"><div>x:</div></td>
-          <td class="table-info-data"><div id="acc-x"></div></td>
-          <td class="table-info-label"><div>y:</div></td>
-          <td class="table-info-data"><div id="acc-y"></div></td>
-          <td class="table-info-label"><div>&theta;:</div></td>
-          <td class="table-info-data"><div id="acc-w"></div></td>
-        </tr>
-      <table>
-
       <div class="table-info-header">Wheels</div>
       <table class="table-info">
         <tr>
@@ -160,7 +143,9 @@
         </tr>
       <table>
 
+      <br>
       <div class="table-info-header">Mapping</div>
+
       <div style="text-align: center">
         <!-- Mapping slider -->
         <label class="switch">

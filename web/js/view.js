@@ -27,10 +27,6 @@ function updateDOM() {
   $("#w-vel-1").html(precision(robot.wheelVelocities[0], 2) + " rad/s");
   $("#w-vel-2").html(precision(robot.wheelVelocities[1], 2) + " rad/s");
   $("#w-vel-3").html(precision(robot.wheelVelocities[2], 2) + " rad/s");
-  //Acceleration
-  $("#acc-x").html(precision(robot.acceleration.x, 2) + " m/s²");
-  $("#acc-y").html(precision(robot.acceleration.y, 2) + " m/s²");
-  $("#acc-w").html(precision(robot.acceleration.angle, 2) + " rad/s²");
 
   // Autonomous slider
   if (isInAutoMode) {
@@ -121,7 +117,6 @@ function render() {
     matrix.rotate(robot.position.angle);
     if (debug.velocity) {drawVelocity();};
     if (debug.scan) {drawLaserScan();};
-    if (debug.acceleration) {drawAcceleration();};
     drawRobot();
     matrix.restore();
   }
@@ -293,14 +288,6 @@ function drawArrow(from, to){
   ctx.moveTo(to.x, to.y);
   ctx.lineTo(to.x - headlen * cos2, to.y - headlen * sin2);
   ctx.stroke();
-}
-
-function drawAcceleration() {
-  ctx.strokeStyle = "#000000";
-  ctx.lineWidth = 0.005;
-  var from = { x: 0, y: 0 };
-  var to = robot.acceleration;
-  drawArrow(from, to);
 }
 
 function drawVelocity() {
