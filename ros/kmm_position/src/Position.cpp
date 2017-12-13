@@ -27,6 +27,7 @@ namespace kmm_position {
     laser_notifier_->registerCallback(boost::bind(&Position::laser_scan_callback, this, _1));
     laser_notifier_->setTolerance(ros::Duration(0.1));
     cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
+    imu_sub_ = nh_.subscribe("imu", 1, &Position::imu_callback, this);
 
     // Services
     reset_position_service_ = nh_.advertiseService("reset_position", &Position::reset_position, this);
@@ -41,6 +42,7 @@ namespace kmm_position {
     config_ = config;
     kalman_.set_predict_noise(config_.predict_noise_linear, config_.predict_noise_angular);
     kalman_.set_lidar_noise(config_.lidar_noise_linear, config_.lidar_noise_angular);
+    kalman_.set_gyro_noise(config_.gyro_noise);
     use_predictions_ = config_.use_predictions;
     use_lidar_ = config_.use_lidar;
     use_accelerometer_ = config_.use_accelerometer;
@@ -51,6 +53,12 @@ namespace kmm_position {
     if (use_predictions_) {
       Eigen::Vector3f u(msg.linear.x, msg.linear.y, msg.angular.z);
       kalman_.predict(u);
+    }
+  }
+
+  void Position::imu_callback(sensor_msgs::Imu msg){
+    if (use_gyroscope_) {
+      kalman_.gyro_measurement(msg.angular_velocity.z);
     }
   }
 

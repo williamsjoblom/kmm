@@ -3,6 +3,8 @@
 #include <Eigen/Dense>
 #include "ros/ros.h"
 
+typedef Eigen::Matrix<float, 6, 1> Vector6f;
+
 namespace kmm_position {
 
   class Kalman {
@@ -12,11 +14,11 @@ namespace kmm_position {
     Kalman(float x, float y, float angle);
 
     // Predict next state based on steering signal.
-    void predict(const Eigen::Vector3f& u);
+    void predict(Eigen::Vector3f u);
 
     // Update the estimated state based on measured values.
-    void lidar_measurement(const Eigen::Vector3f y);
-    void accel_gyro_measurement(const Eigen::Vector3f y);
+    void lidar_measurement(Eigen::Vector3f y);
+    void gyro_measurement(float y);
 
     // Current state.
     Eigen::Vector3f get_state();
@@ -24,16 +26,33 @@ namespace kmm_position {
 
     // Configure noise.
     void reset_state();
-    void set_predict_noise(float linear, float angular);
-    void set_lidar_noise(float linear, float angular);
+
+    void set_predict_noise(
+      float linear_standard_deviation_m,
+      float angular_standard_deviation_deg
+    );
+
+    void set_lidar_noise(
+      float linear_standard_deviation_m,
+      float angular_standard_deviation_deg
+    );
+
+    void set_gyro_noise(float angular);
 
   private:
-    void set_state_cov(float linear, float angular);
-    void set_cov(Eigen::Matrix3f& cov, float linear, float angular);
+    void set_initial_state_cov(
+      float linear_standard_deviation_m,
+      float angular_standard_deviation_deg
+    );
 
-    Eigen::Vector3f state_;
-    Eigen::Matrix3f state_cov_, predict_noise_, lidar_noise_, I_;
-    ros::Time predict_ts_, lidar_measurement_ts_, accel_gyro_measurement_ts_;
+    Eigen::Vector3f u_prev_;
+    ros::Time predict_ts_;
+
+    Vector6f state_, initial_state_;
+    Vector6f state_cov_, initial_state_cov_;
+    Eigen::Vector3f predict_noise_;
+    Eigen::Vector3f lidar_noise_;
+    float gyro_noise_;
   };
 
 }
