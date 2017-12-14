@@ -73,6 +73,9 @@ private:
 
   // Autonomous mode
   bool auto_mode_;
+
+  // Map variables
+  float cell_size_;
 };
 
 }

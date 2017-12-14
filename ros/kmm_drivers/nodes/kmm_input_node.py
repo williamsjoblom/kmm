@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+The input node currently handles the physical button on the robot.
+When the button is pressed, autonomous mode is toggled.
+"""
+
 import rospy
 import RPi.GPIO as GPIO
 from std_msgs.msg import Bool

@@ -3,6 +3,12 @@
 #
 # Direct port of the Arduino NeoPixel library strandtest example.  Showcases
 # various animations on a strip of NeoPixels.
+
+"""
+The LED node handles the LEDs on the robot.
+They are however currently not mounted or implemented in the software.
+"""
+
 import time
 
 from neopixel import *

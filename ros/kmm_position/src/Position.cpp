@@ -36,6 +36,12 @@ namespace kmm_position {
     // Set initial values
     auto_mode_ = false;
 
+    // Get ROS parameters
+    if (!nh_.getParam("/cell_size", cell_size_)) {
+      ROS_ERROR("Couldn't set cell_size!");
+      assert(false);
+    }
+
   }
 
   Position::~Position() {
@@ -102,7 +108,8 @@ namespace kmm_position {
       config_.position_proximity,
       config_.mapping_proximity,
       config_.position_ignore,
-      config_.mapping_ignore
+      config_.mapping_ignore,
+      cell_size_
     );
 
     Eigen::Vector3f messurement(

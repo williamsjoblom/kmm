@@ -74,6 +74,11 @@ namespace kmm_exploration{
     return true;
   }
 
+  /*
+   * Returns true if there is no path to the current target.
+   * Makes sure this is true by only saying yes the tenth time the path to
+   * the same target was empty.
+   */
   bool Exploration::is_target_unreachable() {
     bool found_target_unreachable = has_target_end_point_ && path_.empty();
     if (found_target_unreachable) {
@@ -85,14 +90,24 @@ namespace kmm_exploration{
     return false;
   }
 
+  /*
+   * Returns true if the robot is at the current target position.
+   * This means that the end point could not be explored.
+   */
   bool Exploration::is_target_unexplorable() {
     return has_target_end_point_ && is_at_target_position();
   }
 
+  /*
+   * Returns a target position near the given end point.
+   * Selects a position that is on the opposite side of the end point relative
+   * to the position of the robot if within the allowed course bounds. If the
+   * result is outside the allowed bounds, moves the target inside.
+   */
   Eigen::Vector2f Exploration::get_new_target(Eigen::Vector2f closest_end_point) {
 
-    float new_target_x = closest_end_point.x() + (closest_end_point.x() - pos_x_ > 0 ? 0.2 : - 0.2);
-    float new_target_y = closest_end_point.y() + (closest_end_point.y() - pos_y_ > 0 ? 0.2 : - 0.2);
+    float new_target_x = closest_end_point.x() + (closest_end_point.x() - pos_x_ > 0 ? cell_size_/2 : - cell_size_/2);
+    float new_target_y = closest_end_point.y() + (closest_end_point.y() - pos_y_ > 0 ? cell_size_/2 : - cell_size_/2);
 
     float x_lower_limit = 0;
     float x_upper_limit = cell_size_ * map_rows_;
@@ -120,8 +135,8 @@ namespace kmm_exploration{
   }
 
   /*
-   * Callback for end_points. If robot is not in manual mode, eventually updates
-   * target and publishes and sets goal based on if previous target is explored.
+   * Callback for end_points. If robot is not in manual mode, selects a new, or
+   * updates the old target. Send remove walls request if illegal wall is detected.
    */
   void Exploration::end_points_callback(sensor_msgs::PointCloud msg) {
     if (auto_mode_) {
@@ -166,7 +181,7 @@ namespace kmm_exploration{
           returning_ = false;
 
         } else {
-          Eigen::Vector2f start_position(0.2, 0.2);
+          Eigen::Vector2f start_position(cell_size_/2, cell_size_/2);
           new_target = start_position;
           has_target_end_point_ = false;
           returning_ = true;
@@ -189,9 +204,9 @@ namespace kmm_exploration{
     }
   }
 
-/*
-  Checks if value is new and in that case publishes and sends new goal.
-*/
+  /*
+   * Set new target and send goal to navigation client.
+   */
   void Exploration::set_new_target(Eigen::Vector2f new_target) {
     target_unreachable_cnt_ = 0;
     target_x_ = new_target.x();
@@ -199,9 +214,9 @@ namespace kmm_exploration{
     send_goal();
   }
 
-/*
-  Sends a new travelling goal to action server.
-*/
+  /*
+   * Sends a new goal to navigation client.
+   */
   void Exploration::send_goal() {
     kmm_navigation::MoveToGoal goal;
     goal.x = target_x_;
@@ -211,7 +226,7 @@ namespace kmm_exploration{
   }
 
   /*
-   *  Sends an end point to mapping to remove it and the walls surrounding it.
+   * Sends an end point to mapping to remove it and the walls surrounding it.
    */
   void Exploration::send_remove_walls() {
     kmm_mapping::RemoveWallsGoal end_point;
@@ -226,6 +241,10 @@ namespace kmm_exploration{
     }
   }
 
+  /*
+   * Callback that stores a new position. Determines if we arrived back at start
+   * after mapping the area and sets finished_mapping_ to true if we did.
+   */
   void Exploration::position_callback(geometry_msgs::PoseWithCovarianceStamped msg) {
     pos_x_ = msg.pose.pose.position.x;
     pos_y_ = msg.pose.pose.position.y;
@@ -236,6 +255,9 @@ namespace kmm_exploration{
     }
   }
 
+  /*
+   * Callback that stores a new path in path_
+   */
   void Exploration::path_callback(geometry_msgs::PoseArray msg) {
     path_.clear();
     for (const auto &p : msg.poses) {
@@ -246,8 +268,8 @@ namespace kmm_exploration{
 
   bool Exploration::is_at_start_position() {
     float eps = 0.05;
-    float start_pos_x = 0.2;
-    float start_pos_y = 0.2;
+    float start_pos_x = cell_size_/2;
+    float start_pos_y = cell_size_/2;
     float diff_x = fabs(pos_x_ - start_pos_x);
     float diff_y = fabs(pos_y_ - start_pos_y);
     bool is_at_start_position = (diff_x < eps) && (diff_y < eps);

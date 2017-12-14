@@ -15,7 +15,8 @@ Pose calculate_robot_movement(
   float position_proximity,
   float mapping_proximity,
   float position_ignore,
-  float mapping_ignore
+  float mapping_ignore,
+  float cell_size
 )
 {
   Pose total;
@@ -47,7 +48,7 @@ Pose calculate_robot_movement(
 
     std::vector<Eigen::Vector2f> scanPair;
     std::vector<Eigen::Vector2f> gridPair;
-    build_pairs(scanCopy, scanPair, gridPair, position_ignore);
+    build_pairs(scanCopy, scanPair, gridPair, position_ignore, cell_size);
 
     Pose diff = least_squares(scanPair, gridPair);
     total.accumulate(diff);
@@ -60,13 +61,13 @@ Pose calculate_robot_movement(
   // used to position to position the robot.
   std::vector<Eigen::Vector2f> scanPair;
   std::vector<Eigen::Vector2f> gridPair;
-  build_pairs(position_scan, scanPair, gridPair, position_ignore);
+  build_pairs(position_scan, scanPair, gridPair, position_ignore, cell_size);
   position_scan = gridPair;
 
   // Used to do mapping of walls.
   scanPair.clear();
   gridPair.clear();
-  build_pairs(mapping_scan, scanPair, gridPair, mapping_ignore);
+  build_pairs(mapping_scan, scanPair, gridPair, mapping_ignore, cell_size);
   mapping_scan = gridPair;
 
   return total;
@@ -81,16 +82,17 @@ void build_pairs(
   const std::vector<Eigen::Vector2f> &scan,
   std::vector<Eigen::Vector2f> &a,
   std::vector<Eigen::Vector2f> &b,
-  float ignore
+  float ignore,
+  float cell_size
 )
 {
   for (Eigen::Vector2f point : scan) {
-    float x_round = std::round(point[0] / 0.4) * 0.4;
-    float y_round = std::round(point[1] / 0.4) * 0.4;
+    float x_round = std::round(point[0] / cell_size) * cell_size;
+    float y_round = std::round(point[1] / cell_size) * cell_size;
     float x_diff = std::abs(x_round - point[0]);
     float y_diff = std::abs(y_round - point[1]);
 
-    const float max_diff = 0.1;
+    const float max_diff = 0.11;
 
     bool not_near_corner = !(x_diff < ignore && y_diff < ignore);
     bool is_close_to_grid = (x_diff < max_diff) || (y_diff < max_diff);

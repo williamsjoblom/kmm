@@ -36,16 +36,6 @@ find_package(catkin REQUIRED COMPONENTS
 #  geometry_msgs
 #)
 
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
-
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
-
 ###################################
 ## catkin specific configuration ##
 ###################################

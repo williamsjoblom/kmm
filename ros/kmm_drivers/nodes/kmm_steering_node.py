@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+The steering node is responsible for calculating the wheel velocities to be
+set depending on the data on the /cmd_vel topic.
+"""
+
 import os
 import sys
 import serial

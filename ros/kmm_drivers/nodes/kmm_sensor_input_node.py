@@ -1,5 +1,10 @@
 #!/usr/bin/python
 
+"""
+The sensor input node currently retrieves gyro and acceleration data from the
+Adafruit 10-DOF sensor. The data is published on the /imu topic.
+"""
+
 import os
 import sys
 import serial
@@ -45,8 +50,8 @@ def calibrate():
   """
   Main calibration function. Gathers 1000 points of data and calculates mean
   values, variances as well as covariances for each of the accelerometer axis
-  x and y. The same is done for the z axis of the gyroscope. Returns a dict 
-  with these values. 
+  x and y. The same is done for the z axis of the gyroscope. Returns a dict
+  with these values.
 
   The format for dict is:
   calibration_values = {'coordinate': [mean, variance, covariance1..n], ...}
@@ -84,7 +89,7 @@ def calibrate():
   calibration_values['y'].append(y_mean)
   calibration_values['y'].append(covariance_array[1][1])
   calibration_values['y'].append(covariance_array[1][0])
-  
+
   # Only one axis used for gyro. No need for covariance, just call
   # for the variance with np.var
   calibration_values['z'].append(z_mean)
@@ -99,7 +104,7 @@ def get_variance(coordinate, calibration_values):
   return calibration_values[coordinate][1]
 
 def get_covariance(coordinate, calibration_values):
-  return calibration_values[coordinate][2]   
+  return calibration_values[coordinate][2]
 
 
 
@@ -174,5 +179,3 @@ if __name__ == "__main__":
 
   except rospy.ROSInterruptException:
     pass
-
-

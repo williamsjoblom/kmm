@@ -21,6 +21,10 @@ namespace kmm_navigation {
     filter_constant_ = filter_constant;
   }
 
+  /*
+   * Calculates and controls the next velocity of the robot so it follows the
+   * desired path (path). The new velocity is saved in vel.
+   */
   void PathFollower::get_velocity(
     const std::vector<Eigen::Vector2f>& path,
     const Eigen::Vector2f& robot_position,
@@ -41,8 +45,12 @@ namespace kmm_navigation {
         path_vector = path[i+1] - path[i];
         proj_factor = robot_vector.dot(path_vector)/path_vector.squaredNorm();
         if (proj_factor < 1 && proj_factor >= 0) {
+          // Have found a point on path that is close to the robot position
+
+          //An vector from the robot back to the path
           curr_offset_vector = proj_factor*path_vector - robot_vector;
           if (curr_offset_vector.norm() < offset_distance){
+            // This is the current closest point on the path to the robot
             offset_distance = curr_offset_vector.norm();
             offset_vector = curr_offset_vector;
             forward_vector = path_vector.normalized();
@@ -56,6 +64,7 @@ namespace kmm_navigation {
       }
     }
 
+    // Checks if the robot has reached the target
     has_reached_target = false;
     if (path.size() > 0) {
       Eigen::Vector2f destination = path[path.size() - 1];
@@ -66,11 +75,14 @@ namespace kmm_navigation {
     }
 
     if (has_reached_target) {
+      // The target has been reached and the robot shouldn't move
       lowpass_vel_[0] = 0;
       lowpass_vel_[1] = 0;
       vel[0] = 0;
       vel[1] = 0;
     } else {
+      // The robot has not reached the target and the velocity is to be set
+
       // This is compontent that takes the robot forward along the path.
       Eigen::Vector2f forward_vel_component = forward_vector * max_velocity_;
 

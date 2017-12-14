@@ -5,6 +5,11 @@
 #include <dynamic_reconfigure/server.h>
 #include <kmm_gamepad/GamepadConfig.h>
 
+/*
+ * kmm_gamepad_to_vel_node is used to convert game pad signals to velocities
+ * to be published to /cmd_vel.
+ */
+
 ros::Publisher cmd_vel_pub;
 
 float max_linear_vel = 0.0; // m/s

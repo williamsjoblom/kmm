@@ -37,6 +37,7 @@ namespace kmm_mapping {
         ROS_ERROR("Couldn't set cell_size!");
         assert(false);
     }
+
     offset_ = (w_ - 1) / 2;
     walls_size_ = (w_ + (w_ + 1)) * h_ + w_;
 
@@ -122,7 +123,7 @@ namespace kmm_mapping {
           }
         } else {
           ROS_INFO("Unable to determine wall position! x: %f y: %f fmod x: %f fmod y: %f",
-            x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), 0.4));
+            x, y, std::remainder(std::fabs(x), cell_size_),std::remainder(std::fabs(y), cell_size_));
         };
       };
       reset_wall_point_counts();

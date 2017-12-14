@@ -3,6 +3,12 @@
 #include <SFML/Window.hpp>
 #include <iostream>
 
+
+/*
+ * THIS NODE WORKS BUT IS CURRENTLY NOT IN USE
+ * Can be used to navigate the robot with a game pad without the client.
+ */
+
 int main(int argc, char **argv) {
 
   ros::init(argc, argv, "kmm_gamepad");

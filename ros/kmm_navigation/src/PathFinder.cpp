@@ -119,7 +119,7 @@ namespace kmm_navigation {
 
   /*
    * Returns a set of neighbors of cell. A Neighbor is cell we can get to
-   * from cell. In other words an adjacent cell with no wall in between.
+   * from cell. In other words an adjacent cell with no walls in between.
    */
   std::set<Cell*> PathFinder::get_neighbors(Cell* cell) {
     std::set<Cell*> neighbors;
@@ -200,6 +200,9 @@ namespace kmm_navigation {
     return path;
   }
 
+  /*
+   * Takes a path and makes it smooth by applying Bézier curve theory.
+   */
   std::vector<Eigen::Vector2f> PathFinder::make_smooth(const std::vector<Eigen::Vector2f>& path) {
     if (path.size() < 3) {
       return path;

@@ -17,7 +17,8 @@ Pose calculate_robot_movement(
   float position_proximity,
   float mapping_proximity,
   float position_ignore,
-  float mapping_ignore
+  float mapping_ignore,
+  float cell_size
 );
 
 Pose least_squares(
@@ -29,5 +30,6 @@ void build_pairs(
   const std::vector<Eigen::Vector2f> &scan,
   std::vector<Eigen::Vector2f> &a,
   std::vector<Eigen::Vector2f> &b,
-  float ignore
+  float ignore,
+  float cell_size
 );

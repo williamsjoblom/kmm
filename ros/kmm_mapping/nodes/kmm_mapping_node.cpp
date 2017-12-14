@@ -3,6 +3,12 @@
 #include <dynamic_reconfigure/server.h>
 #include <kmm_mapping/MappingConfig.h>
 
+/*
+ * kmm_mapping_node determines where there are walls and end points and
+ * publishes that data to the topics /walls and /end_points.
+ * Also responsible for the mapping toggle in the client.
+ */
+
 int pnt_cnt_req_;
 int times_req_;
 
