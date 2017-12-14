@@ -219,22 +219,20 @@ function drawGrid() {
   ctx.strokeStyle = "#AAAAAA";
 
   matrix.save();
-  matrix.translate(0,0.2);
-  var rows = 26; // (10 / 0.4) + 1
-  var cols = 51; // ((10 / 0.4) * 2) + 1
+  matrix.translate(0,cell_size/2);
 
   // horizontal grid lines
   for (var i = 0; i < rows + 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows - i), 0.4*(cols/2));
-    ctx.lineTo(0.4*(rows - i), 0.4*(cols/-2));
+    ctx.moveTo(cell_size*(rows - i), cell_size*(cols/2));
+    ctx.lineTo(cell_size*(rows - i), cell_size*(cols/-2));
     ctx.stroke();
   };
   // vertical grid lines
   for (var i = 0; i < cols + 1; i++) {
     ctx.beginPath();
-    ctx.moveTo(0.4*(rows), ((0.4*cols)/2) - (0.4 * i));
-    ctx.lineTo(0, ((0.4*cols)/2) - (0.4 * i));
+    ctx.moveTo(cell_size*(rows), ((cell_size*cols)/2) - (cell_size * i));
+    ctx.lineTo(0, ((cell_size*cols)/2) - (cell_size * i));
     ctx.stroke();
   };
   matrix.restore();

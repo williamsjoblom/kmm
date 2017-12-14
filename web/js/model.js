@@ -89,6 +89,34 @@ var ros = new ROSLIB.Ros({
   console.log('Connection to websocket server closed. ');
 });
 
+// Get map parameters from ROS
+
+ros.getParams(function(params) {});
+
+var rows;
+var map_rows_param = new ROSLIB.Param({
+  ros : ros,
+  name : 'map_rows'
+}).get(function(value) {
+  rows = value;
+});
+
+var cols;
+var map_cols_param = new ROSLIB.Param({
+  ros : ros,
+  name : 'map_cols'
+}).get(function(value) {
+  cols = value;
+});
+
+var cell_size;
+var cell_size_param = new ROSLIB.Param({
+  ros : ros,
+  name : 'cell_size'
+}).get(function(value) {
+  cell_size = value;
+});
+
 // Setup ROS subscribers
 
 // Planned path.
@@ -151,17 +179,15 @@ new ROSLIB.Topic({
 }).subscribe(function(message) {
   walls = [];
   var wall;
-  var width = 51;
-  var cell_size = 0.4;
-  var offset = (width - 1)/2;
+  var offset = (cols - 1)/2;
   var row = 0;
   var col = 0;
-  var is_end_of_vertical;
-  var is_end_of_horizontal;
+  var is_end_of_vertical; // If at the end of a row of vertical walls
+  var is_end_of_horizontal; // If at the end of a row of horizontal walls
   var horizontal = true;
   for (var i = 0; i < message.data.length; i++) {
-    is_end_of_vertical = !horizontal && col == width + 1;
-    is_end_of_horizontal = horizontal && col == width;
+    is_end_of_vertical = !horizontal && col == cols + 1;
+    is_end_of_horizontal = horizontal && col == cols;
     if (is_end_of_vertical) {
       horizontal = true;
       row++;
