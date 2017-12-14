@@ -217,6 +217,10 @@ html, body {
   background: linear-gradient(#bbb, #ddd);
 }
 
+.reset-button.hidden-button {
+  display: none;
+}
+
 .zoom-button {
   color: #646464;
   font-family: "Inconsolata";
@@ -308,6 +312,14 @@ html, body {
   background: linear-gradient(#fff, #ddd);
   -webkit-transition: .4s;
   transition: .4s;
+}
+
+.slider-container {
+  padding-top: 25px;
+}
+
+.slider-container.hidden-slider {
+  display: none;
 }
 
 input:checked + .slider {

@@ -105,12 +105,6 @@ function bindMenuEvents() {
     debug.velocity = !debug.velocity;
   });
 
-  $("#debug-acceleration").click(function () {
-    debug.acceleration = !debug.acceleration;
-  });
-  $('#debug-acceleration').removeAttr('checked');
-  debug.acceleration = false;
-
   $("#debug-path").click(function () {
     debug.path = !debug.path;
   });

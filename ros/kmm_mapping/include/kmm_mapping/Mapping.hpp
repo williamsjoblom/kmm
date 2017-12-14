@@ -35,7 +35,9 @@ public:
   void set_times_req(int times_req);
 
 private:
+  // Subscriber callback functions
   void mapping_scan_callback(const sensor_msgs::PointCloud::ConstPtr& msg);
+  void auto_mode_callback(const std_msgs::Bool::ConstPtr& msg);
 
   // Wall point count functions
   WallPointCount make_wall_point_count(int row, int col);
@@ -73,7 +75,6 @@ private:
   Eigen::Vector2f get_east_end_point(Eigen::Vector2f crossing);
 
   // General help functions
-  int get_num_cell_size_multiples(float f);
   bool are_equal(Eigen::Vector2f vector1, Eigen::Vector2f vector2);
 
   // Reset/set functions called from GUI
@@ -91,6 +92,7 @@ private:
 
   // Subscribers
   ros::Subscriber mapping_scan_sub_;
+  ros::Subscriber auto_mode_sub_;
 
   // Publishers
   ros::Publisher mapping_pub_;
@@ -118,6 +120,9 @@ private:
   float cell_size_; // Size of a cell in meters
   int offset_; // Offset used to index walls_
   int walls_size_; // Size of walls_
+
+  // Autonomous mode
+  bool auto_mode_;
 
   // Message variables
   std_msgs::Int8MultiArray walls_msg_;

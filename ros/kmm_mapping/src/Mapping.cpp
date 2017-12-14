@@ -13,6 +13,7 @@ namespace kmm_mapping {
 
     // Subscribers
     mapping_scan_sub_ = nh_.subscribe("mapping_scan", 1, &Mapping::mapping_scan_callback, this);
+    auto_mode_sub_ = nh_.subscribe("auto_mode", 1, &Mapping::auto_mode_callback, this);
 
     // Timers
     publish_mapping_timer_ = nh_.createTimer(ros::Duration(1. / 5), &Mapping::publish_mapping, this);
@@ -26,18 +27,22 @@ namespace kmm_mapping {
     // Get map variables
     if (!nh_.getParam("/map_rows", h_)) {
         ROS_ERROR("Couldn't set map_rows!");
+        assert(false);
     }
     if (!nh_.getParam("/map_cols", w_)) {
         ROS_ERROR("Couldn't set map_cols!");
+        assert(false);
     }
     if (!nh_.getParam("/cell_size", cell_size_)) {
         ROS_ERROR("Couldn't set cell_size!");
+        assert(false);
     }
     offset_ = (w_ - 1) / 2;
     walls_size_ = (w_ + (w_ + 1)) * h_ + w_;
 
-    // Enable mapping_
+    // Set initial values
     mapping_ = true;
+    auto_mode_ = false;
 
     // Initialize wall vector with 0's
 		for (int i = 0; i < walls_size_; i++) {
@@ -69,6 +74,18 @@ namespace kmm_mapping {
   void Mapping::set_times_req(int times_req) {
     times_req_ = times_req;
   }
+
+
+  /*
+   * SUBSCRIBER CALLBACKS
+   */
+
+   void Mapping::auto_mode_callback(const std_msgs::Bool::ConstPtr& msg) {
+     auto_mode_ = msg->data;
+     if (auto_mode_) {
+       mapping_ = true;
+     }
+   }
 
   /* Analyzes points by counting number of collisions on the same wall.
    * Finally publishes the walls that have enough collisions.
@@ -217,12 +234,16 @@ namespace kmm_mapping {
    * Add wall to walls_.
    */
   void Mapping::add_wall_at(int row, int col, bool horizontal) {
+    int index;
     if (horizontal) {
       int t = (col >= 1 ? 1 : 0);
-      walls_[row*w_ + row*(w_ + 1) + offset_ + col - t] = 1;
+      index  = row*w_ + row*(w_ + 1) + offset_ + col - t;
     } else {
-      walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col] = 1;
-    };
+      index = row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
+    }
+    if (is_wall_index_within_bounds(index)) {
+      walls_[index] = 1;
+    }
   }
 
   /*
@@ -252,8 +273,8 @@ namespace kmm_mapping {
    * End point north of crossing is updated.
    */
   void Mapping::remove_wall_north_of_crossing(Eigen::Vector2f crossing) {
-    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
-    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+    int cs_mults_x = crossing.x() / cell_size_; // cell_size multiples
+    int cs_mults_y = crossing.y() / cell_size_; // cell_size multiples
 
     int row = cs_mults_x + 1;
     int col = cs_mults_y;
@@ -270,8 +291,8 @@ namespace kmm_mapping {
    * End point east of crossing is updated.
    */
   void Mapping::remove_wall_east_of_crossing(Eigen::Vector2f crossing) {
-    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
-    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+    int cs_mults_x = crossing.x() / cell_size_; // cell_size multiples
+    int cs_mults_y = crossing.y() / cell_size_; // cell_size multiples
 
     int row = cs_mults_x;
 
@@ -290,8 +311,8 @@ namespace kmm_mapping {
    * End point south of crossing is updated.
    */
   void Mapping::remove_wall_south_of_crossing(Eigen::Vector2f crossing) {
-    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
-    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+    int cs_mults_x = crossing.x() / cell_size_; // cell_size multiples
+    int cs_mults_y = crossing.y() / cell_size_; // cell_size multiples
 
     int row = cs_mults_x;
     int col = cs_mults_y;
@@ -308,8 +329,8 @@ namespace kmm_mapping {
    * End point west of crossing is updated.
    */
   void Mapping::remove_wall_west_of_crossing(Eigen::Vector2f crossing) {
-    int cs_mults_x = get_num_cell_size_multiples(crossing.x());
-    int cs_mults_y = get_num_cell_size_multiples(crossing.y());
+    int cs_mults_x = crossing.x() / cell_size_; // cell_size multiples
+    int cs_mults_y = crossing.y() / cell_size_; // cell_size multiples
 
     int row = cs_mults_x;
 
@@ -423,14 +444,22 @@ namespace kmm_mapping {
    * Removes end_point from end_points_ if it was already there.
    */
   void Mapping::toggle_end_point(Eigen::Vector2f end_point) {
-    for (auto it = end_points_.begin(); it < end_points_.end(); ) {
-      if (are_equal(end_point, *it)) {
-        it = end_points_.erase(it);
-        return;
-      }
-      it++;
-    };
-    end_points_.push_back(end_point);
+    bool end_point_x_within_bounds = end_point.x() >= 0 && end_point.x() <= h_ * cell_size_;
+    float abs_y_limit = cell_size_ * offset_; // offset = (map_width - 1) / 2
+    bool end_point_y_within_bounds = end_point.y() >= -abs_y_limit
+      && end_point.y() <= abs_y_limit + cell_size_; // positive side has one extra multiple
+    bool end_point_within_bounds = end_point_x_within_bounds
+      && end_point_y_within_bounds;
+    if (end_point_within_bounds) {
+      for (auto it = end_points_.begin(); it < end_points_.end(); ) {
+        if (are_equal(end_point, *it)) {
+          it = end_points_.erase(it);
+          return;
+        }
+        it++;
+      };
+      end_points_.push_back(end_point);
+    }
   }
 
   /*
@@ -470,21 +499,6 @@ namespace kmm_mapping {
    * GENERAL HELP FUNCTIONS
    */
 
-
-   /*
-    * Return the number of times cell_size_ goes in float f.
-    */
-   int Mapping::get_num_cell_size_multiples(float f) {
-     return round(f/0.4);
-     /*int times = 0;
-     float rem = fabs(f);
-     while (rem >= cell_size_) {
-       rem -= cell_size_;
-       times++;
-     }
-     return times * (std::signbit(f) ? -1 : 1);*/ // Return times with the sign of f.
-   }
-
   /*
    * Return true if vector1 == vector2, otherwise false
    */
@@ -507,7 +521,9 @@ namespace kmm_mapping {
    */
   bool Mapping::set_mapping(std_srvs::SetBool::Request &req,
          std_srvs::SetBool::Response &res) {
-    mapping_ = req.data;
+    if (!auto_mode_) { // mapping can't be toggled in auto mode
+      mapping_ = req.data;
+    }
     return true;
   }
 
@@ -516,17 +532,19 @@ namespace kmm_mapping {
    */
   bool Mapping::reset_map(std_srvs::SetBool::Request &req,
     std_srvs::SetBool::Response &res) {
-    // Reset walls
-    walls_.clear();
-    for (int i = 0; i < walls_size_; i++) {
-			walls_.push_back(0);
-    };
+    if (!auto_mode_) {
+      // Reset walls
+      walls_.clear();
+      for (int i = 0; i < walls_size_; i++) {
+  			walls_.push_back(0);
+      };
 
-    // Reset wall point counts
-    hor_wall_point_counts_.clear();
-    ver_wall_point_counts_.clear();
+      // Reset wall point counts
+      hor_wall_point_counts_.clear();
+      ver_wall_point_counts_.clear();
 
-    end_points_.clear();
+      end_points_.clear();
+    }
 
     return true;
   }

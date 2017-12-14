@@ -23,13 +23,17 @@ public:
   Position(ros::NodeHandle nh);
   ~Position();
 
-  void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
   void cmd_vel_callback(geometry_msgs::Twist msg);
   void imu_callback(sensor_msgs::Imu msg);
+  void laser_scan_callback(const sensor_msgs::LaserScan::ConstPtr& msg);
+  void auto_mode_callback(const std_msgs::Bool::ConstPtr& msg);
+
   void publish_scan(ros::Publisher& pub, std::vector<Eigen::Vector2f>& scan);
   void broadcast_robot_pose(const ros::TimerEvent&);
   void publish_robot_pose(const ros::TimerEvent&);
+
   void reconfigure_callback(PositionConfig& config, int level);
+
   bool reset_position(std_srvs::SetBool::Request &req,
         std_srvs::SetBool::Response &res);
 
@@ -49,6 +53,7 @@ private:
   tf::MessageFilter<sensor_msgs::LaserScan>* laser_notifier_;
   ros::Subscriber cmd_vel_sub_;
   ros::Subscriber imu_sub_;
+  ros::Subscriber auto_mode_sub_;
 
   // Publishers
   ros::Publisher position_scan_pub_;
@@ -65,6 +70,9 @@ private:
   bool use_lidar_;
   bool use_accelerometer_;
   bool use_gyroscope_;
+
+  // Autonomous mode
+  bool auto_mode_;
 };
 
 }

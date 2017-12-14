@@ -28,12 +28,26 @@ function updateDOM() {
   $("#w-vel-2").html(precision(robot.wheelVelocities[1], 2) + " rad/s");
   $("#w-vel-3").html(precision(robot.wheelVelocities[2], 2) + " rad/s");
 
-  // Autonomous slider
+  // Autonomous mode settings
   if (isInAutoMode) {
+    // Make auto mode slider checked
     $("#mode-slider").prop("checked", true);
+
+    // Hide mapping slider
+    $("#mapping-slider-container").addClass("hidden-slider");
+
+    // Hide reset buttons
+    $("#reset-position-button").addClass("hidden-button");
+    $("#reset-map-button").addClass("hidden-button");
+
+    // Map canvas
+    $("#map").css('cursor', 'default');
+
+    // Go To button
     $("#go-to").addClass("menu-option-inactive");
     $("#go-to").html("Go to");
-    $("#map").css('cursor', 'default');
+
+    // Cancel any ongoing Go To targets
     isUsingGoTo = false;
     goToPos = null;
     if (targetPositionGoal) {
@@ -41,7 +55,17 @@ function updateDOM() {
       targetPositionGoal = null;
     }
   } else {
+    // Make auto mode slider unchecked
     $("#mode-slider").prop("checked", false);
+
+    // Show mapping slider
+    $("#mapping-slider-container").removeClass("hidden-slider");
+
+    // Show reset buttons
+    $("#reset-position-button").removeClass("hidden-button");
+    $("#reset-map-button").removeClass("hidden-button");
+
+    // Go To button
     $("#go-to").removeClass("menu-option-inactive");
   }
 

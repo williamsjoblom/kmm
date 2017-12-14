@@ -98,8 +98,9 @@
     <div class="sidebar">
       <!-- &gt is an entity '>' to not trigger html code-->
       <div class="hide-button" id="hide-button">&gt;&gt;</div>
-      <div class="table-info-header">Autonomous</div>
-      <div style="text-align: center">
+
+      <div id="mode-slider-container" class="slider-container" style="text-align: center">
+        <div class="table-info-header">Autonomous</div>
         <!-- Mode slider -->
         <label class="switch">
           <input id="mode-slider" type="checkbox">
@@ -144,9 +145,9 @@
       <table>
 
       <br>
-      <div class="table-info-header">Mapping</div>
 
-      <div style="text-align: center">
+      <div id="mapping-slider-container" class="slider-container" style="text-align: center">
+        <div id="mapping-slider-header" class="table-info-header">Mapping</div>
         <!-- Mapping slider -->
         <label class="switch">
           <input id="mapping-slider" type="checkbox">

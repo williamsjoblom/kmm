@@ -28,9 +28,14 @@ namespace kmm_position {
     laser_notifier_->setTolerance(ros::Duration(0.1));
     cmd_vel_sub_ = nh_.subscribe("cmd_vel", 1, &Position::cmd_vel_callback, this);
     imu_sub_ = nh_.subscribe("imu", 1, &Position::imu_callback, this);
+    auto_mode_sub_ = nh_.subscribe("auto_mode", 1, &Position::auto_mode_callback, this);
 
     // Services
     reset_position_service_ = nh_.advertiseService("reset_position", &Position::reset_position, this);
+
+    // Set initial values
+    auto_mode_ = false;
+
   }
 
   Position::~Position() {
@@ -114,6 +119,12 @@ namespace kmm_position {
     publish_scan(position_scan_pub_, position_scan);
   }
 
+
+  void Position::auto_mode_callback(const std_msgs::Bool::ConstPtr& msg) {
+    auto_mode_ = msg->data;
+  }
+
+
   void Position::publish_scan(ros::Publisher& pub, std::vector<Eigen::Vector2f>& scan) {
     sensor_msgs::PointCloud cloud;
     cloud.header.frame_id = "map";
@@ -176,8 +187,9 @@ namespace kmm_position {
    */
   bool Position::reset_position(std_srvs::SetBool::Request &req,
     std_srvs::SetBool::Response &res) {
-    kalman_.reset_state();
-
+    if (!auto_mode_) {
+      kalman_.reset_state();
+    }
     return true;
   }
 }

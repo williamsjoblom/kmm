@@ -48,8 +48,8 @@ namespace kmm_navigation {
       && map_->is_cell_within_bounds(end_cell);
 
     if (!cells_within_bounds) {
-      ROS_ERROR("Cell out of bounds in PathFinder::find_path!");
-      assert(false);
+      std::vector<Eigen::Vector2f> empty_path;
+      return empty_path;
     }
 
     Cell* start = cells_[(int)start_cell.x()][(int)start_cell.y() + map_->get_offset()];
