@@ -72,17 +72,6 @@ sudo apt-get install build-essential
 sudo npm install -g http-server
 sudo apt-get install ros-kinetic-rosbridge-suite
 ```
-Run rosbridge
-```
-roslaunch rosbridge_server rosbridge_websocket.launch
-```
-Run the local webserver (similar to XAMPP but easier)
-```
-cd ~/catkin_ws/src/kmm/web
-http-server
-```
-
-Open broswer at http://localhost:8080
 
 # Köra på roboten
 ssh pi@kmm-raspberry
@@ -101,9 +90,6 @@ ROS_MASTER_URI=samma som på raspberryn
 
 Glöm inte att man måste source:a ~/.rosenv för att variablerna ska ändras.
 kör roslaunch kmm_bringup client.launch
-och såklart http-server för att visa hemsidan
-
-
 
 ## Rosbag
 
