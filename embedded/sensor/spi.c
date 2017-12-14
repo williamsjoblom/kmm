@@ -1,4 +1,11 @@
-#include <avr/io.h>
+/*
+ * spi.c
+ *
+ * Created: 15/11/2017
+ * Author: wilsj878, hamer848, sabse455 
+ */
+
+ #include <avr/io.h>
 #include"spi.h"
 
 #define DDR_SPI DDRB

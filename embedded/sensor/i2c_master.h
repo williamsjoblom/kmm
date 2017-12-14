@@ -1,3 +1,22 @@
+/*
+ * i2c_master.h
+ *
+ * This header contains functions used to initialize and communicate via I2C
+ * between the ATmega128 and the Adafruit 10-DOF sensor. The header also 
+ * contains pre-defined address and register values for this sensor chip.
+ * 
+ * There's also a defined struct that gets sent between each step in the 
+ * communication process. It contains an 8-bit unsigned integer to tell 
+ * latter function calls if the current one failed in order to avoid 
+ * unnecessary execution. There's also a pointer of same type to hold 
+ * the currently retrieved byte of data.  
+ *
+ * Created: 24/11/2017
+ * Author: hamer848, sabse455
+ */
+
+ 
+
 #ifndef _I2C_MASTER_H
 #define _I2C_MASTER_H
 

@@ -1,5 +1,5 @@
-#ifndef _MAIN_H
-#define _MAIN_H
+#ifndef _I2C_MAIN_H
+#define _I2C_MAIN_H
 
 
 #endif
