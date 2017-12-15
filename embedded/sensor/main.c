@@ -29,12 +29,10 @@ uint8_t get_acc_data(uint8_t buf[], Packet *acc_packet) {
   Packet *read_packet;
   for(int i = 3; i > 0; i--) {
     read_packet = i2c_read_ack(acc_packet);
-    if(read_packet->transmission_error) {return 1;}   
     buf[n] = *(read_packet->data);
     n++;
   }
   read_packet = i2c_read_nack(acc_packet);
-  if(read_packet->transmission_error) {return 1;} 
   buf[n] = *(read_packet->data);
   return 0;
 }
@@ -52,12 +50,10 @@ uint8_t get_gyro_data(uint8_t buf[], Packet *gyro_packet) {
   Packet *read_packet;
   for(int i = 1; i > 0; i--) {
     read_packet = i2c_read_ack(gyro_packet); 
-    if(read_packet->transmission_error) {return 1;} 
     buf[n] = *(read_packet->data);
     n++;
   }
   read_packet = i2c_read_nack(gyro_packet);
-  if(read_packet->transmission_error) {return 1;} 
   buf[n] = *(read_packet->data);
   return 0;
 }
@@ -80,15 +76,15 @@ int main() {
 
   while(1) {
     
-    // Accelerometer data fetch and check for error during transmission
-    if(!get_acc_data(buf, &acc_packet)){
+    // Accelerometer data fetch
+    get_acc_data(buf, &acc_packet);
       
-      // Gyroscope data fetch and check for error during transmission
-      if(!get_gyro_data(buf, &gyro_packet)){
-        
-        // Publish to Raspberry Pi 3
-        spi_slave_write(buf, 6);
-      }
-    }
+    // Gyroscope data fetch
+    get_gyro_data(buf, &gyro_packet);
+      
+    // Publish to Raspberry Pi 3
+    spi_slave_write(buf, 6);
+  
+
   }
 }

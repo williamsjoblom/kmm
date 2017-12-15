@@ -21,7 +21,7 @@ from sensor_msgs.msg import Imu
 # Values from adafruit c++ acc code to modify raw data.
 ACC_MG_LSB  = 0.001
 SENSORS_GRAVITY_STANDARD = 9.80665
-CALIBRATION_SAMPLES = 2000
+CALIBRATION_SAMPLES = 1000
 
 # Values from adafruit c++ gyro code to modfy raw data.
 GYRO_RANGE_250DPS = 0.00875
@@ -68,8 +68,8 @@ def calibrate():
   while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
-    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 6))
-    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 6))
+    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4))
+    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 4))
     raw_values['z'].append(float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int))
 
     n = n + 1
@@ -98,13 +98,27 @@ def calibrate():
   return calibration_values
 
 def get_mean(coordinate, calibration_values):
+  """
+  Returns the mean value of coordinate from the dictionary. 
+  """
   return calibration_values[coordinate][0]
 
 def get_variance(coordinate, calibration_values):
+  """
+  Returns the variance of the coordinate from the dictionary.
+  """
   return calibration_values[coordinate][1]
 
 def get_covariance(coordinate, calibration_values):
-  return calibration_values[coordinate][2]
+  """
+  Returns the covariance of the coordinate from the dictionary if any.
+  Otherwise raises an index error and tells the user that the covariance
+  is not existent.
+  """
+  try:
+    return calibration_values[coordinate][2]
+  except IndexError:
+    print("{0} does not have a covariance!".format(coordinate))
 
 
 
@@ -154,7 +168,7 @@ if __name__ == "__main__":
       idx = 0
       rawdata = spi.readbytes(6)
       for i in range(0,4,2):
-        sensor_data[idx] = float(B(uint=(rawdata[i] | (rawdata[i+1] << 8)), length=16).int >> 6)
+        sensor_data[idx] = float(B(uint=(rawdata[i] | (rawdata[i+1] << 8)), length=16).int >> 4)
         idx = idx + 1
 
       sensor_data[2] = float(B(uint=(rawdata[4] | (rawdata[5] << 8)), length=16).int)
