@@ -133,8 +133,8 @@ namespace kmm_navigation {
       Eigen::Vector2f forward_vel_component = forward_vector * forward_velocity;
 
       // This is the component that minimizes the error.
-      if (offset_vector.norm() > 0.1) {
-        offset_vector = offset_vector.normalized() * 0.1;
+      if (offset_vector.norm() > 0.05) {
+        offset_vector = offset_vector.normalized() * 0.05;
       }
       Eigen::Vector2f offset_vel_component = offset_vector * error_p_constant_;
 
