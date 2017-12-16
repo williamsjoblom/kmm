@@ -57,7 +57,7 @@ namespace kmm_navigation {
       if (i != path.size() - 1) {
         double proj_factor = robot_vector.dot(path_vector)/path_vector.squaredNorm();
 
-        if (proj_factor < 1 && proj_factor >= 0) {
+        if (proj_factor < 1 && (proj_factor >= 0 || i == 0)) {
           //An vector from the robot back to the path
           Eigen::Vector2f  curr_offset_vector = proj_factor * path_vector - robot_vector;
 
@@ -100,7 +100,7 @@ namespace kmm_navigation {
       Eigen::Vector2f v2 = path[look_ahead_index] - path[closest_index];
       float angle_deg = std::acos(v1.dot(v2) / (v1.norm() * v2.norm())) * (180 / pi);
       ROS_INFO("path angle: %.2f", angle_deg);
-      is_path_curvning = angle_deg > 5;
+      is_path_curvning = angle_deg > 3;
     }
 
 
