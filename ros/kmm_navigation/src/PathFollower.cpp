@@ -120,7 +120,7 @@ namespace kmm_navigation {
       // The robot has not reached the target and the velocity is to be set
 
       // This is compontent that takes the robot forward along the path.
-      Eigen::Vector2f forward_vel_component = forward_vector * max_velocity_;
+      Eigen::Vector2f forward_vel_component = forward_vector * forward_velocity;
 
       // This is the component that minimizes the error.
       if (offset_vector.norm() > 0.1) {
