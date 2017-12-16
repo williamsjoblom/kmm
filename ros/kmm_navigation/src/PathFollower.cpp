@@ -94,7 +94,7 @@ namespace kmm_navigation {
 
     // Check if path is curvning.
     bool is_path_curvning = false;
-    int look_ahead_index = closest_index + 3;
+    int look_ahead_index = closest_index + 5;
     if (look_ahead_index < path.size()) {
       Eigen::Vector2f v1 = path[closest_index + 1] - path[closest_index];
       Eigen::Vector2f v2 = path[look_ahead_index] - path[closest_index];
