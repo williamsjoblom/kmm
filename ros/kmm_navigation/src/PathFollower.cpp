@@ -19,6 +19,10 @@ namespace kmm_navigation {
     safe_velocity_ = safe_velocity;
   }
 
+  void PathFollower::set_look_ahead(int look_ahead) {
+    look_ahead_ = look_ahead;
+  }
+
   void PathFollower::set_error_p_constant(float error_p_constant) {
     error_p_constant_ = error_p_constant;
   }
@@ -90,17 +94,18 @@ namespace kmm_navigation {
     }
 
     // Check if close to target.
-    bool is_close_to_target = distance_to_destination < 0.15;
+    bool is_close_to_target = distance_to_destination < 0.2;
 
     // Check if path is curvning.
     bool is_path_curvning = false;
-    int look_ahead_index = closest_index + 5;
-    if (look_ahead_index < path.size()) {
-      Eigen::Vector2f v1 = path[closest_index + 1] - path[closest_index];
+    int after_closest_index = closest_index + 1;
+    int look_ahead_index = std::min(closest_index + look_ahead_, (int)path.size() - 1);
+    if (after_closest_index < path.size()) {
+      Eigen::Vector2f v1 = path[after_closest_index] - path[closest_index];
       Eigen::Vector2f v2 = path[look_ahead_index] - path[closest_index];
       float angle_deg = std::acos(v1.dot(v2) / (v1.norm() * v2.norm())) * (180 / pi);
       ROS_INFO("path angle: %.2f", angle_deg);
-      is_path_curvning = angle_deg > 3;
+      is_path_curvning = angle_deg > 2;
     }
 
 

@@ -16,10 +16,12 @@ namespace kmm_navigation {
     );
     void set_max_velocity(float max_velocity);
     void set_safe_velocity(float safe_velocity);
+    void set_look_ahead(int look_ahead);
     void set_error_p_constant(float error_p_constant);
     void set_filter_constant(float filter_constant);
 
   private:
+    int look_ahead_ = 0;
     float max_velocity_ = 0;
     float safe_velocity_ = 0;
     float error_p_constant_ = 0;
