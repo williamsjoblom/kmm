@@ -21,7 +21,7 @@ from sensor_msgs.msg import Imu
 # Values from adafruit c++ acc code to modify raw data.
 ACC_MG_LSB  = 0.001
 SENSORS_GRAVITY_STANDARD = 9.80665
-CALIBRATION_SAMPLES = 2000
+CALIBRATION_SAMPLES = 1000
 
 # Values from adafruit c++ gyro code to modfy raw data.
 GYRO_RANGE_250DPS = 0.00875
@@ -68,8 +68,8 @@ def calibrate():
   while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
-    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 6))
-    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 6))
+    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4))
+    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 4))
     raw_values['z'].append(float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int))
 
     n = n + 1
@@ -154,7 +154,7 @@ if __name__ == "__main__":
       idx = 0
       rawdata = spi.readbytes(6)
       for i in range(0,4,2):
-        sensor_data[idx] = float(B(uint=(rawdata[i] | (rawdata[i+1] << 8)), length=16).int >> 6)
+        sensor_data[idx] = float(B(uint=(rawdata[i] | (rawdata[i+1] << 8)), length=16).int >> 4)
         idx = idx + 1
 
       sensor_data[2] = float(B(uint=(rawdata[4] | (rawdata[5] << 8)), length=16).int)
@@ -163,9 +163,9 @@ if __name__ == "__main__":
 
       z_mean = 0
       # Convert values to understandable format and package into Imu message.
-      x_acc = (sensor_data[0] - x_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
-      y_acc = (sensor_data[1] - y_mean) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
-      z_gyro = (sensor_data[2] - z_mean) * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS
+      x_acc = sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- x_mean
+      y_acc = sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- y_mean
+      z_gyro = sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS # - z_mean
 
       rospy.loginfo("Acc x: {0}\nAcc y: {1}\nGyro z: {2}".format(x_acc, y_acc, z_gyro))
 
