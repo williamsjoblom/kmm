@@ -99,7 +99,8 @@ namespace kmm_navigation {
       Eigen::Vector2f v1 = path[closest_index + 1] - path[closest_index];
       Eigen::Vector2f v2 = path[look_ahead_index] - path[closest_index];
       float angle_deg = std::acos(v1.dot(v2) / (v1.norm() * v2.norm())) * (180 / pi);
-      ROS_INFO("angle: %.2f", angle_deg);
+      ROS_INFO("path angle: %.2f", angle_deg);
+      is_path_curvning = angle_deg > 5;
     }
 
 
