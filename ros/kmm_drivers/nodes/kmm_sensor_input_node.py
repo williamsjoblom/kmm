@@ -68,11 +68,6 @@ def calibrate():
   while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
-<<<<<<< HEAD
-    raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4))
-    raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 4))
-    raw_values['z'].append(float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int))
-=======
 
     # Data bit shift and conversion into m/s^2 and rad/s.
     raw_x = float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
@@ -81,7 +76,6 @@ def calibrate():
     raw_values['x'].append(raw_x)
     raw_values['y'].append(raw_y)
     raw_values['z'].append(raw_z)
->>>>>>> 80a84ecd8f75c2fdadec64e72c76a5801bcdcf25
 
     n = n + 1
 
@@ -192,15 +186,9 @@ if __name__ == "__main__":
 
       z_mean = 0
       # Convert values to understandable format and package into Imu message.
-<<<<<<< HEAD
-      x_acc = sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- x_mean
-      y_acc = sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- y_mean
-      z_gyro = sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS # - z_mean
-=======
       x_acc = (sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - x_mean
       y_acc = (sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - y_mean
       z_gyro = (sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS) - z_mean
->>>>>>> 80a84ecd8f75c2fdadec64e72c76a5801bcdcf25
 
       rospy.loginfo("Acc x: {0}\nAcc y: {1}\nGyro z: {2}".format(x_acc, y_acc, z_gyro))
 
