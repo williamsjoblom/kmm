@@ -90,7 +90,7 @@ namespace kmm_navigation {
         raw_path = path_finder_->find_path(robot_position_, target);
         path_ = path_finder_->make_smooth(raw_path);
         if (raw_path.empty()) {
-          path_follower_.reset();
+          //path_follower_.reset();
           break;
         }
       }
@@ -100,7 +100,7 @@ namespace kmm_navigation {
       if (action_server_.isPreemptRequested() || !ros::ok()) {
         publish_vel(0, 0, 0);
         path_.clear();
-        path_follower_.reset();
+        //path_follower_.reset();
         action_server_.setPreempted();
         return;
       }
@@ -120,7 +120,7 @@ namespace kmm_navigation {
     // The robot has reached the target destination.
     publish_vel(0, 0, 0);
     path_.clear();
-    path_follower_.reset();
+    //path_follower_.reset();
     action_server_.setSucceeded(result_);
   }
 
