@@ -14,14 +14,16 @@ namespace kmm_navigation {
       Eigen::Vector2f& vel,
       bool& has_reached_target
     );
-    void set_error_p_constant(float error_p_constant);
     void set_max_velocity(float max_velocity);
+    void set_safe_velocity(float safe_velocity);
+    void set_error_p_constant(float error_p_constant);
     void set_filter_constant(float filter_constant);
 
   private:
-    float error_p_constant_;
-    float max_velocity_;
-    float filter_constant_;
+    float max_velocity_ = 0;
+    float safe_velocity_ = 0;
+    float error_p_constant_ = 0;
+    float filter_constant_ = 0;
     Eigen::Vector2f lowpass_vel_;
     ros::Time vel_ts_;
   };

@@ -66,8 +66,9 @@ namespace kmm_navigation {
   }
 
   void Navigation::reconfigure_callback(NavigationConfig& config, int level) {
-    path_follower_.set_error_p_constant(config.error_p_constant);
     path_follower_.set_max_velocity(config.max_velocity);
+    path_follower_.set_max_velocity(config.safe_velocity);
+    path_follower_.set_error_p_constant(config.error_p_constant);
     path_follower_.set_filter_constant(config.filter_constant);
   }
 
