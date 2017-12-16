@@ -94,7 +94,7 @@ namespace kmm_navigation {
     }
 
     // Check if close to target.
-    bool is_close_to_target = distance_to_destination < 0.2;
+    bool is_close_to_target = distance_to_destination < 0.25;
 
     // Check if path is curvning.
     bool is_path_curvning = false;
