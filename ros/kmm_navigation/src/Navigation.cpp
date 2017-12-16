@@ -164,6 +164,7 @@ namespace kmm_navigation {
   */
   void Navigation::publish_path(const ros::TimerEvent&) {
     geometry_msgs::PoseArray msg;
+    msg.header.frame_id = "map";
     for (Eigen::Vector2f& p : path_) {
       geometry_msgs::Pose pose;
       pose.position.x = p.x();
