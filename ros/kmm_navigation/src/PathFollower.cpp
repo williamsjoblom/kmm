@@ -11,6 +11,11 @@ namespace kmm_navigation {
     max_velocity_ = 0;
   }
 
+  void PathFollower::reset() {
+    lowpass_vel_[0] = 0;
+    lowpass_vel_[1] = 0;
+  }
+
   void PathFollower::set_max_velocity(float max_velocity) {
     max_velocity_ = max_velocity;
   }

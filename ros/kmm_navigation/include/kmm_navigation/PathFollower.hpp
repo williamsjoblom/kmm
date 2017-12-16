@@ -19,6 +19,7 @@ namespace kmm_navigation {
     void set_look_ahead(int look_ahead);
     void set_error_p_constant(float error_p_constant);
     void set_filter_constant(float filter_constant);
+    void reset();
 
   private:
     int look_ahead_ = 0;
