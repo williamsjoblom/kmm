@@ -1,3 +1,10 @@
+/*
+ * i2c_master.c
+ *
+ * Created: 24/11/2017
+ * Author: hamer848, sabse455 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/io.h>
@@ -17,7 +24,10 @@ void i2c_init() {
   i2c_write8(GYRO_WRITE, CTRL_REG1_A, 0x0F);  // Power on gyroscope
 
   // Increase Gyro range to avoid hitting the range roof.
-  i2c_write8(GYRO_WRITE, CTRL_REG4_A, GYRO_RANGE_500DPS) 
+  //i2c_write8(GYRO_WRITE, CTRL_REG4_A, GYRO_RANGE_500DPS); 
+
+  // Enable the High Resolution mode for accelerometer.
+  i2c_write8(ACC_WRITE, CTRL_REG4_A, 0x08); 
 }
 
 uint8_t i2c_write8(uint8_t slave_address, uint8_t reg_address, uint8_t byte) {
@@ -38,13 +48,13 @@ uint8_t i2c_write8(uint8_t slave_address, uint8_t reg_address, uint8_t byte) {
           return 1;
         } 
       } else {
-        return 2;
+        return 1;
       } 
     } else {
-      return 3;
+      return 1;
     }
   } else {
-    return 4;
+    return 1;
   }
 }
 

@@ -4,6 +4,12 @@ import rospy
 import spidev
 import RPi.GPIO as GPIO
 
+"""
+    A python testing file for the i2c data coming via spi. 
+    Prints x, y, and z that the AVR has gathered from the Adafruit sensor and
+    sent over SPI to the main module. The script is ran from the user's home
+    folder.
+"""
 if __name__ == "__main__":
     print("Starting session...")
 

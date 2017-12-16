@@ -68,24 +68,38 @@ def calibrate():
   while(n < CALIBRATION_SAMPLES):
 
     byte_data = spi.readbytes(6)
+<<<<<<< HEAD
     raw_values['x'].append(float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4))
     raw_values['y'].append(float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 4))
     raw_values['z'].append(float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int))
+=======
+
+    # Data bit shift and conversion into m/s^2 and rad/s.
+    raw_x = float(B(uint=(byte_data[0] | (byte_data[1] << 8)), length=16).int >> 4) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
+    raw_y = float(B(uint=(byte_data[2] | (byte_data[3] << 8)), length=16).int >> 4) * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD
+    raw_z = float(B(uint=(byte_data[4] | (byte_data[5] << 8)), length=16).int) * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS
+    raw_values['x'].append(raw_x)
+    raw_values['y'].append(raw_y)
+    raw_values['z'].append(raw_z)
+>>>>>>> 80a84ecd8f75c2fdadec64e72c76a5801bcdcf25
 
     n = n + 1
 
   # Create a 2-d array with covariances and variances for x and y
   covariance_array = np.cov(raw_values['x'], raw_values['y'])
 
+  # Mean axis values for stationary robot. 
   x_mean = np.mean(raw_values['x'])
   y_mean = np.mean(raw_values['y'])
   z_mean = np.mean(raw_values['z'])
 
 
+  # Append mean, variance and covariance for x
   calibration_values['x'].append(x_mean)
   calibration_values['x'].append(covariance_array[0][0])
   calibration_values['x'].append(covariance_array[0][1])
 
+  # Append mean, variance and covariance for y
   calibration_values['y'].append(y_mean)
   calibration_values['y'].append(covariance_array[1][1])
   calibration_values['y'].append(covariance_array[1][0])
@@ -98,13 +112,27 @@ def calibrate():
   return calibration_values
 
 def get_mean(coordinate, calibration_values):
+  """
+  Returns the mean value of coordinate from the dictionary. 
+  """
   return calibration_values[coordinate][0]
 
 def get_variance(coordinate, calibration_values):
+  """
+  Returns the variance of the coordinate from the dictionary.
+  """
   return calibration_values[coordinate][1]
 
 def get_covariance(coordinate, calibration_values):
-  return calibration_values[coordinate][2]
+  """
+  Returns the covariance of the coordinate from the dictionary if any.
+  Otherwise raises an index error and tells the user that the covariance
+  is not existent.
+  """
+  try:
+    return calibration_values[coordinate][2]
+  except IndexError:
+    print("{0} does not have a covariance!".format(coordinate))
 
 
 
@@ -158,14 +186,21 @@ if __name__ == "__main__":
         idx = idx + 1
 
       sensor_data[2] = float(B(uint=(rawdata[4] | (rawdata[5] << 8)), length=16).int)
+      
       imu_msg.header.stamp = rospy.Time.now()
       imu_msg.header.frame_id = 'imu'
 
       z_mean = 0
       # Convert values to understandable format and package into Imu message.
+<<<<<<< HEAD
       x_acc = sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- x_mean
       y_acc = sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD #- y_mean
       z_gyro = sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS # - z_mean
+=======
+      x_acc = (sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - x_mean
+      y_acc = (sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - y_mean
+      z_gyro = (sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS) - z_mean
+>>>>>>> 80a84ecd8f75c2fdadec64e72c76a5801bcdcf25
 
       rospy.loginfo("Acc x: {0}\nAcc y: {1}\nGyro z: {2}".format(x_acc, y_acc, z_gyro))
 

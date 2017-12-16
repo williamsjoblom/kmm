@@ -2,6 +2,8 @@
 
 namespace kmm_navigation {
 
+  const double pi = 3.1415926535897;
+
   PathFollower::PathFollower()
   : lowpass_vel_(0, 0)
   {
@@ -9,12 +11,16 @@ namespace kmm_navigation {
     max_velocity_ = 0;
   }
 
-  void PathFollower::set_error_p_constant(float error_p_constant) {
-    error_p_constant_ = error_p_constant;
-  }
-
   void PathFollower::set_max_velocity(float max_velocity) {
     max_velocity_ = max_velocity;
+  }
+
+  void PathFollower::set_safe_velocity(float safe_velocity) {
+    safe_velocity_ = safe_velocity;
+  }
+
+  void PathFollower::set_error_p_constant(float error_p_constant) {
+    error_p_constant_ = error_p_constant;
   }
 
   void PathFollower::set_filter_constant(float filter_constant) {
@@ -32,46 +38,75 @@ namespace kmm_navigation {
     bool& has_reached_target
   )
   {
+    if (path.size() < 2) {
+      vel[0] = 0;
+      vel[1] = 0;
+      has_reached_target = true;
+      return;
+    }
+
     double offset_distance = std::numeric_limits<double>::infinity();
     Eigen::Vector2f offset_vector(0,0);
-    Eigen::Vector2f curr_offset_vector;
-    Eigen::Vector2f path_vector;
-    Eigen::Vector2f robot_vector;
     Eigen::Vector2f forward_vector(0, 0);
-    double proj_factor;
-    for (int i = 0 ; i < path.size(); i++){
-      robot_vector = robot_position - path[i];
-      if (i != path.size() - 1) {
-        path_vector = path[i+1] - path[i];
-        proj_factor = robot_vector.dot(path_vector)/path_vector.squaredNorm();
-        if (proj_factor < 1 && proj_factor >= 0) {
-          // Have found a point on path that is close to the robot position
+    int closest_index = 0;
 
+    for (int i = 0 ; i < path.size(); i++){
+      Eigen::Vector2f robot_vector = robot_position - path[i];
+      Eigen::Vector2f path_vector = path[i+1] - path[i];
+
+      if (i != path.size() - 1) {
+        double proj_factor = robot_vector.dot(path_vector)/path_vector.squaredNorm();
+
+        if (proj_factor < 1 && proj_factor >= 0) {
           //An vector from the robot back to the path
-          curr_offset_vector = proj_factor*path_vector - robot_vector;
-          if (curr_offset_vector.norm() < offset_distance){
+          Eigen::Vector2f  curr_offset_vector = proj_factor * path_vector - robot_vector;
+
+          if (curr_offset_vector.norm() < offset_distance) {
             // This is the current closest point on the path to the robot
             offset_distance = curr_offset_vector.norm();
             offset_vector = curr_offset_vector;
             forward_vector = path_vector.normalized();
+            closest_index = i;
           }
         }
       }
-      if (robot_vector.norm() < offset_distance) {
-          offset_distance = robot_vector.norm();
-          offset_vector = robot_vector * -1;
-          forward_vector = path_vector.normalized();
+
+      if (i != 0) {
+        if (robot_vector.norm() < offset_distance) {
+            offset_distance = robot_vector.norm();
+            offset_vector = robot_vector * -1;
+            forward_vector = path_vector.normalized();
+            closest_index = i;
+        }
       }
     }
 
     // Checks if the robot has reached the target
     has_reached_target = false;
-    if (path.size() > 0) {
-      Eigen::Vector2f destination = path[path.size() - 1];
-      float distance_to_destination = (destination - robot_position).norm();
-      if (distance_to_destination < 0.05) {
-        has_reached_target = true;
-      }
+    Eigen::Vector2f destination = path[path.size() - 1];
+    float distance_to_destination = (destination - robot_position).norm();
+    if (distance_to_destination < 0.05) {
+      has_reached_target = true;
+    }
+
+    // Check if close to target.
+    bool is_close_to_target = distance_to_destination < 0.15;
+
+    // Check if path is curvning.
+    bool is_path_curvning = false;
+    int look_ahead_index = closest_index + 5;
+    if (look_ahead_index < path.size()) {
+      Eigen::Vector2f v1 = path[closest_index + 1] - path[closest_index];
+      Eigen::Vector2f v2 = path[look_ahead_index] - path[closest_index];
+      float angle_deg = std::acos(v1.dot(v2) / (v1.norm() * v2.norm())) * (180 / pi);
+      ROS_INFO("angle: %.2f", angle_deg);
+    }
+
+
+    // Adjust speed and slow down in difficult situations.
+    float forward_velocity = max_velocity_;
+    if (is_close_to_target || is_path_curvning) {
+      forward_velocity = safe_velocity_;
     }
 
     if (has_reached_target) {
@@ -87,10 +122,10 @@ namespace kmm_navigation {
       Eigen::Vector2f forward_vel_component = forward_vector * max_velocity_;
 
       // This is the component that minimizes the error.
-      Eigen::Vector2f offset_vel_component = offset_vector * error_p_constant_;
-      if (offset_vel_component.norm() > max_velocity_) {
-        offset_vel_component = offset_vel_component.normalized() * max_velocity_;
+      if (offset_vector.norm() > 0.1) {
+        offset_vector = offset_vector.normalized() * 0.1;
       }
+      Eigen::Vector2f offset_vel_component = offset_vector * error_p_constant_;
 
       // Lowpass filter forward velocity.
       Eigen::Vector2f total_vel(0, 0);
