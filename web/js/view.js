@@ -1,11 +1,12 @@
 // Tooltips
 $("#zoom-in-button").attr('title', 'Zoom in');
 $("#zoom-out-button").attr('title', 'Zoom out');
-$("#view-state-button").attr('title', 'Toggle view state');
+$("#view-state-button").attr('title', 'Toggle view state (v)');
 $("#center-view-button").attr('title', 'Center view');
-$("#reset-position-button").attr('title', 'Set position to start position (0.2, 0.2)');
-$("#reset-map-button").attr('title', 'Reset all map data');
-$("#hide-button").attr('title', 'Hide/show the sidebar');
+$("#mapping-slider").attr('title', 'Toggle autonomous mode (a)');
+$("#reset-position-button").attr('title', 'Set position to start position (0.2, 0.2) (p)');
+$("#reset-map-button").attr('title', 'Reset all map data (m)');
+$("#hide-button").attr('title', 'Hide/show the sidebar (s)');
 
 // Render canvas 60Hz
 requestAnimationFrame(render);
