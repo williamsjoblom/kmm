@@ -162,9 +162,20 @@ int main() {
 
     int frequency = 20;
     int period = 1000000 / frequency;
+
+    int periods_per_effect = frequency * 20; // 20s
+    int elapsed_periods = 0;
+    int effect = 0; 
     
     while(true) {
-	strip_animate_cycle();
+	switch (effect) {
+	case 0: strip_animate_cycle(); break;
+	case 1: strip_animate(); break;
+	case 2: strip_animate_knight(); break;
+	case 3: strip_animate_spin(); break;
+	}
+	
+	
 	strip_render();
 	
 	ret = ws2811_render(&ledstring);
@@ -174,6 +185,12 @@ int main() {
 	}
 
 	usleep(period);
+
+	elapsed_periods++;
+	if (elapsed_periods >= periods_per_effect) {
+	    effect++; effect %= 4;
+	    elapsed_periods = 0;
+	}
     }
     
 }
