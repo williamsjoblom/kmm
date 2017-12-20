@@ -186,9 +186,9 @@ if __name__ == "__main__":
 
       z_mean = 0
       # Convert values to understandable format and package into Imu message.
-      x_acc = (sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - x_mean
-      y_acc = (sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) - y_mean
-      z_gyro = (sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS) - z_mean
+      x_acc = (sensor_data[0] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) #- x_mean
+      y_acc = (sensor_data[1] * ACC_MG_LSB * SENSORS_GRAVITY_STANDARD) #- y_mean
+      z_gyro = (sensor_data[2] * GYRO_RANGE_500DPS * SENSORS_DPS_TO_RADS) #- z_mean
 
       rospy.loginfo("Acc x: {0}\nAcc y: {1}\nGyro z: {2}".format(x_acc, y_acc, z_gyro))
 

@@ -119,27 +119,55 @@ function bindSidebarEvents() {
   $("#mapping-slider").click(toggleMapping);
   $("#reset-position-button").click(resetPosition);
   $("#reset-map-button").click(resetMap);
-  $("#hide-button").click(hideOrShowSidebar);
+  $("#hide-button").click(toggleSidebar);
 }
 
 function bindButtonEvents(){
   document.addEventListener("keyup", setGoalClickKey, false);
   document.addEventListener("keyup", toggleModeKey, false);
+  document.addEventListener("keyup", resetMapKey, false);
+  document.addEventListener("keyup", resetPositionKey, false);
+  document.addEventListener("keyup", toggleViewStateKey, false);
+  document.addEventListener("keyup", toggleSidebarKey, false);
 }
 
-function toggleModeKey(e){
-  if (e.keyCode == 77) { // m
+function toggleModeKey(e) {
+  if (e.keyCode == 65) { // a
     toggleMode();
   }
 }
 
-function setGoalClickKey(e){
+function setGoalClickKey(e) {
   if (e.keyCode == 71) { // g
     setGoalClick();
   }
 }
 
-function setGoalClick(e){
+function resetMapKey(e) {
+  if (e.keyCode == 77) { // m
+    resetMap();
+  }
+}
+
+function resetPositionKey(e) {
+  if (e.keyCode == 80) { // p
+    resetPosition();
+  }
+}
+
+function toggleViewStateKey(e) {
+  if (e.keyCode == 86) { // v
+    toggleViewState();
+  }
+}
+
+function toggleSidebarKey(e) {
+  if (e.keyCode == 83) { // s
+    toggleSidebar();
+  }
+}
+
+function setGoalClick(e) {
   isUsingGoTo = !isUsingGoTo;
   if (!isInAutoMode && !goToPos && isUsingGoTo) { // Set new
     $("#go-to").html("Set goal");
@@ -200,27 +228,33 @@ function toggleMode() {
 }
 
 function toggleMapping() {
-  var setMapping = new ROSLIB.ServiceRequest({
-    data : !mapping
-  });
-  setMappingClient.callService(setMapping, function(result) {});
+  if (!isInAutoMode) {
+    var setMapping = new ROSLIB.ServiceRequest({
+      data : !mapping
+    });
+    setMappingClient.callService(setMapping, function(result) {});
+  }
 }
 
 function resetPosition() {
-  var resetPosition = new ROSLIB.ServiceRequest({
-    data : true
-  });
-  resetPositionClient.callService(resetPosition, function(result) {});
+  if (!isInAutoMode) {
+    var resetPosition = new ROSLIB.ServiceRequest({
+      data : true
+    });
+    resetPositionClient.callService(resetPosition, function(result) {});
+  }
 }
 
 function resetMap() {
-  var resetMap = new ROSLIB.ServiceRequest({
-    data : true
-  });
-  resetMapClient.callService(resetMap, function(result) {});
+  if (!isInAutoMode) {
+    var resetMap = new ROSLIB.ServiceRequest({
+      data : true
+    });
+    resetMapClient.callService(resetMap, function(result) {});
+  }
 }
 
-function hideOrShowSidebar() {
+function toggleSidebar() {
   var $showHideElem = $("#hide-button");
   if(view.sidebarState) {
     view.sidebarState = false;
