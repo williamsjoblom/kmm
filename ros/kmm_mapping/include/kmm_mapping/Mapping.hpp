@@ -64,6 +64,7 @@ private:
   int get_horizontal_wall_index(int row, int col);
   int get_vertical_wall_index(int row, int col);
   int get_wall_index(int row, int col, int horizontal);
+  bool is_wall_within_bounds(int row, int col, bool horizontal);
   bool is_wall_index_within_bounds(int wall_index);
 
   // End points functions

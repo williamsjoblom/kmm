@@ -235,15 +235,17 @@ namespace kmm_mapping {
    * Add wall to walls_.
    */
   void Mapping::add_wall_at(int row, int col, bool horizontal) {
-    int index;
-    if (horizontal) {
-      int t = (col >= 1 ? 1 : 0);
-      index  = row*w_ + row*(w_ + 1) + offset_ + col - t;
-    } else {
-      index = row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
-    }
-    if (is_wall_index_within_bounds(index)) {
-      walls_[index] = 1;
+    if (is_wall_within_bounds(row, col, horizontal)) {
+      int index;
+      if (horizontal) {
+        int t = (col >= 1 ? 1 : 0);
+        index  = row*w_ + row*(w_ + 1) + offset_ + col - t;
+      } else {
+        index = row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
+      }
+      if (is_wall_index_within_bounds(index)) {
+        walls_[index] = 1;
+      }
     }
   }
 
@@ -281,7 +283,9 @@ namespace kmm_mapping {
     int col = cs_mults_y;
 
     int index = get_vertical_wall_index(row, col);
-    if (is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
+    bool horizontal = false;
+    if (is_wall_within_bounds(row, col, horizontal) &&
+        is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
       walls_[index] = 0;
       toggle_end_point(get_north_end_point(crossing));
     }
@@ -301,7 +305,9 @@ namespace kmm_mapping {
     int col = cs_mults_y - t;
 
     int index = get_horizontal_wall_index(row, col);
-    if (is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
+    bool horizontal = true;
+    if (is_wall_within_bounds(row, col, horizontal) &&
+        is_wall_index_within_bounds(index) && is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
       walls_[index] = 0;
       toggle_end_point(get_east_end_point(crossing));
     }
@@ -319,7 +325,9 @@ namespace kmm_mapping {
     int col = cs_mults_y;
 
     int index = get_vertical_wall_index(row, col);
-    if (is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
+    bool horizontal = false;
+    if (is_wall_within_bounds(row, col, horizontal) &&
+        is_wall_index_within_bounds(index) && is_wall_index_within_bounds(index) && is_vertical_wall_at(row, col)) {
       walls_[index] = 0;
       toggle_end_point(get_south_end_point(crossing));
     }
@@ -339,7 +347,9 @@ namespace kmm_mapping {
     int col = cs_mults_y + t;
 
     int index = get_horizontal_wall_index(row, col);
-    if (is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
+    bool horizontal = true;
+    if (is_wall_within_bounds(row, col, horizontal) &&
+        is_wall_index_within_bounds(index) && is_wall_index_within_bounds(index) && is_horizontal_wall_at(row, col)) {
       walls_[index] = 0;
       toggle_end_point(get_west_end_point(crossing));
     }
@@ -358,18 +368,20 @@ namespace kmm_mapping {
    * Set horizontal = true if horizontal wall, else false.
    */
   bool Mapping::is_wall_at(int row, int col, bool horizontal) {
-    if (horizontal) {
-      if (col == 0 || row < 0) { // Illegal row for horizontal
-        return false;
+    if (is_wall_within_bounds(row, col, horizontal)) {
+      if (horizontal) {
+        if (col == 0 || row < 0) { // Illegal row for horizontal
+          return false;
+        };
+        int t = (col >= 1 ? 1 : 0);
+        return walls_[row*w_ + row*(w_ + 1) + offset_ + col - t];
+      } else {
+        if (row == 0) { // Illegal row for vertical
+          return false;
+        };
+        return walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col];
       };
-      int t = (col >= 1 ? 1 : 0);
-      return walls_[row*w_ + row*(w_ + 1) + offset_ + col - t];
-    } else {
-      if (row == 0) { // Illegal row for vertical
-        return false;
-      };
-      return walls_[row*w_ + (w_ + 1)*(row - 1) + offset_ + col];
-    };
+    }
   }
 
   /*
@@ -402,6 +414,23 @@ namespace kmm_mapping {
       };
       return row*w_ + (w_ + 1)*(row - 1) + offset_ + col;
     };
+  }
+
+  /*
+   * Returns true if the wall index is within bounds, otherwise false
+   */
+  bool Mapping::is_wall_within_bounds(int row, int col, bool horizontal) {
+    bool is_row_within_bounds;
+    bool is_col_within_bounds;
+    if (horizontal) {
+      is_row_within_bounds = (row >= 0 && row < h_);
+      is_col_within_bounds = (col >= -offset_ && col <= offset_);
+    } else {
+      is_row_within_bounds = (row > 0 && row <= h_);
+      is_col_within_bounds = ((col >= -(offset_ + 1)) && (col <= offset_ +1)
+        && col != 0);
+    }
+    return is_row_within_bounds && is_col_within_bounds;
   }
 
   /*
