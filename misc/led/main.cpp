@@ -117,6 +117,50 @@ void strip_animate_cycle() {
     c = (c + 1) % 8;
 }
 
+void strip_animate_fade() {
+    static int r = 0;
+    static int g = 0;
+    static int b = 0;
+    
+    int step = 0x07;
+
+    static int state = 0;
+
+    switch (state) {
+    case 0:
+	r += step;
+	if (r >= 0xFF) { r = 0xFF; state++; }
+	break;
+    case 1:
+	b -= step;
+	if (b <= 0) {
+	    state++;
+	    b = 0;
+	}
+	break;
+    case 2:
+	g += step;
+	if (g >= 0xFF) { g = 0xFF; state++; }
+	break;
+    case 3:
+	r -= step;
+	if (r <= 0) { r = 0; state++; }
+	break;
+    case 4:
+	b += step;
+	if (b >= 0xFF) { b = 0xFF; state++; }
+	break;
+    case 5:
+	g -= step;
+	if (g <= 0) { g = 0; state = 0; }
+	break;
+    }
+    
+    for (int i = 0; i < LED_COUNT; i++) {
+	strip[i] = (r & 0xFF) << 16 | (g & 0xFF) << 8 | (b & 0xFF);
+    }
+}
+
 void strip_animate_knight() {
     static int current = 0;
     static bool forward = true;
@@ -166,53 +210,52 @@ void strip_render()
 }
 
 int main() {
-    setup_handlers();
+	setup_handlers();
     
-    ws2811_return_t ret;
+	ws2811_return_t ret;
     
-    std::cout << "Initializing LEDs on " << RPI_PWM_CHANNELS << " PWM channels" << std::endl;
+	std::cout << "Initializing LEDs on " << RPI_PWM_CHANNELS << " PWM channels" << std::endl;
     
-    ret = init_ledstring();
-    if (ret != WS2811_SUCCESS) {
-	std::cout << "Initialization error: " << ws2811_get_return_t_str(ret);
-	return 1;
-    }
-
-    std::cout << "Initialization OK!" << std::endl;
-    std::cout << "Starting render loop" << std::endl;
-
-    int frequency = 20;
-    int period = 1000000 / frequency;
-
-    int periods_per_effect = frequency * 20; // 20s
-    int elapsed_periods = 0;
-    int effect = 0; 
-    
-    while(running) {
-	switch (effect) {
-	case 0: strip_animate_cycle(); break;
-	case 1: strip_animate(); break;
-	case 2: strip_animate_knight(); break;
-	case 3: strip_animate_spin(); break;
-	}
-	
-	
-	strip_render();
-	
-	ret = ws2811_render(&ledstring);
+	ret = init_ledstring();
 	if (ret != WS2811_SUCCESS) {
-	    std::cout << "Render error: " << ws2811_get_return_t_str(ret);
+	    std::cout << "Initialization error: " << ws2811_get_return_t_str(ret);
 	    return 1;
 	}
 
-	usleep(period);
+	std::cout << "Initialization OK!" << std::endl;
+	std::cout << "Starting render loop" << std::endl;
 
-	elapsed_periods++;
-	if (elapsed_periods >= periods_per_effect) {
-	    effect++; effect %= 4;
-	    elapsed_periods = 0;
+	int frequency = 20;
+	int period = 1000000 / frequency;
+
+	int periods_per_effect = frequency * 20; // 20s
+	int elapsed_periods = 0;
+	int effect = 0; 
+    
+	while(running) {
+	    switch (effect) {
+	    case 0: strip_animate_cycle(); break;
+	    case 1: strip_animate(); break;
+	    case 2: strip_animate_fade(); break;
+	    }
+	
+	
+	    strip_render();
+	
+	    ret = ws2811_render(&ledstring);
+	    if (ret != WS2811_SUCCESS) {
+		std::cout << "Render error: " << ws2811_get_return_t_str(ret);
+		return 1;
+	    }
+
+	    usleep(period);
+
+	    elapsed_periods++;
+	    if (elapsed_periods >= periods_per_effect) {
+		effect++; effect %= 3;
+		elapsed_periods = 0;
+	    }
 	}
-    }
 
     strip_clear();
     strip_render();
