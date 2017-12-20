@@ -38,6 +38,8 @@ ws2811_led_t colors[] =
     0x00FF007F,  // pink
 };
 
+bool running = true;
+
 ws2811_t ledstring;
 
 ws2811_led_t strip[LED_COUNT];
@@ -60,6 +62,23 @@ ws2811_return_t init_ledstring() {
 
     return ws2811_init(&ledstring);
 }
+
+
+static void ctrl_c_handler(int signum)
+{
+    (void)(signum);
+    running = false;
+}
+
+static void setup_handlers(void)
+{
+    struct sigaction sa;
+    sa.sa_handler = ctrl_c_handler;
+       
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+}
+
 
 void strip_clear() {
     for (int i = 0; i < LED_COUNT; i++) {
@@ -106,7 +125,7 @@ void strip_animate_knight() {
 
     for (int s = 0; s < STRIP_COUNT; s++) {
 	int i = current + s * (LED_COUNT / STRIP_COUNT);
-	strip[i] = 0xFFFFFF;
+	strip[i] = 0xFF0000;
     }
 
     if (forward) {
@@ -147,6 +166,8 @@ void strip_render()
 }
 
 int main() {
+    setup_handlers();
+    
     ws2811_return_t ret;
     
     std::cout << "Initializing LEDs on " << RPI_PWM_CHANNELS << " PWM channels" << std::endl;
@@ -167,7 +188,7 @@ int main() {
     int elapsed_periods = 0;
     int effect = 0; 
     
-    while(true) {
+    while(running) {
 	switch (effect) {
 	case 0: strip_animate_cycle(); break;
 	case 1: strip_animate(); break;
@@ -192,5 +213,10 @@ int main() {
 	    elapsed_periods = 0;
 	}
     }
+
+    strip_clear();
+    strip_render();
+    ws2811_render(&ledstring);
     
+    ws2811_fini(&ledstring);
 }
