@@ -67,7 +67,7 @@ void gamepadCallback(geometry_msgs::Twist gamepad_msg) {
 
 int main(int argc, char **argv) {
 
-  ros::init(argc, argv, "kmm_gamepad");
+  ros::init(argc, argv, "kmm_gamepad_to_vel");
   ros::NodeHandle nh;
 
   dynamic_reconfigure::Server<kmm_gamepad::GamepadConfig> server;
